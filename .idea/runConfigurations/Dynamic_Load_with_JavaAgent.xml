@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Dynamic Load with JavaAgent" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.intergral.deep.examples.Main" />
+    <module name="dynamic-load" />
+    <option name="VM_PARAMETERS" value="-javaagent:$PROJECT_DIR$/agent/target/agent-1.0-SNAPSHOT.jar" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="com.intergral.deep.examples.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

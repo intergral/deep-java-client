@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.intergral.deep</groupId>
+        <artifactId>deep-java-client</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>deep</artifactId>
+
+    <properties>
+    </properties>
+
+    <repositories>
+        <repository>
+            <!--This repo is used to get the sun tools jar-->
+            <id>nuiton</id>
+            <url>https://nexus.nuiton.org/nexus/content/groups/releases/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.intergral.deep</groupId>
+            <artifactId>api</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.intergral.deep</groupId>
+            <artifactId>agent</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy-agent</artifactId>
+            <version>1.14.4</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.intergral.deep</groupId>
+            <artifactId>agent-api</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <!-- Unpack tcnative so we can relocate these -->
+                        <id>unpack-tcnative</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <dependency>
+                                    <groupId>com.intergral.deep</groupId>
+                                    <artifactId>agent</artifactId>
+                                    <version>${project.version}</version>
+                                    <outputDirectory>${project.build.directory}/unpack/</outputDirectory>
+                                    <destFileName>deep-agent.jar</destFileName>
+                                </dependency>
+                                <!--                                <dependency>-->
+                                <!--                                    <groupId>com.nerdvision</groupId>-->
+                                <!--                                    <artifactId>native</artifactId>-->
+                                <!--                                    <version>${project.version}</version>-->
+                                <!--                                    <outputDirectory>${project.build.directory}/unpack/</outputDirectory>-->
+                                <!--                                    <destFileName>nerdvision-native.jar</destFileName>-->
+                                <!--                                </dependency>-->
+                                <dependency>
+                                    <groupId>com.sun</groupId>
+                                    <artifactId>tools</artifactId>
+                                    <version>1.7.0.13</version>
+                                    <outputDirectory>${project.build.directory}/unpack/</outputDirectory>
+                                    <destFileName>tools.jar</destFileName>
+                                </dependency>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>assembly.xml</descriptor>
+                    </descriptors>
+                    <archive>
+                        <manifest>
+                            <addClasspath>false</addClasspath>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <!-- Git specific -->
+                            <Git-Branch>${git.branch}</Git-Branch>
+                            <Git-Commit-Id>${git.commit.id}</Git-Commit-Id>
+                            <Git-Commit-Time>${git.commit.time}</Git-Commit-Time>
+                            <Git-Dirty>${git.dirty}</Git-Dirty>
+                            <Git-Tags>${git.tags}</Git-Tags>
+                            <Git-Remote-Origin-Url>${git.remote.origin.url}</Git-Remote-Origin-Url>
+                            <!-- Add build time -->
+                            <Build-Time>${maven.build.timestamp}</Build-Time>
+                            <!-- Version components -->
+                            <Version-Major>${parsedVersion.majorVersion}</Version-Major>
+                            <Version-Minor>${parsedVersion.minorVersion}</Version-Minor>
+                            <Version-Micro>${parsedVersion.incrementalVersion}</Version-Micro>
+                            <Version>${project.version}</Version>
+                            <!-- Add info -->
+                            <Implementation-Build>${git.commit.id}</Implementation-Build>
+                            <Implementation-Branch>${git.branch}</Implementation-Branch>
+                            <!-- Add Build Info -->
+                            <X-CI-Project-Name>${env.CI_PROJECT_NAME}</X-CI-Project-Name>
+                            <X-CI-Pipeline-Id>${env.CI_PIPELINE_ID}</X-CI-Pipeline-Id>
+                            <X-CI-Pipeline-Iid>${env.CI_PIPELINE_IID}</X-CI-Pipeline-Iid>
+                            <X-CI-Pipeline-Source>${env.CI_PIPELINE_SOURCE}</X-CI-Pipeline-Source>
+                            <X-CI-Pipeline-Url>${env.CI_PIPELINE_URL}</X-CI-Pipeline-Url>
+
+                            <Specification-Title>${project.artifactId}</Specification-Title>
+                            <Specification-Version>${project.version}</Specification-Version>
+                            <Implementation-Title>${project.name}</Implementation-Title>
+                            <Implementation-Version>${project.version}</Implementation-Version>
+                            <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+                        </manifestEntries>
+                    </archive>
+                    <finalName>deep-${project.version}</finalName>
+                    <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
