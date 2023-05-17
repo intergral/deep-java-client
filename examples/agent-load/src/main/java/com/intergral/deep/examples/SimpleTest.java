@@ -59,16 +59,16 @@ public class SimpleTest extends BaseTest
     {
         for( final Character c : newInfo.keySet() )
         {
-            final Integer i = newInfo.get(c);
+            final Integer i = newInfo.get( c );
 
-            Integer curr = charCounter.get(c);
-            if (curr == null)
+            Integer curr = charCounter.get( c );
+            if( curr == null )
             {
-                charCounter.put(c, i);
+                charCounter.put( c, i );
             }
             else
             {
-                charCounter.put(c, curr + i);
+                charCounter.put( c, curr + i );
             }
         }
     }
@@ -88,7 +88,6 @@ public class SimpleTest extends BaseTest
             throw new Exception( "Hit max executions " + val + " " + max );
         }
     }
-
 
 
     @Override

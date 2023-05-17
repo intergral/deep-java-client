@@ -63,7 +63,7 @@ public class ShippedToolsJarProvider implements ByteBuddyAgent.AttachmentProvide
             // else load the tools jar and return an accessor to use it
             try
             {
-                return Accessor.Simple.of( new URLClassLoader( new URL[] { tools.toURI().toURL() }, null ), tools );
+                return Accessor.Simple.of( new URLClassLoader( new URL[]{ tools.toURI().toURL() }, null ), tools );
             }
             catch( MalformedURLException exception )
             {

@@ -46,7 +46,6 @@ public class DeepLoader implements IDeepLoader
      * Convert the config to a string
      *
      * @param config the config to parse
-     *
      * @return the config as a string
      */
     String configAsArgs( final Map<String, Object> config )
@@ -143,7 +142,6 @@ public class DeepLoader implements IDeepLoader
      * Extract a stream to a temp file and return the absolute file path
      *
      * @param inputStream the stream to extract
-     *
      * @return the absolute file path to the extracted library
      */
     private String extractLibrary( final InputStream inputStream )

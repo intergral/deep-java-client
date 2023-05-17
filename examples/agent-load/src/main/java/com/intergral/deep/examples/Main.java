@@ -67,7 +67,7 @@ public class Main
 //        }
 
         final SimpleTest ts = new SimpleTest( "This is a test", 2 );
-        for( ;; )
+        for( ; ; )
         {
             try
             {
@@ -134,7 +134,7 @@ public class Main
 
         for( javax.script.ScriptEngineFactory engineFactory : engineFactories )
         {
-            System.out.println(engineFactory.getNames());
+            System.out.println( engineFactory.getNames() );
         }
 
         javax.script.ScriptEngine engine = mgr.getEngineByName( "JavaScript" );

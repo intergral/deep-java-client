@@ -186,7 +186,8 @@
                 <configuration>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <transformers>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                        <transformer
+                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                             <manifestEntries>
                                 <Premain-Class>com.intergral.deep.agent.Agent</Premain-Class>
                                 <Agent-Class>com.intergral.deep.agent.Agent</Agent-Class>
@@ -226,17 +227,27 @@
                             </manifestEntries>
                         </transformer>
                         <!--These shade the tcnative libs with the relocation.native.prefix-->
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
-                            <resource>META-INF/native/lib${relocation.native.prefix}_netty_tcnative_linux_x86_64.so</resource>
-                            <file>${project.build.directory}/unpack/META-INF/native/libnetty_tcnative_linux_x86_64.so</file>
+                        <transformer
+                                implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
+                            <resource>META-INF/native/lib${relocation.native.prefix}_netty_tcnative_linux_x86_64.so
+                            </resource>
+                            <file>${project.build.directory}/unpack/META-INF/native/libnetty_tcnative_linux_x86_64.so
+                            </file>
                         </transformer>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
-                            <resource>META-INF/native/lib${relocation.native.prefix}_netty_tcnative_osx_x86_64.jnilib</resource>
-                            <file>${project.build.directory}/unpack/META-INF/native/libnetty_tcnative_osx_x86_64.jnilib</file>
+                        <transformer
+                                implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
+                            <resource>META-INF/native/lib${relocation.native.prefix}_netty_tcnative_osx_x86_64.jnilib
+                            </resource>
+                            <file>
+                                ${project.build.directory}/unpack/META-INF/native/libnetty_tcnative_osx_x86_64.jnilib
+                            </file>
                         </transformer>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
-                            <resource>META-INF/native/${relocation.native.prefix}_netty_tcnative_windows_x86_64.dll</resource>
-                            <file>${project.build.directory}/unpack/META-INF/native/netty_tcnative_windows_x86_64.dll</file>
+                        <transformer
+                                implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
+                            <resource>META-INF/native/${relocation.native.prefix}_netty_tcnative_windows_x86_64.dll
+                            </resource>
+                            <file>${project.build.directory}/unpack/META-INF/native/netty_tcnative_windows_x86_64.dll
+                            </file>
                         </transformer>
                     </transformers>
                     <filters>
@@ -423,14 +434,14 @@
                         <configuration>
                             <trimStackTrace>false</trimStackTrace>
                             <systemProperties>
-<!--                                <property>-->
-<!--                                    <name>deep.callback.class</name>-->
-<!--                                    <value>com.nerdvision.agent.snapshot.Callback</value>-->
-<!--                                </property>-->
-<!--                                <property>-->
-<!--                                    <name>deep.hook.class</name>-->
-<!--                                    <value>com.nerdvision.agent.plugins.MethodHook</value>-->
-<!--                                </property>-->
+                                <!--                                <property>-->
+                                <!--                                    <name>deep.callback.class</name>-->
+                                <!--                                    <value>com.nerdvision.agent.snapshot.Callback</value>-->
+                                <!--                                </property>-->
+                                <!--                                <property>-->
+                                <!--                                    <name>deep.hook.class</name>-->
+                                <!--                                    <value>com.nerdvision.agent.plugins.MethodHook</value>-->
+                                <!--                                </property>-->
                                 <property>
                                     <name>deep.logging.level</name>
                                     <value>INFO</value>

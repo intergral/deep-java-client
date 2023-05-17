@@ -27,14 +27,14 @@ public class Logger
 {
     public static org.slf4j.Logger configureLogging( final Settings settings )
     {
-        final java.util.logging.Logger logger = java.util.logging.Logger.getLogger("com.nerdvision");
-        logger.setUseParentHandlers(false);
+        final java.util.logging.Logger logger = java.util.logging.Logger.getLogger( "com.nerdvision" );
+        logger.setUseParentHandlers( false );
         final ConsoleHandler handler = new ConsoleHandler();
-        logger.addHandler(handler);
+        logger.addHandler( handler );
 
-        final Level settingAs = settings.getSettingAs("logging.level", Level.class);
-        handler.setLevel(settingAs);
-        logger.setLevel(settingAs);
-        return LoggerFactory.getLogger( AgentImpl.class);
+        final Level settingAs = settings.getSettingAs( "logging.level", Level.class );
+        handler.setLevel( settingAs );
+        logger.setLevel( settingAs );
+        return LoggerFactory.getLogger( AgentImpl.class );
     }
 }

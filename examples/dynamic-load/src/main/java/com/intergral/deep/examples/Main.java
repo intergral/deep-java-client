@@ -40,8 +40,8 @@ public class Main
         System.setProperty( "nv.jar.path", jarPath.toString() );
         Deep.start();
         final Deep instance = Deep.getInstance();
-        System.out.println(instance.<IDeep>api().getVersion());
-        System.out.println(instance.<IReflection>reflection());
+        System.out.println( instance.<IDeep>api().getVersion() );
+        System.out.println( instance.<IReflection>reflection() );
 
 //        try
 //        {
@@ -76,7 +76,7 @@ public class Main
 //        }
 
         final SimpleTest ts = new SimpleTest( "This is a test", 2 );
-        for( ;; )
+        for( ; ; )
         {
             try
             {
@@ -143,7 +143,7 @@ public class Main
 
         for( javax.script.ScriptEngineFactory engineFactory : engineFactories )
         {
-            System.out.println(engineFactory.getNames());
+            System.out.println( engineFactory.getNames() );
         }
 
         javax.script.ScriptEngine engine = mgr.getEngineByName( "JavaScript" );

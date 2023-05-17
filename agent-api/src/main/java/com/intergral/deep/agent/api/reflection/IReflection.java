@@ -44,7 +44,6 @@ public interface IReflection
      * @param target    the object to look at
      * @param fieldName the field name to look for
      * @param <T>       the type to return as
-     *
      * @return the field as T, else {@code null}
      */
     <T> T getFieldValue( Object target, String fieldName );

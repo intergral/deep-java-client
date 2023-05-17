@@ -41,164 +41,164 @@ public class Settings
 
     public static Settings build( final Map<String, String> agentArgs )
     {
-        final InputStream resourceAsStream = Settings.class.getResourceAsStream("/nerdvision_settings.properties");
-        return build(agentArgs, resourceAsStream);
+        final InputStream resourceAsStream = Settings.class.getResourceAsStream( "/deep_settings.properties" );
+        return build( agentArgs, resourceAsStream );
     }
 
     static Settings build( final Map<String, String> agentArgs, final InputStream stream )
     {
         final Properties properties = new Properties();
-        try (final InputStream resourceAsStream = stream;)
+        try( final InputStream resourceAsStream = stream; )
         {
-            properties.load(resourceAsStream);
+            properties.load( resourceAsStream );
         }
-        catch (IOException e)
+        catch( IOException e )
         {
             // logging is not initialized until after the settings class
             e.printStackTrace();
         }
 
-        for (final Map.Entry<Object, Object> propEntry : properties.entrySet())
+        for( final Map.Entry<Object, Object> propEntry : properties.entrySet() )
         {
-            final String key = String.valueOf(propEntry.getKey());
-            final String systemProp = readSystemProperty(key);
-            final String envProp = readEnvProperty(key);
-            final String agentKey = agentArgs.get(key);
+            final String key = String.valueOf( propEntry.getKey() );
+            final String systemProp = readSystemProperty( key );
+            final String envProp = readEnvProperty( key );
+            final String agentKey = agentArgs.get( key );
 
-            if (agentKey != null)
+            if( agentKey != null )
             {
-                properties.put(key, agentKey);
+                properties.put( key, agentKey );
             }
-            else if (envProp != null)
+            else if( envProp != null )
             {
-                properties.put(key, envProp);
+                properties.put( key, envProp );
             }
-            else if (systemProp != null)
+            else if( systemProp != null )
             {
-                properties.put(key, systemProp);
+                properties.put( key, systemProp );
             }
         }
 
 
-        for (Map.Entry<String, String> agentArg : agentArgs.entrySet())
+        for( Map.Entry<String, String> agentArg : agentArgs.entrySet() )
         {
-            properties.put(agentArg.getKey(), agentArg.getValue());
+            properties.put( agentArg.getKey(), agentArg.getValue() );
         }
-        return new Settings(properties);
+        return new Settings( properties );
     }
 
     private static String readEnvProperty( final String key )
     {
-        return System.getenv("NV_" + key.toUpperCase().replaceAll("\\.", "_"));
+        return System.getenv( "DEEP_" + key.toUpperCase().replaceAll( "\\.", "_" ) );
     }
 
     private static String readSystemProperty( final String key )
     {
-        return System.getProperty("nv." + key, System.getProperty("nerdvision." + key));
+        return System.getProperty( "deep." + key );
     }
 
     @SuppressWarnings("unchecked")
     public static <T> T coerc( final String str, final Class<T> type )
     {
-        if (str == null)
+        if( str == null )
         {
             return null;
         }
 
-        if (type == Boolean.class || type == boolean.class)
+        if( type == Boolean.class || type == boolean.class )
         {
-            return (T) Boolean.valueOf(str);
+            return (T) Boolean.valueOf( str );
         }
-        else if (type == Integer.class || type == int.class)
+        else if( type == Integer.class || type == int.class )
         {
-            return (T) Integer.valueOf(str);
+            return (T) Integer.valueOf( str );
         }
-        else if (type == Long.class || type == long.class)
+        else if( type == Long.class || type == long.class )
         {
-            return (T) Long.valueOf(str);
+            return (T) Long.valueOf( str );
         }
-        else if (type == String.class)
+        else if( type == String.class )
         {
             return (T) str;
         }
-        else if (type == Double.class || type == double.class)
+        else if( type == Double.class || type == double.class )
         {
-            return (T) Double.valueOf(str);
+            return (T) Double.valueOf( str );
         }
-        else if (type == Float.class || type == float.class)
+        else if( type == Float.class || type == float.class )
         {
-            return (T) Float.valueOf(str);
+            return (T) Float.valueOf( str );
         }
-        else if (type == List.class)
+        else if( type == List.class )
         {
             // Java doesnt allow us to know what type of List, so they can only be strings
-            return (T) makeList(str);
+            return (T) makeList( str );
         }
-        else if (type == Map.class)
+        else if( type == Map.class )
         {
-            final List<String> strs = makeList(str);
+            final List<String> strs = makeList( str );
             final Map<String, String> map = new HashMap<>();
 
-            for (final String s : strs)
+            for( final String s : strs )
             {
-                final String[] split = s.split("=");
-                if (split.length == 2)
+                final String[] split = s.split( "=" );
+                if( split.length == 2 )
                 {
-                    map.put(split[0], split[1]);
+                    map.put( split[0], split[1] );
                 }
             }
 
             return (T) map;
         }
-        else if (type == Level.class)
+        else if( type == Level.class )
         {
-            if (str.equalsIgnoreCase("debug"))
+            if( str.equalsIgnoreCase( "debug" ) )
             {
                 return (T) Level.FINEST;
             }
-            return (T) Level.parse(str);
+            return (T) Level.parse( str );
         }
-        else if (type == Pattern.class)
+        else if( type == Pattern.class )
         {
-            return (T) Pattern.compile(str);
+            return (T) Pattern.compile( str );
         }
-        else if (type == URL.class)
+        else if( type == URL.class )
         {
             try
             {
-                return (T) new URL(str);
+                return (T) new URL( str );
             }
-            catch (MalformedURLException mue)
+            catch( MalformedURLException mue )
             {
-                throw new RuntimeException(str + " is not a valid URL");
+                throw new RuntimeException( str + " is not a valid URL" );
             }
         }
 
-        throw new IllegalArgumentException("Cannot coerc " + str + " to " + type);
+        throw new IllegalArgumentException( "Cannot coerc " + str + " to " + type );
     }
 
     private static List<String> makeList( final String str )
     {
         final String trimmed = str.trim();
-        if (trimmed.isEmpty())
+        if( trimmed.isEmpty() )
         {
             return Collections.emptyList();
         }
 
-        String[] split = trimmed.split(",");
+        String[] split = trimmed.split( "," );
         // Either 1 key only or using different format
-        if (split.length == 1)
+        if( split.length == 1 )
         {
-            split = trimmed.split(";");
+            split = trimmed.split( ";" );
         }
 
-        return Arrays.asList(split);
+        return Arrays.asList( split );
     }
 
     public <T> T getSettingAs( String key, Class<T> clazz )
     {
-        final String property = this.properties.getProperty(key);
+        final String property = this.properties.getProperty( key );
 
-        return coerc(property, clazz);
+        return coerc( property, clazz );
     }
 }
