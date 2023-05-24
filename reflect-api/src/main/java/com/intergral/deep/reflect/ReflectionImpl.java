@@ -17,10 +17,17 @@
 package com.intergral.deep.reflect;
 
 import com.intergral.deep.agent.api.reflection.IReflection;
+import com.intergral.deep.agent.api.utils.ArrayIterator;
+import com.intergral.deep.agent.api.utils.CompoundIterator;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ReflectionImpl implements IReflection
 {
@@ -141,12 +148,51 @@ public class ReflectionImpl implements IReflection
         try
         {
             final Field field = getField( target, fieldName );
+
+            return callField( target, field );
+        }
+        catch( Exception e )
+        {
+            return null;
+        }
+    }
+
+    @Override
+    public Iterator<Field> getFieldIterator( final Class<?> clazz )
+    {
+        if( clazz == null || clazz == Object.class )
+        {
+            return new Iterator<Field>()
+            {
+                @Override
+                public boolean hasNext()
+                {
+                    return false;
+                }
+
+                @Override
+                public Field next()
+                {
+                    return null;
+                }
+            };
+        }
+        final Field[] fields = clazz.getFields();
+        final Field[] declaredFields = clazz.getDeclaredFields();
+        //noinspection unchecked
+        return new CompoundIterator<>( new ArrayIterator<>( fields ), new ArrayIterator<>( declaredFields ) );
+    }
+
+    @Override
+    public <T> T callField( final Object target, final Field field )
+    {
+        try
+        {
             if( field == null )
             {
                 return null;
             }
             setAccessible( field.getDeclaringClass(), field );
-
             //noinspection unchecked
             return (T) field.get( target );
         }
@@ -154,5 +200,13 @@ public class ReflectionImpl implements IReflection
         {
             return null;
         }
+    }
+
+    @Override
+    public Set<String> getModifiers( final Field field )
+    {
+        final int modifiers = field.getModifiers();
+        final String string = Modifier.toString( modifiers );
+        return Arrays.stream( string.split( " " ) ).collect( Collectors.toSet() );
     }
 }

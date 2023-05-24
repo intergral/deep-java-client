@@ -17,6 +17,8 @@ package com.intergral.deep.agent.api.reflection;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * @author nwightma
@@ -47,4 +49,10 @@ public interface IReflection
      * @return the field as T, else {@code null}
      */
     <T> T getFieldValue( Object target, String fieldName );
+
+    Iterator<Field> getFieldIterator( Class<?> clazz );
+
+    <T> T callField( Object target, Field field );
+
+    Set<String> getModifiers( Field field );
 }

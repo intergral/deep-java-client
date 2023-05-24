@@ -25,12 +25,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 
 public class DeepLoader implements IDeepLoader
 {
     @Override
-    public void load( final String pid, final Map<String, Object> config ) throws Throwable
+    public void load( final String pid, final String config ) throws Throwable
     {
         final File agentJar = getAgentJar();
         final File tools = getToolsJar();
@@ -38,42 +37,7 @@ public class DeepLoader implements IDeepLoader
         {
             throw new RuntimeException( "Cannot find jar." );
         }
-        ByteBuddyAgent.attach( agentJar, pid, configAsArgs( config ), new ShippedToolsJarProvider( tools ) );
-    }
-
-
-    /**
-     * Convert the config to a string
-     *
-     * @param config the config to parse
-     * @return the config as a string
-     */
-    String configAsArgs( final Map<String, Object> config )
-    {
-        final StringBuilder stringBuilder = new StringBuilder();
-        for( Map.Entry<String, Object> entry : config.entrySet() )
-        {
-            if( entry.getValue() == null )
-            {
-                continue;
-            }
-            if( stringBuilder.length() != 0 )
-            {
-                stringBuilder.append( ',' );
-            }
-            if( entry.getValue() instanceof Map )
-            {
-                //noinspection unchecked
-                stringBuilder.append( entry.getKey() )
-                        .append( '=' )
-                        .append( configAsArgs( (Map<String, Object>) entry.getValue() ) );
-            }
-            else
-            {
-                stringBuilder.append( entry.getKey() ).append( '=' ).append( entry.getValue() );
-            }
-        }
-        return stringBuilder.toString();
+        ByteBuddyAgent.attach( agentJar, pid, config, new ShippedToolsJarProvider( tools ) );
     }
 
 
@@ -120,7 +84,7 @@ public class DeepLoader implements IDeepLoader
     private InputStream getAgentJarStream()
     {
         // this is pretty much just for testing, see Example
-        final String property = System.getProperty( "nv.jar.path" );
+        final String property = System.getProperty( "deep.jar.path" );
         if( property != null )
         {
             try
@@ -129,12 +93,12 @@ public class DeepLoader implements IDeepLoader
             }
             catch( FileNotFoundException e )
             {
-                System.err.println( "Unable to load NerdVision jar from path: " + property );
+                System.err.println( "Unable to load Deep jar from path: " + property );
                 e.printStackTrace( System.err );
                 return null;
             }
         }
-        return Deep.class.getResourceAsStream( "/nerdvision-agent.jar" );
+        return Deep.class.getResourceAsStream( "/deep-agent.jar" );
     }
 
 
@@ -154,7 +118,7 @@ public class DeepLoader implements IDeepLoader
         FileOutputStream fileOutputStream = null;
         try
         {
-            final File tempFile = File.createTempFile( "nerdvision", "agent" );
+            final File tempFile = File.createTempFile( "deep", "agent" );
 
             fileOutputStream = new FileOutputStream( tempFile );
 

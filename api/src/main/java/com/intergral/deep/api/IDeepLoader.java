@@ -30,5 +30,5 @@ public interface IDeepLoader
      * @param config the config to use
      * @throws Throwable if loader fails
      */
-    void load( final String pid, final Map<String, Object> config ) throws Throwable;
+    void load( final String pid, final String config ) throws Throwable;
 }

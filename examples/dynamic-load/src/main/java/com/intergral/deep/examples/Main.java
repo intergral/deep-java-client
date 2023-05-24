@@ -37,8 +37,13 @@ public class Main
                 .getParent()
                 .getParent()
                 .resolve( "agent/target/deep-1.0-SNAPSHOT.jar" );
-        System.setProperty( "nv.jar.path", jarPath.toString() );
-        Deep.start();
+        System.setProperty( "deep.jar.path", jarPath.toString() );
+        Deep.config()
+                .setValue( "logging.level", "FINE" )
+                .setValue( "service.url", "localhost:43315" )
+                .setValue( "service.secure", false )
+                .start();
+
         final Deep instance = Deep.getInstance();
         System.out.println( instance.<IDeep>api().getVersion() );
         System.out.println( instance.<IReflection>reflection() );
@@ -100,6 +105,29 @@ public class Main
         System.out.println( "something" );
     }
 
+    public void name() throws Exception
+    {
+        final HashMap<String, String> hashMap = new HashMap<String, String>()
+        {{
+            put( "name", "ben" );
+        }};
+        javax.script.ScriptEngineManager mgr = new javax.script.ScriptEngineManager();
+        final List<javax.script.ScriptEngineFactory> engineFactories = mgr.getEngineFactories();
+
+        for( javax.script.ScriptEngineFactory engineFactory : engineFactories )
+        {
+            System.out.println( engineFactory.getNames() );
+        }
+
+        javax.script.ScriptEngine engine = mgr.getEngineByName( "JavaScript" );
+        final javax.script.Bindings bindings = engine.createBindings();
+        bindings.put( "obj", hashMap );
+        bindings.put( "person", new Person( new Person( "mary" ), "bob" ) );
+
+        System.out.println( engine.eval( "person", bindings ) );
+        System.out.println( engine.eval( "person.getParent()", bindings ) );
+    }
+
     public static class Person
     {
         private final Person parent;
@@ -129,29 +157,5 @@ public class Main
         {
             return name;
         }
-    }
-
-
-    public void name() throws Exception
-    {
-        final HashMap<String, String> hashMap = new HashMap<String, String>()
-        {{
-            put( "name", "ben" );
-        }};
-        javax.script.ScriptEngineManager mgr = new javax.script.ScriptEngineManager();
-        final List<javax.script.ScriptEngineFactory> engineFactories = mgr.getEngineFactories();
-
-        for( javax.script.ScriptEngineFactory engineFactory : engineFactories )
-        {
-            System.out.println( engineFactory.getNames() );
-        }
-
-        javax.script.ScriptEngine engine = mgr.getEngineByName( "JavaScript" );
-        final javax.script.Bindings bindings = engine.createBindings();
-        bindings.put( "obj", hashMap );
-        bindings.put( "person", new Person( new Person( "mary" ), "bob" ) );
-
-        System.out.println( engine.eval( "person", bindings ) );
-        System.out.println( engine.eval( "person.getParent()", bindings ) );
     }
 }

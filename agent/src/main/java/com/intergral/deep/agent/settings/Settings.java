@@ -16,11 +16,18 @@
 
 package com.intergral.deep.agent.settings;
 
+import com.intergral.deep.agent.api.plugin.IPlugin;
+import com.intergral.deep.agent.api.resource.Resource;
+import com.intergral.deep.agent.api.settings.ISettings;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -29,10 +36,12 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
-public class Settings
+public class Settings implements ISettings
 {
 
     private final Properties properties;
+    private Resource resource;
+    private Collection<IPlugin> plugins;
 
     private Settings( Properties properties )
     {
@@ -41,8 +50,25 @@ public class Settings
 
     public static Settings build( final Map<String, String> agentArgs )
     {
-        final InputStream resourceAsStream = Settings.class.getResourceAsStream( "/deep_settings.properties" );
-        return build( agentArgs, resourceAsStream );
+        final String settingFile = readProperty( "deep.settings", agentArgs );
+        final InputStream propertiesStream;
+        if( settingFile != null )
+        {
+            try
+            {
+                propertiesStream = new FileInputStream( settingFile );
+            }
+            catch( FileNotFoundException e )
+            {
+                throw new RuntimeException( e );
+            }
+        }
+        else
+        {
+            propertiesStream = Settings.class.getResourceAsStream( "/deep_settings.properties" );
+        }
+
+        return build( agentArgs, propertiesStream );
     }
 
     static Settings build( final Map<String, String> agentArgs, final InputStream stream )
@@ -61,30 +87,35 @@ public class Settings
         for( final Map.Entry<Object, Object> propEntry : properties.entrySet() )
         {
             final String key = String.valueOf( propEntry.getKey() );
-            final String systemProp = readSystemProperty( key );
-            final String envProp = readEnvProperty( key );
-            final String agentKey = agentArgs.get( key );
-
-            if( agentKey != null )
+            final String property = readProperty( key, agentArgs );
+            if( property != null )
             {
-                properties.put( key, agentKey );
-            }
-            else if( envProp != null )
-            {
-                properties.put( key, envProp );
-            }
-            else if( systemProp != null )
-            {
-                properties.put( key, systemProp );
+                properties.put( key, property );
             }
         }
 
+        properties.putAll( agentArgs );
 
-        for( Map.Entry<String, String> agentArg : agentArgs.entrySet() )
-        {
-            properties.put( agentArg.getKey(), agentArg.getValue() );
-        }
         return new Settings( properties );
+    }
+
+    private static String readProperty( final String key, final Map<String, String> agentArgs )
+    {
+        // todo should this not be env over everything else?
+        // arguments sent to agent have priority
+        final String agentArg = agentArgs.get( key );
+        if( agentArg != null )
+        {
+            return agentArg;
+        }
+        // then use env properties
+        final String s = readEnvProperty( key );
+        if( s != null )
+        {
+            return s;
+        }
+        // then system properties
+        return readSystemProperty( key );
     }
 
     private static String readEnvProperty( final String key )
@@ -129,7 +160,7 @@ public class Settings
         {
             return (T) Float.valueOf( str );
         }
-        else if( type == List.class )
+        else if( type == List.class || type == Collection.class )
         {
             // Java doesnt allow us to know what type of List, so they can only be strings
             return (T) makeList( str );
@@ -200,5 +231,99 @@ public class Settings
         final String property = this.properties.getProperty( key );
 
         return coerc( property, clazz );
+    }
+
+    @Override
+    public Map<String, String> getMap( String key )
+    {
+        final Map settingAs = getSettingAs( key, Map.class );
+        if( settingAs == null )
+        {
+            return Collections.emptyMap();
+        }
+        return settingAs;
+    }
+
+    public String getServiceHost()
+    {
+        final String serviceUrl = getSettingAs( "service.url", String.class );
+        if( serviceUrl.contains( "://" ) )
+        {
+            try
+            {
+                return new URL( serviceUrl ).getHost();
+            }
+            catch( MalformedURLException e )
+            {
+                throw new InvalidConfigException( "service.url", serviceUrl, e );
+            }
+        }
+        else if( serviceUrl.contains( ":" ) )
+        {
+            return serviceUrl.split( ":" )[0];
+        }
+
+        throw new InvalidConfigException( "service.url", serviceUrl );
+    }
+
+    public int getServicePort()
+    {
+        final String serviceUrl = getSettingAs( "service.url", String.class );
+        if( serviceUrl.contains( "://" ) )
+        {
+            try
+            {
+                return new URL( serviceUrl ).getPort();
+            }
+            catch( MalformedURLException e )
+            {
+                throw new InvalidConfigException( "service.url", serviceUrl, e );
+            }
+        }
+        else if( serviceUrl.contains( ":" ) )
+        {
+            return Integer.parseInt( serviceUrl.split( ":" )[1] );
+        }
+
+        throw new InvalidConfigException( "service.url", serviceUrl );
+    }
+
+    public void setPlugins( Collection<IPlugin> plugins )
+    {
+        this.plugins = plugins;
+    }
+
+    @Override
+    public Resource getResource()
+    {
+        return this.resource;
+    }
+
+    public void setResource( Resource resouurce )
+    {
+        this.resource = resouurce;
+    }
+
+    public List<String> getAsList( final String key )
+    {
+        final List settingAs = getSettingAs( key, List.class );
+        if( settingAs == null )
+        {
+            return Collections.emptyList();
+        }
+        return settingAs;
+    }
+
+    public static class InvalidConfigException extends RuntimeException
+    {
+        public InvalidConfigException( String key, String value )
+        {
+            super( String.format( "Config value (%s) for key (%s) is invalid.", key, value ) );
+        }
+
+        public InvalidConfigException( String key, String value, Throwable cause )
+        {
+            super( String.format( "Config value (%s) for key (%s) is invalid.", key, value ), cause );
+        }
     }
 }

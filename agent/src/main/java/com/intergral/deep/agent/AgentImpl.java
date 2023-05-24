@@ -19,17 +19,25 @@ package com.intergral.deep.agent;
 import com.intergral.deep.agent.api.IDeep;
 import com.intergral.deep.agent.api.hook.IDeepHook;
 import com.intergral.deep.agent.api.reflection.IReflection;
+import com.intergral.deep.agent.tracepoint.inst.InstrumentationService;
+import com.intergral.deep.agent.logging.Logger;
+import com.intergral.deep.agent.settings.Settings;
+import com.intergral.deep.agent.tracepoint.inst.TracepointInstrumentationService;
 
 import java.lang.instrument.Instrumentation;
 import java.util.Map;
-import java.util.jar.JarFile;
 
 public class AgentImpl
 {
 
-    public static void startup( final JarFile jarFile, final Instrumentation inst, final Map<String, String> args )
+    public static void startup( final Instrumentation inst, final Map<String, String> args )
     {
-        System.out.println( "Starting Deep Agent" );
+        final Settings settings = Settings.build( args );
+        final org.slf4j.Logger logger = Logger.configureLogging( settings );
+        final TracepointInstrumentationService tracepointInstrumentationService = InstrumentationService.init( inst, settings );
+        final DeepAgent deepAgent = new DeepAgent( settings, tracepointInstrumentationService );
+
+        deepAgent.start();
     }
 
     public static Object loadDeepAPI()
@@ -53,7 +61,7 @@ public class AgentImpl
             @Override
             public IReflection reflectionService()
             {
-                return Utils.getReflection();
+                return ReflectionUtils.getReflection();
             }
         };
     }

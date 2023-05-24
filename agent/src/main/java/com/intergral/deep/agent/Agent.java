@@ -81,8 +81,8 @@ public class Agent
             inst.appendToBootstrapClassLoaderSearch( jarfile );
 
             final Class<?> c = Class.forName( "com.intergral.deep.agent.AgentImpl", true, null );
-            final Method method = c.getMethod( "startup", JarFile.class, Instrumentation.class, Map.class );
-            method.invoke( null, jarfile, inst, args );
+            final Method method = c.getMethod( "startup", Instrumentation.class, Map.class );
+            method.invoke( null, inst, args );
         }
         catch( Throwable t )
         {

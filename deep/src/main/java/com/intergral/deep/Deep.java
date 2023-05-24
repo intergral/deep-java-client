@@ -23,7 +23,7 @@ import com.intergral.deep.api.IDeepLoader;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.HashMap;
+import java.util.Map;
 
 public class Deep
 {
@@ -34,7 +34,7 @@ public class Deep
 
     public static void start()
     {
-        Deep.getInstance().startDeep();
+        Deep.config().start();
     }
 
     public static Deep getInstance()
@@ -50,11 +50,21 @@ public class Deep
         return DEEP_INSTANCE;
     }
 
-    private void startDeep()
+    public static DeepConfigBuilder config()
+    {
+        return new DeepConfigBuilder();
+    }
+
+    public void startWithConfig( final String config )
+    {
+        getInstance().startDeep( config );
+    }
+
+    private void startDeep( final String config )
     {
         try
         {
-            loadAgent();
+            loadAgent( config );
 
             loadAPI();
         }
@@ -64,12 +74,12 @@ public class Deep
         }
     }
 
-    private void loadAgent() throws Throwable
+    private void loadAgent( final String config ) throws Throwable
     {
         final IDeepLoader loader = getLoader();
         final String pid = getPid();
 
-        loader.load( pid, new HashMap<>() );
+        loader.load( pid, config );
     }
 
 
@@ -93,8 +103,8 @@ public class Deep
      */
     IDeepLoader getLoader() throws Throwable
     {
-        final String property = System.getProperty( "nv.loader", DeepLoader.class.getName() );
-        final String env = System.getenv( "NV_LOADER" );
+        final String property = System.getProperty( "deep.loader", DeepLoader.class.getName() );
+        final String env = System.getenv( "DEEP_LOADER" );
         final String loader;
         if( env != null )
         {
