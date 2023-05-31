@@ -34,7 +34,7 @@
     <licenses>
         <license>
             <name>AGPL-3.0-only</name>
-            <url>https://github.com/intergral/deep-java-client/blob/master/LICENSE</url>
+            <url>https://raw.githubusercontent.com/intergral/deep-java-client/master/LICENSE</url>
             <distribution>repo</distribution>
         </license>
     </licenses>

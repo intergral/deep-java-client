@@ -38,6 +38,8 @@
             <item name="Docs" href="https://intergral.github.io/deep-proto/common/" />
         </menu>
 
+        <menu ref="parent" />
+        <menu ref="modules" />
         <menu ref="reports"/>
     </body>
 
