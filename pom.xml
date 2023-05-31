@@ -201,6 +201,52 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>docs</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <reporting>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <!--force the java doc to use java 8-->
+                            <source>8</source>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </reporting>
+            <distributionManagement>
+                <site>
+                    <id>github</id>
+                    <url>https://intergral.github.io/deep-java-client/</url>
+                </site>
+            </distributionManagement>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-site-plugin</artifactId>
+                            <version>3.12.1</version>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-project-info-reports-plugin</artifactId>
+                            <version>3.0.0</version>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-site-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <dependencyManagement>

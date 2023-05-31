@@ -28,6 +28,7 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
           cache: 'maven'
-      - name: Generate Java Proto
+      - name: Update java version
         run: mvn versions:set -DnewVersion=${VERSION} -B -U
-      - run: mvn -s .ci-settings.xml clean deploy -P release-ossrh -B -U -pl agent --also-make
+      - name: Build and Release
+        run: mvn -s .ci-settings.xml clean deploy -P release-ossrh -B -U -pl agent --also-make
