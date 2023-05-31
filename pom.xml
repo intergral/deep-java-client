@@ -69,7 +69,7 @@
             <dependency>
                 <groupId>com.intergral.deep</groupId>
                 <artifactId>deep-proto</artifactId>
-                <version>0.0.2-SNAPSHOT</version>
+                <version>1.0.0</version>
             </dependency>
 
             <!-- Logging -->
