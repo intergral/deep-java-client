@@ -209,8 +209,8 @@ public class FrameCollector extends VariableProcessor
 
     protected boolean isAppFrame( final StackTraceElement stackTraceElement )
     {
-        final List<String> inAppInclude = settings.getAsList( "in_app.include" );
-        final List<String> inAppExclude = settings.getAsList( "in_app.exclude" );
+        final List<String> inAppInclude = settings.getAsList( "in.app.include" );
+        final List<String> inAppExclude = settings.getAsList( "in.app.exclude" );
 
         final String className = stackTraceElement.getClassName();
 

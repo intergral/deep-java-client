@@ -30,7 +30,7 @@ public class AuthProvider
 
     public static IAuthProvider provider( final ISettings settings )
     {
-        final String serviceAuthProvider = settings.getSettingAs( "service.auth_provider", String.class );
+        final String serviceAuthProvider = settings.getSettingAs( "service.auth.provider", String.class );
         if( serviceAuthProvider == null || serviceAuthProvider.trim().isEmpty() )
         {
             return NOOP_PROVIDER;
