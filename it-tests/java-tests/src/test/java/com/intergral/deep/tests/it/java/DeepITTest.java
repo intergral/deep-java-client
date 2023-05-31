@@ -37,34 +37,30 @@ public class DeepITTest extends ANVITTest
                 .setCurrentHash( "" )
                 .setResponseType( ResponseType.UPDATE )
                 .addResponse( TracePointConfig.newBuilder()
-                        .setPath( "BPTestTarget.java" ).setLineNumber( 32 ).build() )
+                        .setPath( "BPTestTarget.java" ).setLineNumber( 33 ).build() )
                 .build();
         onNext( build );
 
         grpcConnectLatch.await( 1, TimeUnit.MINUTES );
         final AtomicBoolean hasTriggered = new AtomicBoolean( false );
 
-        new Thread()
-        {
-            @Override
-            public void run()
+        new Thread( () -> {
+            while( !hasTriggered.get() )
             {
-                while( !hasTriggered.get() )
+                // if this line changes then the test will need changed below
+                final BPTestTarget checkBPFires = new BPTestTarget( "checkBPFires" );
+                System.out.println( checkBPFires.getName() );
+                try
                 {
-                    // if this line changes then the test will need changed below
-                    final BPTestTarget checkBPFires = new BPTestTarget( "checkBPFires" );
-                    System.out.println( checkBPFires.getName() );
-                    try
-                    {
-                        Thread.sleep( 1000 );
-                    }
-                    catch( InterruptedException e )
-                    {
-                        e.printStackTrace();
-                    }
+                    //noinspection BusyWait
+                    Thread.sleep( 1000 );
+                }
+                catch( InterruptedException e )
+                {
+                    e.printStackTrace();
                 }
             }
-        }.start();
+        } ).start();
 
         snapshotlatch.await(5, TimeUnit.MINUTES);
 
