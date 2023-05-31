@@ -1,24 +1,25 @@
 /*
- *    Copyright 2023 Intergral GmbH
+ *     Copyright (C) 2023  Intergral GmbH
  *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.intergral.deep.agent.tracepoint.handler;
 
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.settings.Settings;
-import com.intergral.deep.agent.tracepoint.evaluator.IEvaluator;
+import com.intergral.deep.agent.api.plugin.IEvaluator;
 import com.intergral.deep.agent.tracepoint.handler.bfs.Node;
 import com.intergral.deep.agent.tracepoint.inst.InstUtils;
 import com.intergral.deep.agent.types.TracePointConfig;
@@ -117,7 +118,7 @@ public class FrameCollector extends VariableProcessor
                 varIds );
     }
 
-    private Map<String, Object> selectVariables( final int frameIndex )
+    protected Map<String, Object> selectVariables( final int frameIndex )
     {
         if( frameIndex == 0 )
         {
@@ -138,7 +139,7 @@ public class FrameCollector extends VariableProcessor
                 .map( stringObjectEntry -> new Node( new Node.NodeValue( stringObjectEntry.getKey(),
                         stringObjectEntry.getValue() ), frameParent ) ).collect( Collectors.toSet() );
 
-        Node.breadthFirstSearch( new Node( null, new HashSet<>(initialNodes), frameParent ), this::processNode );
+        Node.breadthFirstSearch( new Node( null, new HashSet<>( initialNodes ), frameParent ), this::processNode );
 
         return frameVars;
     }
@@ -165,7 +166,7 @@ public class FrameCollector extends VariableProcessor
         // add the result to the parent - this maintains the hierarchy in the var look up
         node.getParent().addChild( variableId );
 
-        if( processResult.processChildren() )
+        if( value.getValue() != null && processResult.processChildren() )
         {
             final Set<Node> childNodes = super.processChildNodes( variableId, value.getValue(), node.depth() );
             node.addChildren( childNodes );
@@ -206,7 +207,7 @@ public class FrameCollector extends VariableProcessor
         return newId;
     }
 
-    private boolean isAppFrame( final StackTraceElement stackTraceElement )
+    protected boolean isAppFrame( final StackTraceElement stackTraceElement )
     {
         final List<String> inAppInclude = settings.getAsList( "in_app.include" );
         final List<String> inAppExclude = settings.getAsList( "in_app.exclude" );
@@ -240,14 +241,14 @@ public class FrameCollector extends VariableProcessor
         return stackTraceElement.getFileName();
     }
 
-    private String getMethodName( final StackTraceElement stackTraceElement,
-                                  final Map<String, Object> variables,
-                                  final int frameIndex )
+    protected String getMethodName( final StackTraceElement stackTraceElement,
+                                    final Map<String, Object> variables,
+                                    final int frameIndex )
     {
         return stackTraceElement.getMethodName();
     }
 
-    protected IExpressionResult evaluateExpression( final String watch )
+    protected IExpressionResult evaluateWatchExpression( final String watch )
     {
         return new IExpressionResult()
         {
@@ -268,7 +269,7 @@ public class FrameCollector extends VariableProcessor
     protected Resource processAttributes( final TracePointConfig tracepoint )
     {
         final HashMap<String, Object> attributes = new HashMap<>();
-        attributes.put( "tp", tracepoint.getId() );
+        attributes.put( "tracepoint", tracepoint.getId() );
         attributes.put( "path", tracepoint.getPath() );
         attributes.put( "line", tracepoint.getLineNo() );
         attributes.put( "stack", tracepoint.getStackType() );

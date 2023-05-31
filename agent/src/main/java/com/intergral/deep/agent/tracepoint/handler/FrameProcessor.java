@@ -1,24 +1,27 @@
 /*
- *    Copyright 2023 Intergral GmbH
+ *     Copyright (C) 2023  Intergral GmbH
  *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.intergral.deep.agent.tracepoint.handler;
 
+import com.intergral.deep.agent.Utils;
+import com.intergral.deep.agent.api.plugin.IEventContext;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.settings.Settings;
-import com.intergral.deep.agent.tracepoint.evaluator.IEvaluator;
+import com.intergral.deep.agent.api.plugin.IEvaluator;
 import com.intergral.deep.agent.types.TracePointConfig;
 import com.intergral.deep.agent.types.snapshot.EventSnapshot;
 
@@ -27,17 +30,18 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class FrameProcessor extends FrameCollector
+public class FrameProcessor extends FrameCollector implements IEventContext
 {
     private final Collection<TracePointConfig> tracePointConfigs;
-    private final long lineStart;
+    private final long[] lineStart;
     private Collection<TracePointConfig> filteredTracepoints;
+    private TracePointConfig currentTP;
 
     public FrameProcessor( final Settings settings,
                            final IEvaluator evaluator,
                            final Map<String, Object> variables,
                            final Collection<TracePointConfig> tracePointConfigs,
-                           final long lineStart, final StackTraceElement[] stack )
+                           final long[] lineStart, final StackTraceElement[] stack )
     {
         super( settings, evaluator, variables, stack );
         this.tracePointConfigs = tracePointConfigs;
@@ -47,7 +51,7 @@ public class FrameProcessor extends FrameCollector
     public boolean canCollect()
     {
         this.filteredTracepoints = this.tracePointConfigs.stream()
-                .filter( tracePointConfig -> tracePointConfig.canFire( this.lineStart ) &&
+                .filter( tracePointConfig -> tracePointConfig.canFire( this.lineStart[0] ) &&
                         this.conditionPasses( tracePointConfig ) )
                 .collect( Collectors.toList() );
 
@@ -82,25 +86,61 @@ public class FrameProcessor extends FrameCollector
 
         for( final TracePointConfig tracepoint : filteredTracepoints )
         {
-            final EventSnapshot snapshot = new EventSnapshot( tracepoint,
-                    this.lineStart,
-                    this.settings.getResource(),
-                    processedFrame.frames(),
-                    processedFrame.variables() );
-
-            for( String watch : tracepoint.getWatches() )
+            try( final AutoCloseable ignored = withTracepoint( tracepoint ) )
             {
-                final FrameCollector.IExpressionResult result = super.evaluateExpression( watch );
-                snapshot.addWatchResult( result.result(), result.variables() );
+                final EventSnapshot snapshot = new EventSnapshot( tracepoint,
+                        this.lineStart[1],
+                        this.settings.getResource(),
+                        processedFrame.frames(),
+                        processedFrame.variables() );
+
+                for( String watch : tracepoint.getWatches() )
+                {
+                    final FrameCollector.IExpressionResult result = super.evaluateWatchExpression( watch );
+                    snapshot.addWatchResult( result.result(), result.variables() );
+                }
+
+                final Resource attributes = super.processAttributes( tracepoint );
+                snapshot.mergeAttributes( attributes );
+
+                snapshots.add( snapshot );
+                tracepoint.fired( this.lineStart[0] );
             }
-
-            final Resource attributes = super.processAttributes( tracepoint );
-            snapshot.mergeAttributes( attributes );
-
-            snapshots.add( snapshot );
-            tracepoint.fired( this.lineStart );
+            catch( Exception e )
+            {
+                throw new RuntimeException( e );
+            }
         }
 
         return snapshots;
+    }
+
+    private AutoCloseable withTracepoint( final TracePointConfig tracepoint )
+    {
+        this.currentTP = tracepoint;
+        return () -> currentTP = null;
+    }
+
+    protected <T> T getTracepointConfig( final String key, final Class<T> clazz, T def )
+    {
+        if( currentTP == null )
+        {
+            return def;
+        }
+        return currentTP.getArg( key, clazz, def );
+    }
+
+    @Override
+    public String evaluateExpression( final String expression )
+    {
+        final Object o = this.evaluator.evaluateExpression( expression, this.variables );
+        return Utils.valueOf( o );
+    }
+
+    public interface IFactory
+    {
+        FrameProcessor provide( Settings settings, IEvaluator evaluator, Map<String, Object> variables,
+                                Collection<TracePointConfig> tracePointConfigs, long[] lineStart,
+                                StackTraceElement[] stack );
     }
 }

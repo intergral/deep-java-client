@@ -144,5 +144,8 @@ public class Main
 
         System.out.println( engine.eval( "person", bindings ) );
         System.out.println( engine.eval( "person.getParent()", bindings ) );
+        System.out.println( engine.eval( "System.exit()", bindings ) );
+        System.out.println( engine.eval( "person.name", bindings ) );
+        System.out.println( engine.eval( "person.parent.name == 'mary'", bindings ) );
     }
 }

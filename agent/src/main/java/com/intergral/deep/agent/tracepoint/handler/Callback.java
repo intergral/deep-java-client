@@ -1,12 +1,30 @@
+/*
+ *     Copyright (C) 2023  Intergral GmbH
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.intergral.deep.agent.tracepoint.handler;
 
 import com.intergral.deep.agent.Utils;
 import com.intergral.deep.agent.push.PushService;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.tracepoint.TracepointConfigService;
+import com.intergral.deep.agent.tracepoint.cf.CFFrameProcessor;
 import com.intergral.deep.agent.tracepoint.cf.CFUtils;
 import com.intergral.deep.agent.tracepoint.evaluator.EvaluatorService;
-import com.intergral.deep.agent.tracepoint.evaluator.IEvaluator;
+import com.intergral.deep.agent.api.plugin.IEvaluator;
 import com.intergral.deep.agent.tracepoint.inst.asm.Visitor;
 import com.intergral.deep.agent.types.TracePointConfig;
 import com.intergral.deep.agent.types.snapshot.EventSnapshot;
@@ -80,7 +98,7 @@ public class Callback
         try
         {
             final IEvaluator evaluator = CFUtils.findCfEval( variables );
-            commonCallback( bpIds, filename, lineNo, variables, evaluator );
+            commonCallback( bpIds, filename, lineNo, variables, evaluator, CFFrameProcessor::new );
         }
         catch( Throwable t )
         {
@@ -105,7 +123,7 @@ public class Callback
         try
         {
             final IEvaluator evaluator = EvaluatorService.createEvaluator();
-            commonCallback( bpIds, filename, lineNo, variables, evaluator );
+            commonCallback( bpIds, filename, lineNo, variables, evaluator, FrameProcessor::new );
         }
         catch( Throwable t )
         {
@@ -118,9 +136,9 @@ public class Callback
                                         final String filename,
                                         final int lineNo,
                                         final Map<String, Object> variables,
-                                        final IEvaluator evaluator )
+                                        final IEvaluator evaluator, final FrameProcessor.IFactory factory )
     {
-        final long lineStart = Utils.currentTimeNanos();
+        final long[] lineStart = Utils.currentTimeNanos();
         if( FIRING.get() )
         {
             LOGGER.debug( "hit - skipping as we are already firing" );
@@ -148,7 +166,7 @@ public class Callback
                 stack = Arrays.copyOfRange( stack, offset, stack.length );
             }
 
-            final FrameProcessor frameProcessor = new FrameProcessor( Callback.SETTINGS,
+            final FrameProcessor frameProcessor = factory.provide( Callback.SETTINGS,
                     evaluator,
                     variables,
                     tracePointConfigs,
@@ -164,7 +182,7 @@ public class Callback
                     final Collection<EventSnapshot> snapshots = frameProcessor.collect();
                     for( EventSnapshot snapshot : snapshots )
                     {
-                        Callback.PUSH_SERVICE.pushSnapshot( snapshot );
+                        Callback.PUSH_SERVICE.pushSnapshot( snapshot, frameProcessor );
                     }
                 }
                 catch( Exception e )

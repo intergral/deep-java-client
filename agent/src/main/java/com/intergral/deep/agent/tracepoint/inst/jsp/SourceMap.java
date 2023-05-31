@@ -1,5 +1,18 @@
-/**
- * Copyright (C) 2019 Intergral Information Solutions GmbH. All Rights Reserved
+/*
+ *     Copyright (C) 2023  Intergral GmbH
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package com.intergral.deep.agent.tracepoint.inst.jsp;
 
@@ -12,7 +25,7 @@ import java.util.Map;
 public class SourceMap
 {
     private final String defaultStratum;
-    private final Map<String, StratumSection> nameToStratrumSectionMap = new HashMap<String, StratumSection>();
+    private final Map<String, StratumSection> nameToStratrumSectionMap = new HashMap<>();
 
 
     public SourceMap( final String defaultStratum )
@@ -29,8 +42,8 @@ public class SourceMap
 
     /**
      * Maps the filename and line number to line numbers in the output file.
-     * 
-     * @param filename the stratum filename (i.e fib.jsp)
+     *
+     * @param filename   the stratum filename (i.e fib.jsp)
      * @param lineNumber the line number
      * @return the list of line numbers in the output file (i.e. fib_jsp.java file)
      */
@@ -103,7 +116,7 @@ public class SourceMap
 
     /**
      * Look a linenumber from a output file to a filename and linenumner
-     * 
+     *
      * @param lineNumber the linenumber to look for (i.e. include_005ftime_jsp.java:91)
      * @return the filename and linenumber it maps to (i.e. time.jsp:1)
      */

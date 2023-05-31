@@ -1,5 +1,18 @@
-/**
- * Copyright (C) 2019 Intergral Information Solutions GmbH. All Rights Reserved
+/*
+ *     Copyright (C) 2023  Intergral GmbH
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package com.intergral.deep.agent.tracepoint.inst.jsp;
 
@@ -41,7 +54,8 @@ public class SourceMapParser
         {
             throw new IllegalStateException( "smap doesnt start with SMAP, '" + first + "'" );
         }
-        /*final String generateFile = */reader.readLine();
+        /*final String generateFile = */
+        reader.readLine();
         final String defaultStratum = reader.readLine();
 
         final SourceMap topSmap = new SourceMap( defaultStratum );
@@ -55,20 +69,26 @@ public class SourceMapParser
             if( line.startsWith( STRATUM_SECTION ) )
             {
                 if( current != null )
+                {
                     throw new IllegalStateException();
+                }
 
                 current = readStratumSection( line );
             }
             else if( line.equals( FILE_SECTION ) )
             {
                 if( current == null )
+                {
                     throw new IllegalStateException();
+                }
                 current.setFileSection( readFileSection( reader ) );
             }
             else if( line.equals( LINE_SECTION ) )
             {
                 if( current == null )
+                {
                     throw new IllegalStateException();
+                }
                 current.setLineSection( readLineSection( reader ) );
             }
             line = reader.readLine();
@@ -89,8 +109,7 @@ public class SourceMapParser
     private StratumSection readStratumSection( String currentLine )
     {
         final String name = currentLine.substring( 2, currentLine.length() );
-        final StratumSection ss = new StratumSection( name.trim() );
-        return ss;
+        return new StratumSection( name.trim() );
     }
 
 
@@ -131,7 +150,11 @@ public class SourceMapParser
                 outputLineIncrement = Integer.parseInt( outSplit[1] );
             }
 
-            lineSection.add( new LineSectionEntry( inputStart, fileId, repeatCount, outputStartLine, outputLineIncrement ) );
+            lineSection.add( new LineSectionEntry( inputStart,
+                    fileId,
+                    repeatCount,
+                    outputStartLine,
+                    outputLineIncrement ) );
 
             reader.mark( size );
             line = reader.readLine();

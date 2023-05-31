@@ -1,17 +1,18 @@
 /*
- *    Copyright 2023 Intergral GmbH
+ *     Copyright (C) 2023  Intergral GmbH
  *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.intergral.deep.agent.resource;
@@ -36,9 +37,9 @@ public class ResourceDetector
 {
 
     // Visible for testing
-    static final String ATTRIBUTE_PROPERTY = "otel.resource.attributes";
-    static final String SERVICE_NAME_PROPERTY = "otel.service.name";
-    static final String DISABLED_ATTRIBUTE_KEYS = "otel.experimental.resource.disabled.keys";
+    static final String ATTRIBUTE_PROPERTY = "deep.resource.attributes";
+    static final String SERVICE_NAME_PROPERTY = "deep.service.name";
+    static final String DISABLED_ATTRIBUTE_KEYS = "deep.resource.disabled.keys";
 
     public static Resource configureResource(
             Settings config,
@@ -47,9 +48,9 @@ public class ResourceDetector
         Resource result = Resource.create( Collections.emptyMap() );
 
         Set<String> enabledProviders =
-                new HashSet<>( config.getAsList( "otel.java.enabled.resource.providers" ) );
+                new HashSet<>( config.getAsList( "deep.java.enabled.resource.providers" ) );
         Set<String> disabledProviders =
-                new HashSet<>( config.getAsList( "otel.java.disabled.resource.providers" ) );
+                new HashSet<>( config.getAsList( "deep.java.disabled.resource.providers" ) );
 
         for( ResourceProvider resourceProvider :
                 SpiUtil.loadOrdered( ResourceProvider.class, serviceClassLoader ) )
@@ -94,7 +95,7 @@ public class ResourceDetector
             {
                 resourceAttributes.put(
                         entry.getKey(),
-                        // Attributes specified via otel.resource.attributes follow the W3C Baggage spec and
+                        // Attributes specified via deep.resource.attributes follow the W3C Baggage spec and
                         // characters outside the baggage-octet range are percent encoded
                         // https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/sdk.md#specifying-resource-information-via-an-environment-variable
                         URLDecoder.decode( entry.getValue(), StandardCharsets.UTF_8.displayName() ) );

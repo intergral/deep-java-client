@@ -1,3 +1,20 @@
+/*
+ *     Copyright (C) 2023  Intergral GmbH
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.intergral.deep.agent.tracepoint.inst.asm;
 
 import com.google.common.collect.Sets;
@@ -69,7 +86,11 @@ public class Visitor extends ClassVisitor
 {
     // these are the local variables that we want to capture when using CF, if we try to get all locals we get verify errors.
     // and we do not care about all the locals for CF.
-    private static final List<String> CF_VARS = Arrays.asList( "__localScope", "instance", "__arguments", "this", "parentPage" );
+    private static final List<String> CF_VARS = Arrays.asList( "__localScope",
+            "instance",
+            "__arguments",
+            "this",
+            "parentPage" );
     private static final Logger LOGGER = LoggerFactory.getLogger( Visitor.class );
     private static final SkipException EXCEPTION = new SkipException();
     private static final boolean DEBUG = false;
@@ -238,11 +259,16 @@ public class Visitor extends ClassVisitor
                         Label startFinally = new Label();
                         Label endCatch = new Label();
                         // add the try/catch around the original code
-                        tryCatchBlocks.add( new TryCatchBlockNode( start, new LabelNode( endOfTry ), new LabelNode( catchStart ),
+                        tryCatchBlocks.add( new TryCatchBlockNode( start,
+                                new LabelNode( endOfTry ),
+                                new LabelNode( catchStart ),
                                 "java/lang/Throwable" ) );
                         // add try/finally for the original code
                         tryCatchBlocks.add(
-                                new TryCatchBlockNode( start, new LabelNode( endOfTry ), new LabelNode( startFinally ), null ) );
+                                new TryCatchBlockNode( start,
+                                        new LabelNode( endOfTry ),
+                                        new LabelNode( startFinally ),
+                                        null ) );
                         // add try/finally for the catch code
                         tryCatchBlocks.add(
                                 new TryCatchBlockNode( new LabelNode( catchStart ), new LabelNode( endCatch ),
@@ -309,8 +335,12 @@ public class Visitor extends ClassVisitor
                         }
 
                         // Callback.callBackFinally(set)
-                        hook.add( new MethodInsnNode( INVOKESTATIC, Type.getInternalName( CALLBACK_CLASS ), "callBackFinally",
-                                Type.getMethodDescriptor( Type.VOID_TYPE, Type.getType( Set.class ), Type.getType( Map.class ) ),
+                        hook.add( new MethodInsnNode( INVOKESTATIC,
+                                Type.getInternalName( CALLBACK_CLASS ),
+                                "callBackFinally",
+                                Type.getMethodDescriptor( Type.VOID_TYPE,
+                                        Type.getType( Set.class ),
+                                        Type.getType( Map.class ) ),
                                 false ) );
                         if( isReturnNode )
                         {
@@ -378,8 +408,11 @@ public class Visitor extends ClassVisitor
                         // load exception
                         hook.add( new VarInsnNode( ALOAD, varOffset ) );
                         // Callback.callBackException(t);
-                        hook.add( new MethodInsnNode( INVOKESTATIC, Type.getInternalName( CALLBACK_CLASS ), "callBackException",
-                                "(Ljava/lang/Throwable;)V", false ) );
+                        hook.add( new MethodInsnNode( INVOKESTATIC,
+                                Type.getInternalName( CALLBACK_CLASS ),
+                                "callBackException",
+                                "(Ljava/lang/Throwable;)V",
+                                false ) );
                         // load exception again (callback consumes it)
                         hook.add( new VarInsnNode( ALOAD, varOffset ) );
                         // re throw the exception
@@ -420,8 +453,12 @@ public class Visitor extends ClassVisitor
                             seenLabels.add( ((LineNumberNode) node).start.getLabel() );
                         }
                         // Callback.callBackFinally(set)
-                        hook.add( new MethodInsnNode( INVOKESTATIC, Type.getInternalName( CALLBACK_CLASS ), "callBackFinally",
-                                Type.getMethodDescriptor( Type.VOID_TYPE, Type.getType( Set.class ), Type.getType( Map.class ) ),
+                        hook.add( new MethodInsnNode( INVOKESTATIC,
+                                Type.getInternalName( CALLBACK_CLASS ),
+                                "callBackFinally",
+                                Type.getMethodDescriptor( Type.VOID_TYPE,
+                                        Type.getType( Set.class ),
+                                        Type.getType( Map.class ) ),
                                 false ) );
                         // load exception back
                         hook.add( new VarInsnNode( ALOAD, varOffset + 1 ) );
@@ -464,12 +501,14 @@ public class Visitor extends ClassVisitor
 
                     if( node.getType() == AbstractInsnNode.LABEL )
                     {
+                        //noinspection DataFlowIssue
                         LabelNode lab = (LabelNode) node;
                         seenLabels.add( lab.getLabel() );
                     }
 
                     if( node.getType() == AbstractInsnNode.LINE )
                     {
+                        //noinspection DataFlowIssue
                         LineNumberNode ln = (LineNumberNode) node;
                         // if we are a constructor and have not called super yet - the cache the line for later
                         if( isConstructor && !hasCalledSuper )
@@ -651,7 +690,6 @@ public class Visitor extends ClassVisitor
                     }
                 }
 
-                // TODO: 15.07.20 might need further testing on this part
                 final Type[] argumentTypes = Type.getArgumentTypes( desc );
                 // if we have params but no locals (except this) then add the params
                 if( argumentTypes.length != 0 && noneOrJustThis( localVariables ) )
@@ -785,7 +823,6 @@ public class Visitor extends ClassVisitor
      *
      * @param t     variable type
      * @param index variable index
-     *
      * @return the instruction list
      */
     static InsnList loadVariable( final Type t, final int index )
@@ -831,7 +868,6 @@ public class Visitor extends ClassVisitor
      * @param clazz      variable class
      * @param loadOpcode opcode
      * @param primitive  is primitive variable
-     *
      * @return the instruction list
      */
     private static InsnList box( final int index, final Type primitive, final Class<?> clazz, final int loadOpcode )

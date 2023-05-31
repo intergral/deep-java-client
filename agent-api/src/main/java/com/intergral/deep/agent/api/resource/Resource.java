@@ -1,17 +1,6 @@
 /*
- *    Copyright 2023 Intergral GmbH
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *        http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.intergral.deep.agent.api.resource;
@@ -40,7 +29,7 @@ public class Resource
     private static final Resource EMPTY = create( Collections.emptyMap() );
     private static final Resource TELEMETRY_SDK;
 
-    private static final Resource DEFAULT;
+    public static final Resource DEFAULT;
     /**
      * The MANDATORY Resource instance contains the mandatory attributes that must be used if they are
      * not provided by the Resource that is given to an SDK signal provider.
@@ -54,7 +43,7 @@ public class Resource
                 create(
                         new HashMap<String, Object>()
                         {{
-                            put( TELEMETRY_SDK_NAME, "opentelemetry" );
+                            put( TELEMETRY_SDK_NAME, "deep" );
                             put( TELEMETRY_SDK_LANGUAGE, "java" );
                             put( TELEMETRY_SDK_VERSION, DeepVersion.VERSION );
                         }} );

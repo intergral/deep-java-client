@@ -1,7 +1,24 @@
+/*
+ *     Copyright (C) 2023  Intergral GmbH
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.intergral.deep.agent.tracepoint.cf;
 
 import com.intergral.deep.agent.ReflectionUtils;
-import com.intergral.deep.agent.tracepoint.evaluator.IEvaluator;
+import com.intergral.deep.agent.api.plugin.IEvaluator;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -90,7 +107,8 @@ public class CFUtils
     static boolean isScope( final Object varScope )
     {
         return (varScope instanceof Map)
-                && (varScope.getClass().getName().startsWith( "coldfusion" ) && varScope.getClass().getName().contains( "Scope" )
+                && (varScope.getClass().getName().startsWith( "coldfusion" ) &&
+                varScope.getClass().getName().contains( "Scope" )
                 || varScope.getClass().getName().equals( "coldfusion.runtime.ArgumentCollection" ));
     }
 
@@ -98,7 +116,8 @@ public class CFUtils
     static boolean isLuceeScope( final Object varScope )
     {
         return (varScope instanceof Map)
-                && (varScope.getClass().getName().startsWith( "lucee" ) && varScope.getClass().getName().contains( "scope" ));
+                && (varScope.getClass().getName().startsWith( "lucee" ) &&
+                varScope.getClass().getName().contains( "scope" ));
     }
 
 

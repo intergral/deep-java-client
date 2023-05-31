@@ -1,3 +1,20 @@
+/*
+ *     Copyright (C) 2023  Intergral GmbH
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.intergral.deep.agent.tracepoint.inst;
 
 import com.intergral.deep.agent.Utils;
@@ -127,6 +144,23 @@ public class TracepointInstrumentationService implements ClassFileTransformer
         return iBreakpoints;
     }
 
+    public static TracepointInstrumentationService init( final Instrumentation inst, final Settings settings )
+    {
+        final TracepointInstrumentationService tracepointInstrumentationService = new TracepointInstrumentationService(
+                inst,
+                settings );
+
+        inst.addTransformer( tracepointInstrumentationService, true );
+
+        return tracepointInstrumentationService;
+    }
+
+    /**
+     * Process the new config from the services and determine which classes need to be transformed,
+     * and trigger transformation.
+     *
+     * @param breakpointResponse the new list of tracepoints that have been received from the server.
+     */
     public synchronized void processBreakpoints( final Collection<TracePointConfig> breakpointResponse )
     {
         final Map<String, Map<String, TracePointConfig>> existingBreakpoints = this.classPrefixBreakpoints;
@@ -177,8 +211,8 @@ public class TracepointInstrumentationService implements ClassFileTransformer
         if( this.classPrefixBreakpoints.containsKey( "jsp" ) || existingBreakpoints.containsKey( "jsp" ) )
         {
             final Map<String, TracePointConfig> jsp = this.classPrefixBreakpoints.get( "jsp" );
-            @SuppressWarnings("RedundantTypeArguments") final IClassScanner jspScanner = reTransFormJSPClasses( new HashMap<>(
-                            jsp == null ? Collections.<String, TracePointConfig>emptyMap() : jsp ),
+            final IClassScanner jspScanner = reTransFormJSPClasses( new HashMap<>(
+                            jsp == null ? Collections.emptyMap() : jsp ),
                     Utils.newMap( existingBreakpoints.get( "jsp" ) ) );
             compositeClassScanner.addScanner( jspScanner );
         }
@@ -187,8 +221,8 @@ public class TracepointInstrumentationService implements ClassFileTransformer
         if( this.classPrefixBreakpoints.containsKey( "cfm" ) || existingBreakpoints.containsKey( "cfm" ) )
         {
             final Map<String, TracePointConfig> cfm = this.classPrefixBreakpoints.get( "cfm" );
-            @SuppressWarnings("RedundantTypeArguments") final IClassScanner cfmScanner = reTransFormCfClasses( new HashMap<>(
-                            cfm == null ? Collections.<String, TracePointConfig>emptyMap() : cfm ),
+            final IClassScanner cfmScanner = reTransFormCfClasses( new HashMap<>(
+                            cfm == null ? Collections.emptyMap() : cfm ),
                     Utils.newMap( existingBreakpoints.get( "cfm" ) ) );
             compositeClassScanner.addScanner( cfmScanner );
         }
@@ -253,14 +287,12 @@ public class TracepointInstrumentationService implements ClassFileTransformer
         return new SetClassScanner( newClasses );
     }
 
-
     private IClassScanner reTransformClassesThatNoLongerHaveTracePoints( final Set<String> existingClasses,
                                                                          final Set<String> newClasses )
     {
         existingClasses.removeAll( newClasses );
         return new SetClassScanner( existingClasses );
     }
-
 
     @Override
     public byte[] transform( final ClassLoader loader,
@@ -274,14 +306,16 @@ public class TracepointInstrumentationService implements ClassFileTransformer
         ClassNode cn = null;
         final Collection<TracePointConfig> iBreakpoints;
         final String className = InstUtils.internalClassStripInner( classNameP );
+        final String shortClassName = InstUtils.fileName( className ); // we use the method fileName as it strips all but the last of the internal class name for us
+        final Collection<TracePointConfig> matchedTracepoints = matchTracepoints( className, shortClassName );
         // no breakpoints for this class or any CF classes
-        if( !this.classPrefixBreakpoints.containsKey( className ) && !this.classPrefixBreakpoints.containsKey( "cfm" )
+        if( matchedTracepoints.isEmpty() && !this.classPrefixBreakpoints.containsKey( "cfm" )
                 && !this.classPrefixBreakpoints.containsKey( "jsp" ) )
         {
             return null;
         }
         // no breakpoints for this class, but we have a cfm breakpoints, and this is a cfm class
-        else if( !this.classPrefixBreakpoints.containsKey( className ) &&
+        else if( matchedTracepoints.isEmpty() &&
                 this.classPrefixBreakpoints.containsKey( "cfm" )
                 && CFUtils.isCfClass( classNameP ) )
         {
@@ -307,7 +341,7 @@ public class TracepointInstrumentationService implements ClassFileTransformer
             isCf = true;
         }
         // no breakpoints for this class, but we have a jsp breakpoints, and this is a jsp class
-        else if( !this.classPrefixBreakpoints.containsKey( className ) &&
+        else if( matchedTracepoints.isEmpty() &&
                 this.classPrefixBreakpoints.containsKey( "jsp" )
                 && JSPUtils.isJspClass( this.jspSuffix, this.jspPackages, InstUtils.externalClassName( className ) ) )
         {
@@ -346,7 +380,7 @@ public class TracepointInstrumentationService implements ClassFileTransformer
         else
         {
             isCf = false;
-            iBreakpoints = this.classPrefixBreakpoints.get( className ).values();
+            iBreakpoints = matchedTracepoints;
         }
         LOGGER.debug( "Transforming class: {}", className );
 
@@ -396,4 +430,21 @@ public class TracepointInstrumentationService implements ClassFileTransformer
         }
         return null;
     }
+
+    private Collection<TracePointConfig> matchTracepoints( final String className, final String shortClassName )
+    {
+        final Map<String, TracePointConfig> classMatches = this.classPrefixBreakpoints.get( className );
+        if( classMatches != null )
+        {
+            return classMatches.values();
+        }
+
+        final Map<String, TracePointConfig> shortClassMatches = this.classPrefixBreakpoints.get( shortClassName );
+        if( shortClassMatches != null )
+        {
+            return shortClassMatches.values();
+        }
+        return Collections.emptyList();
+    }
+
 }

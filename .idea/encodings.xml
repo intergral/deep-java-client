@@ -15,11 +15,25 @@
     <file url="file://$PROJECT_DIR$/examples/dynamic-load/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/examples/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/examples/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/it-tests/cf-tests/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/it-tests/cf-tests/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/it-tests/java-tests/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/it-tests/java-tests/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/it-tests/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/it-tests/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/plugins/cf-plugin/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/plugins/cf-plugin/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/plugins/java-plugin/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/plugins/java-plugin/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/plugins/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/plugins/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/reflect-api/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/reflect-api/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/reflect-java-9/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/reflect-java-9/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/test-utils/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/test-utils/src/main/resources" charset="UTF-8" />
   </component>
 </project>

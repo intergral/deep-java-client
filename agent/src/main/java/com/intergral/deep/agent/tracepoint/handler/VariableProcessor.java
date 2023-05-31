@@ -1,24 +1,25 @@
 /*
- *    Copyright 2023 Intergral GmbH
+ *     Copyright (C) 2023  Intergral GmbH
  *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.intergral.deep.agent.tracepoint.handler;
 
 import com.intergral.deep.agent.ReflectionUtils;
 import com.intergral.deep.agent.Utils;
-import com.intergral.deep.agent.api.utils.ArrayIterator;
+import com.intergral.deep.agent.api.utils.ArrayObjectIterator;
 import com.intergral.deep.agent.api.utils.CompoundIterator;
 import com.intergral.deep.agent.tracepoint.handler.bfs.Node;
 import com.intergral.deep.agent.types.snapshot.Variable;
@@ -79,9 +80,7 @@ public abstract class VariableProcessor
             return Collections.emptySet();
         }
 
-        final Node.IParent parent = ( node ) -> {
-            this.appendChild( variableId.getId(), node );
-        };
+        final Node.IParent parent = ( node ) -> this.appendChild( variableId.getId(), node );
 
         return findChildrenForParent( parent, value );
     }
@@ -90,7 +89,7 @@ public abstract class VariableProcessor
     {
         if( arrayType( value ) )
         {
-            return processNamedIterable( parent, new NamedIterable<>( ((Object[]) value) ) );
+            return processNamedIterable( parent, new NamedIterable<>( new ArrayObjectIterator( value ) ) );
         }
         if( collectionType( value ) )
         {
@@ -146,8 +145,9 @@ public abstract class VariableProcessor
 
     protected VariableResponse processVariable( final Node.NodeValue value )
     {
+        final Object objValue = value.getValue();
         // get the variable hash id
-        final String identityCode = String.valueOf( System.identityHashCode( value.getValue() ) );
+        final String identityCode = String.valueOf( System.identityHashCode( objValue ) );
 
         //check the collector cache for this id
         final String cacheId = checkId( identityCode );
@@ -170,9 +170,17 @@ public abstract class VariableProcessor
                 value.getModifiers(),
                 value.getOriginalName() );
 
-        final String varType = value.getValue().getClass().getName();
+        final String varType;
+        if( objValue == null )
+        {
+            varType = "null";
+        }
+        else
+        {
+            varType = objValue.getClass().getName();
+        }
 
-        final Utils.ITrimResult iTrimResult = Utils.trim( this.valueToString( value.getValue() ),
+        final Utils.ITrimResult iTrimResult = Utils.trim( this.valueToString( objValue ),
                 this.frameConfig.maxStringLength() );
 
         final Variable variable = new Variable( varType, iTrimResult.value(), identityCode, iTrimResult.truncated() );
@@ -246,11 +254,6 @@ public abstract class VariableProcessor
             this.iterator = iterator;
         }
 
-        public NamedIterable( final T[] value )
-        {
-            this.iterator = new ArrayIterator<>( value );
-        }
-
         @Override
         public boolean hasNext()
         {
@@ -260,14 +263,14 @@ public abstract class VariableProcessor
         @Override
         public NamedIterable.INamedItem next()
         {
-            this.index++;
+            final String name = String.valueOf( index++ );
             final Object next = this.iterator.next();
             return new INamedItem()
             {
                 @Override
                 public String name()
                 {
-                    return String.valueOf( index );
+                    return name;
                 }
 
                 @Override
@@ -397,20 +400,7 @@ public abstract class VariableProcessor
             this.clazz = clazz;
             if( this.clazz.getSuperclass() == null || this.clazz.getSuperclass() == Object.class )
             {
-                this.iterator = new Iterator<Field>()
-                {
-                    @Override
-                    public boolean hasNext()
-                    {
-                        return false;
-                    }
-
-                    @Override
-                    public Field next()
-                    {
-                        return null;
-                    }
-                };
+                this.iterator = ReflectionUtils.getFieldIterator( clazz );
             }
             else
             {

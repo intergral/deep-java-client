@@ -1,0 +1,18 @@
+name: CF IT Tests
+
+on: workflow_dispatch
+
+jobs:
+  cfTests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Run CF Tests
+        run: mvn clean verify -U -B -P cf-it-tests -pl it-tests/cf-tests --also-make

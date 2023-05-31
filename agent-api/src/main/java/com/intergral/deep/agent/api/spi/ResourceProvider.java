@@ -10,9 +10,10 @@ import com.intergral.deep.agent.api.settings.ISettings;
 
 /**
  * A service provider interface (SPI) for providing a {@link Resource} that is merged into the
- * {@linkplain Resource#getDefault() default resource}.
+ * default resource.
  */
-public interface ResourceProvider extends Ordered {
+public interface ResourceProvider extends Ordered
+{
 
-  Resource createResource( ISettings settings );
+    Resource createResource( ISettings settings );
 }
