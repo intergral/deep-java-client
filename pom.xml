@@ -26,6 +26,50 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
+    <name>DEEP Java Agent</name>
+    <description>Java agent for DEEP</description>
+
+    <url>https://intergral.com</url>
+
+    <licenses>
+        <license>
+            <name>AGPL-3.0-only</name>
+            <url>https://github.com/intergral/deep-java-client/blob/master/LICENSE</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <organization>
+        <name>Intergral GmbH</name>
+        <url>https://intergral.com</url>
+    </organization>
+
+    <scm>
+        <url>https://github.com/intergral/deep-java-client</url>
+    </scm>
+
+    <issueManagement>
+        <system>github</system>
+        <url>https://github.com/intergral/deep-java-client</url>
+    </issueManagement>
+
+    <developers>
+        <developer>
+            <name>Intergral GmbH</name>
+            <id>intergral</id>
+            <organization>Intergral Information Solutions GmbH</organization>
+            <email>support@intergral.com</email>
+            <timezone>+1</timezone>
+            <organizationUrl>https://www.intergral.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Ben Donnelly</name>
+            <id>bdonnell</id>
+            <organization>Intergral GmbH</organization>
+            <email>b.w.donnelly1@gmail.com</email>
+        </developer>
+    </developers>
+
     <modules>
         <module>agent-api</module>
         <module>agent</module>
@@ -60,6 +104,78 @@
             <modules>
                 <module>examples</module>
             </modules>
+        </profile>
+
+        <!--This profile will deal with releasing the jar-->
+        <profile>
+            <id>release-ossrh</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>ossrh</id>
+                    <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+                </snapshotRepository>
+                <repository>
+                    <id>ossrh</id>
+                    <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                </repository>
+            </distributionManagement>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.sonatype.plugins</groupId>
+                            <artifactId>nexus-staging-maven-plugin</artifactId>
+                            <version>1.6.8</version>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-gpg-plugin</artifactId>
+                            <version>1.6</version>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <passphrase>${env.GPG_PASSPHRASE}</passphrase>
+                                    <gpgArguments>
+                                        <!--https://stackoverflow.com/questions/28859942/how-do-i-get-the-maven-gpg-plugin-to-use-a-passphrase-from-environment-variable-->
+                                        <arg>--pinentry-mode</arg>
+                                        <arg>loopback</arg>
+
+                                        <argument>--no-tty</argument>
+                                        <argument>--batch</argument>
+                                    </gpgArguments>
+                                    <executable>gpg</executable>
+                                    <keyname>0x8FD157B6</keyname>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 

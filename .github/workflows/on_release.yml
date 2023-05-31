@@ -11,6 +11,7 @@ jobs:
       OSS_USERNAME: ${{ secrets.OSS_USERNAME }}
       OSS_PASSWORD: ${{ secrets.OSS_PASSWORD }}
       GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      VERSION: ${{ github.ref_name }}
 
     steps:
       - uses: actions/checkout@v3
@@ -28,4 +29,5 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - name: Generate Java Proto
-        run: make rel-java
+        run: mvn versions:set -DnewVersion=${VERSION} -B -U
+      - run: mvn -s .ci-settings.xml clean deploy -P release-ossrh -B -U -pl agent --also-make
