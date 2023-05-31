@@ -27,6 +27,8 @@
     </parent>
 
     <artifactId>cf-tests</artifactId>
+    <name>CF Tests</name>
+    <description>These tests deploy a docker container for the specified cf and deploy a small app. Then we mock a connection, then collect real data with the agent.</description>
 
     <properties>
     </properties>

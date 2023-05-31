@@ -28,6 +28,8 @@
 
     <groupId>com.intergral.deep.tests</groupId>
     <artifactId>test-utils</artifactId>
+    <name>Test Utils</name>
+    <description>Small set of utility classes to help with tests.</description>
 
     <properties>
 

@@ -28,6 +28,9 @@
 
     <artifactId>agent</artifactId>
 
+    <name>Agent</name>
+    <description>This is the main output of the build, containing an all encompassing jar as a java agent.</description>
+
     <properties>
         <relocation.package>com.intergral.deep.relocated</relocation.package>
         <relocation.native.prefix>com_intergral_deep_relocated</relocation.native.prefix>

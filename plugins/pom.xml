@@ -32,7 +32,10 @@
         <module>cf-plugin</module>
     </modules>
 
+    <groupId>com.intergral.deep.plugins</groupId>
     <artifactId>plugins</artifactId>
+    <name>Plugins</name>
+    <description>A set of extensions that add specific functionality to deep given the environment we are running in.</description>
 
     <properties>
     </properties>

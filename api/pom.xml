@@ -27,6 +27,8 @@
     </parent>
 
     <artifactId>api</artifactId>
+    <name>API</name>
+    <description>This is a bridge API between the user code and the agent. This allows us to get access to the agent API from outside the java agent.</description>
 
     <properties>
 

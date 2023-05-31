@@ -27,6 +27,8 @@
     </parent>
 
     <artifactId>deep</artifactId>
+    <name>Deep</name>
+    <description>This is the main entry point for user applications, and the dependency that should be in users applications.</description>
 
     <properties>
     </properties>

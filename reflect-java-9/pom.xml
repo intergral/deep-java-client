@@ -27,8 +27,11 @@
     </parent>
 
     <artifactId>reflect-java-9</artifactId>
+    <name>Reflect Java 9</name>
+    <description>If we are Java > 8 then we need to deal with modules.</description>
 
     <properties>
+        <!--This modules needs to be compiled with at least java 9-->
         <maven.compiler.source>1.9</maven.compiler.source>
         <maven.compiler.target>1.9</maven.compiler.target>
         <maven.test.compiler.source>1.9</maven.test.compiler.source>

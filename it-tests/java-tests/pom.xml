@@ -27,6 +27,8 @@
     </parent>
 
     <artifactId>java-tests</artifactId>
+    <name>Java Tests</name>
+    <description>A small collection of tests to check different Java features.</description>
 
     <properties>
 

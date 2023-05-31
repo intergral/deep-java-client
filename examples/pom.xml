@@ -24,9 +24,15 @@
         <groupId>com.intergral.deep</groupId>
         <artifactId>deep-java-client</artifactId>
         <version>1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <groupId>com.intergral.deep.examples</groupId>
+
     <artifactId>examples</artifactId>
+    <name>Examples</name>
+    <description>A small collection of examples on using deep.</description>
+
     <packaging>pom</packaging>
     <modules>
         <module>agent-load</module>

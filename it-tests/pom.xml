@@ -28,6 +28,9 @@
 
     <groupId>com.intergral.deep.tests</groupId>
     <artifactId>it-tests</artifactId>
+    <name>IT Tests</name>
+    <description>This contains a collection of IT tests that verify the agent works in a variety of environments</description>
+
     <packaging>pom</packaging>
     <modules>
         <!-- The java-tests module includes simple it tests that should run as part of the build -->

@@ -28,6 +28,9 @@
 
     <artifactId>agent-api</artifactId>
 
+    <name>Agent API</name>
+    <description>This is the definition of the APIs that the agent makes available. These can be used to create plugins and other extensions to deep.</description>
+
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>

@@ -11,4 +11,4 @@ theme:
 
 nav:
   - Home: index.md
-  - Maven Site: https://intergral.github.io/deep-java-client/mvn/index.html
+  - Maven Site & Java Docs: https://intergral.github.io/deep-java-client/mvn/index.html

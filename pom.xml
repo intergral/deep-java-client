@@ -27,7 +27,7 @@
     <packaging>pom</packaging>
 
     <name>DEEP Java Agent</name>
-    <description>Java agent for DEEP</description>
+    <description>This project produces the main java agent (Agent) and the api (Agent API) as well as the deep agent.</description>
 
     <url>https://intergral.com</url>
 
