@@ -39,7 +39,7 @@ import java.util.Set;
 
 public class Callback
 {
-    @SuppressWarnings("AnonymousHasLambdaAlternative")
+//    @SuppressWarnings("AnonymousHasLambdaAlternative")
 //    public static final ThreadLocal<Deque<CallbackHook>> CALLBACKS = new ThreadLocal<Deque<CallbackHook>>()
 //    {
 //        @Override
