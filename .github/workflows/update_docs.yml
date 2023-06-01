@@ -77,7 +77,6 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: Mvn docs
-          path: site.tar.gz
 
       - name: Unpack
         run: |
