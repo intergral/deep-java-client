@@ -197,10 +197,10 @@ public class Callback
         }
     }
 
-
+    // the below methods are here as they are called from instrumented classes. This is a throwback to NV that we will address in later releases
     public static void callBackException( final Throwable t )
     {
-        System.out.println( "callBackException" );
+//        System.out.println( "callBackException" );
 //        try
 //        {
 //            LOGGER.debug( "Capturing throwable", t );
@@ -220,7 +220,7 @@ public class Callback
 
     public static void callBackFinally( final Set<String> breakpointIds, final Map<String, Object> map )
     {
-        System.out.println( "callBackFinally" );
+//        System.out.println( "callBackFinally" );
 //        for( String breakpointId : breakpointIds )
 //        {
 //            try
