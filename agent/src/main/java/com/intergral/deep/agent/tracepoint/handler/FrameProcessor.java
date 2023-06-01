@@ -77,7 +77,7 @@ public class FrameProcessor extends FrameCollector implements IEventContext {
     final IFrameResult processedFrame = super.processFrame();
 
     for (final TracePointConfig tracepoint : filteredTracepoints) {
-      try (final AutoCloseable ignored = withTracepoint(tracepoint)) {
+      try (AutoCloseable ignored = withTracepoint(tracepoint)) {
         final EventSnapshot snapshot = new EventSnapshot(tracepoint,
             this.lineStart[1],
             this.settings.getResource(),

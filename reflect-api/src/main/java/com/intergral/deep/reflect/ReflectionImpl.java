@@ -82,7 +82,7 @@ public class ReflectionImpl implements IReflection {
     while (clazz != null) {
       try {
         return clazz.getMethod(methodName, argTypes);
-      } catch (Exception e) {
+      } catch (Exception ignored) {
         // ignored
       }
       try {

@@ -30,6 +30,7 @@ public class TracepointConfigService implements ITracepointConfig {
   private final TracepointInstrumentationService tracepointInstrumentationService;
   private String currentHash = null;
   private Collection<TracePointConfig> installedTracepoints;
+  @SuppressWarnings("unused")
   private long lastUpdate;
 
   public TracepointConfigService(

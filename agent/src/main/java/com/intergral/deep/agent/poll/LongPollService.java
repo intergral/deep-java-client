@@ -36,11 +36,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class LongPollService implements ITimerTask {
-
   private final Settings settings;
   private final GrpcService grpcService;
   private final DriftAwareThread thread;
-  private String currentHash;
   private ITracepointConfig tracepointConfig;
 
   public LongPollService(final Settings settings, final GrpcService grpcService) {

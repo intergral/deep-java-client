@@ -55,7 +55,6 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
       TracepointInstrumentationService.class);
 
   private final Instrumentation inst;
-  private final Settings settings;
   private final String disPath;
   private final String jspSuffix;
   private final List<String> jspPackages;
@@ -65,8 +64,7 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
 
   public TracepointInstrumentationService(final Instrumentation inst, final Settings settings) {
     this.inst = inst;
-    this.settings = settings;
-    disPath = settings.getSettingAs("transform.path", String.class);
+    this.disPath = settings.getSettingAs("transform.path", String.class);
     //noinspection unchecked
     this.jspPackages = settings.getSettingAs("jsp.packages", List.class);
     this.jspSuffix = settings.getSettingAs("jsp.suffix", String.class);
@@ -103,10 +101,10 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
       final String srcRoot = breakpoint.getArgs().get("src_root");
       final String relPathFromNv = breakpoint.getPath();
       final String locationString = location.toString();
-      if ((srcRoot != null && locationString.endsWith(relPathFromNv.substring(srcRoot.length())))
+      if (srcRoot != null && locationString.endsWith(relPathFromNv.substring(srcRoot.length()))
           || locationString.endsWith(relPathFromNv)
-          || (relPathFromNv.startsWith("/src/main/cfml")
-          && locationString.endsWith(relPathFromNv.substring("/src/main/cfml".length())))
+          || relPathFromNv.startsWith("/src/main/cfml")
+          && locationString.endsWith(relPathFromNv.substring("/src/main/cfml".length()))
       ) {
         iBreakpoints.add(breakpoint);
       }
@@ -353,8 +351,8 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
       }
 
       // if we are not java 1.1 and are greater than COMPUTE_ON_CLASS_VERSION (50 (java 1.6)) then compute frames
-      final boolean classVersionNeedsComputeFrames = (cn.version != org.objectweb.asm.Opcodes.V1_1
-          && cn.version >= COMPUTE_ON_CLASS_VERSION);
+      final boolean classVersionNeedsComputeFrames = cn.version != org.objectweb.asm.Opcodes.V1_1
+          && cn.version >= COMPUTE_ON_CLASS_VERSION;
 
       final ClassWriter writer = new ClassLoaderAwareClassWriter(reader,
           // compute the frames if we need to else just maxes as we are a class version that does not have frames

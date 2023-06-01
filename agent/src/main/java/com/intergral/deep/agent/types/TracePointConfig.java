@@ -24,56 +24,49 @@ import java.util.Map;
 public class TracePointConfig {
 
   /**
-   * // The number of times this tracepoint should fire
-   */
-  private static final String FIRE_COUNT = "fire_count";
-  /**
-   * // The start of the time period this tracepoint can fire in
-   */
-  private static final String WINDOW_START = "window_start";
-  /**
-   * // The end of the time period this tracepoint can fire in
-   */
-  private static final String WINDOW_END = "window_end";
-  /**
-   * // The minimum time between successive triggers, in ms
-   */
-  private static final String FIRE_PERIOD = "fire_period";
-  /**
-   * // The condition that has to be 'truthy' for this tracepoint to fire
-   */
-  private static final String CONDITION = "condition";
-
-  /**
-   * // This is the key to indicate the frame collection type
-   */
-  private static final String FRAME_TYPE = "frame_type";
-  /**
-   * // This is the key to indicate the stack collection type
-   */
-  private static final String STACK_TYPE = "stack_type";
-
-  /**
-   * // Collect only the frame we are on
+   * Collect only the frame we are on
    */
   public static final String SINGLE_FRAME_TYPE = "single_frame";
   /**
-   * // Collect from all available frames
+   * Collect from all available frames
    */
   public static final String ALL_FRAME_TYPE = "all_frame";
   /**
-   * // Collect on frame data
+   * Collect on frame data
    */
   public static final String NO_FRAME_TYPE = "no_frame";
-
   /**
-   * // Collect the full stack
+   * Collect the full stack
    */
   public static final String STACK = "stack";
   /**
-   * // Do not collect the stack data
+   * The number of times this tracepoint should fire
    */
-  private static final String NO_STACK = "no_stack";
+  private static final String FIRE_COUNT = "fire_count";
+  /**
+   * The start of the time period this tracepoint can fire in
+   */
+  private static final String WINDOW_START = "window_start";
+  /**
+   * The end of the time period this tracepoint can fire in
+   */
+  private static final String WINDOW_END = "window_end";
+  /**
+   * The minimum time between successive triggers, in ms
+   */
+  private static final String FIRE_PERIOD = "fire_period";
+  /**
+   * The condition that has to be 'truthy' for this tracepoint to fire
+   */
+  private static final String CONDITION = "condition";
+  /**
+   * This is the key to indicate the frame collection type
+   */
+  private static final String FRAME_TYPE = "frame_type";
+  /**
+   * This is the key to indicate the stack collection type
+   */
+  private static final String STACK_TYPE = "stack_type";
 
   private final String id;
   private final String path;
@@ -217,11 +210,11 @@ public class TracePointConfig {
     private int fireCount = 0;
     private long lastFire = 0;
 
-    private int getFireCount() {
+    int getFireCount() {
       return this.fireCount;
     }
 
-    private void fired(final long ts) {
+    void fired(final long ts) {
       this.lastFire = ts;
       this.fireCount++;
     }

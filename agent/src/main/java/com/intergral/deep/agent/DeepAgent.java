@@ -29,12 +29,9 @@ import com.intergral.deep.agent.tracepoint.TracepointConfigService;
 import com.intergral.deep.agent.tracepoint.handler.Callback;
 import com.intergral.deep.agent.tracepoint.inst.TracepointInstrumentationService;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DeepAgent {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(DeepAgent.class);
   private final Settings settings;
   private final GrpcService grpcService;
   private final LongPollService pollService;

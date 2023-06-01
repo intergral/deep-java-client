@@ -218,6 +218,19 @@
                             <source>8</source>
                         </configuration>
                     </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-pmd-plugin</artifactId>
+                        <version>3.21.0</version>
+                        <configuration>
+                            <linkXRef>true</linkXRef>
+                            <excludes>
+                                <!--PMD doesn't like java.com classes-->
+                                <exclude>**/ProxyCallback.java</exclude>
+                                <exclude>**/Visitor.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </reporting>
             <distributionManagement>
@@ -255,15 +268,6 @@
                 <activeByDefault>false</activeByDefault>
             </activation>
             <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-checkstyle-plugin</artifactId>
-                            <version>3.3.0</version>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -287,6 +291,45 @@
                             <execution>
                                 <id>validate</id>
                                 <phase>validate</phase>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>pmd</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-pmd-plugin</artifactId>
+                            <version>3.21.0</version>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-pmd-plugin</artifactId>
+                        <configuration>
+                            <linkXRef>true</linkXRef>
+                            <printFailingErrors>true</printFailingErrors>
+                            <excludes>
+                                <!--PMD doesn't like java.com classes-->
+                                <exclude>**/ProxyCallback.java</exclude>
+                                <exclude>**/Visitor.java</exclude>
+                            </excludes>
+                        </configuration>
+                        <executions>
+                            <execution>
                                 <goals>
                                     <goal>check</goal>
                                 </goals>
@@ -401,6 +444,11 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>3.3.0</version>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>

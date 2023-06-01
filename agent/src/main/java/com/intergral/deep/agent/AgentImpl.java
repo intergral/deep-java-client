@@ -31,7 +31,7 @@ public class AgentImpl {
 
   public static void startup(final Instrumentation inst, final Map<String, String> args) {
     final Settings settings = Settings.build(args);
-    final org.slf4j.Logger logger = Logger.configureLogging(settings);
+    Logger.configureLogging(settings);
 
     final TracepointInstrumentationService tracepointInstrumentationService =
         TracepointInstrumentationService.init(inst, settings);

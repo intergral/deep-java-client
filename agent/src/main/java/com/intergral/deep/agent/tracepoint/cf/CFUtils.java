@@ -88,7 +88,7 @@ public class CFUtils {
 
 
   static boolean isScope(final Object varScope) {
-    return (varScope instanceof Map)
+    return varScope instanceof Map
         && (varScope.getClass().getName().startsWith("coldfusion")
         && varScope.getClass().getName().contains("Scope")
         || varScope.getClass().getName().equals("coldfusion.runtime.ArgumentCollection"));
@@ -96,9 +96,9 @@ public class CFUtils {
 
 
   static boolean isLuceeScope(final Object varScope) {
-    return (varScope instanceof Map)
-        && (varScope.getClass().getName().startsWith("lucee")
-        && varScope.getClass().getName().contains("scope"));
+    return varScope instanceof Map
+        && varScope.getClass().getName().startsWith("lucee")
+        && varScope.getClass().getName().contains("scope");
   }
 
 

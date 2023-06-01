@@ -21,12 +21,9 @@ import com.intergral.deep.agent.api.settings.ISettings;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class BasicAuthProvider implements IAuthProvider {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(BasicAuthProvider.class);
   private final ISettings settings;
 
   public BasicAuthProvider(final ISettings settings) {

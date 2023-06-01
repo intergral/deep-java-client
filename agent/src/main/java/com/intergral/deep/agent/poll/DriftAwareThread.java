@@ -165,7 +165,7 @@ public class DriftAwareThread extends Thread {
       throws InterruptedException {
     // correcting for early wake up
     if (nextExecutionTime != -1 && now < nextExecutionTime) {
-      final long delay = (nextExecutionTime - now);
+      final long delay = nextExecutionTime - now;
       if (delay > 0) {
         return delay;
       }

@@ -64,7 +64,7 @@ public class Settings implements ISettings {
 
   static Settings build(final Map<String, String> agentArgs, final InputStream stream) {
     final Properties properties = new Properties();
-    try (final InputStream resourceAsStream = stream) {
+    try (InputStream resourceAsStream = stream) {
       properties.load(resourceAsStream);
     } catch (IOException e) {
       // logging is not initialized until after the settings class
