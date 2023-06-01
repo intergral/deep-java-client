@@ -38,7 +38,7 @@ public class DeepITTest extends ANVITTest {
         .setResponseType(ResponseType.UPDATE)
         .addResponse(TracePointConfig.newBuilder()
             .setPath("BPTestTarget.java")
-            .setLineNumber(33)
+            .setLineNumber(31)
             .addWatches("this")
             .build())
         .build();
