@@ -98,6 +98,7 @@ public class PushUtils
     {
         return watches.stream().map( watchResult -> {
             final WatchResult.Builder builder = WatchResult.newBuilder();
+            builder.setExpression( watchResult.expression() );
             if( watchResult.isError() )
             {
                 builder.setErrorResult( watchResult.error() );

@@ -248,7 +248,7 @@ public class FrameCollector extends VariableProcessor
                 @Override
                 public WatchResult result()
                 {
-                    return new WatchResult( variableIDS.get( 0 ) );
+                    return new WatchResult( watch, variableIDS.get( 0 ) );
                 }
 
                 @Override
@@ -265,7 +265,7 @@ public class FrameCollector extends VariableProcessor
                 @Override
                 public WatchResult result()
                 {
-                    return new WatchResult( String.format( "%s: %s", t.getClass().getName(), t.getMessage() ) );
+                    return new WatchResult( watch, String.format( "%s: %s", t.getClass().getName(), t.getMessage() ) );
                 }
 
                 @Override

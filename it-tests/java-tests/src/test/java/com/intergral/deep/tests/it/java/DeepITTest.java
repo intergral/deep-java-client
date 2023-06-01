@@ -67,16 +67,17 @@ public class DeepITTest extends ANVITTest
             }
         } ).start();
 
-        snapshotlatch.await(5, TimeUnit.MINUTES);
+        snapshotlatch.await( 5, TimeUnit.MINUTES );
 
         final Snapshot snapshot = snapshotAtomicReference.get();
-        assertEquals(snapshot.getVarLookupMap().get( "1" ).getChildren( 0 ).getName(), "name");
-        assertEquals(snapshot.getVarLookupMap().get( "2" ).getValue(), "checkBPFires");
+        assertEquals( snapshot.getVarLookupMap().get( "1" ).getChildren( 0 ).getName(), "name" );
+        assertEquals( snapshot.getVarLookupMap().get( "2" ).getValue(), "checkBPFires" );
 
         final WatchResult watches = snapshot.getWatches( 0 );
-        System.out.println(watches);
+        assertEquals( "this", watches.getExpression() );
+        assertEquals( "this", watches.getGoodResult().getName() );
 
-        final Variable varLookupOrThrow = snapshot.getVarLookupOrThrow( "3" );
-        System.out.println(varLookupOrThrow);
+        final Variable varLookupOrThrow = snapshot.getVarLookupOrThrow( watches.getGoodResult().getID() );
+        assertEquals( "com.intergral.deep.tests.it.java.BPTestTarget", varLookupOrThrow.getType() );
     }
 }

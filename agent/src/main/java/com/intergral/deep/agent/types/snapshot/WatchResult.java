@@ -21,15 +21,18 @@ public class WatchResult
 {
     private final String error;
     private final VariableID result;
+    private final String expression;
 
-    public WatchResult( final String error )
+    public WatchResult( final String expression, final String error )
     {
+        this.expression = expression;
         this.error = error;
         this.result = null;
     }
 
-    public WatchResult( final VariableID result )
+    public WatchResult( final String expression, final VariableID result )
     {
+        this.expression = expression;
         this.error = null;
         this.result = result;
     }
@@ -47,5 +50,10 @@ public class WatchResult
     public VariableID goodResult()
     {
         return result;
+    }
+
+    public String expression()
+    {
+        return this.expression;
     }
 }
