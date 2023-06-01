@@ -31,11 +31,14 @@ jobs:
       - name: Build site
         run: mvn -U -B site:site site:stage -P docs,cf-it-tests,examples
 
+      - name: Zip Site
+        run: tar -czf site.tar.gz target/staging
+
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: Mvn docs
-          path: target/staging
+          path: site.tar.gz
 
   mkdocs:
     runs-on: ubuntu-latest
@@ -74,7 +77,13 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: Mvn docs
-          path: _site/mvn/
+          path: site.tar.gz
+
+      - name: Unpack
+        run: |
+          mkdir -p _site/mvn 
+          tar -xvf site.tar.gz --strip-components=2 -C _site/mvn
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
 
