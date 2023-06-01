@@ -18,19 +18,42 @@
 package com.intergral.deep.agent.tracepoint.evaluator;
 
 import com.intergral.deep.agent.api.plugin.IEvaluator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
 public class EvaluatorService
 {
+    private final static Logger LOGGER = LoggerFactory.getLogger( EvaluatorService.class );
+    private final static Exception NO_EVALUATOR_EXCEPTION = new RuntimeException( "No evaluator available." );
+
     public static IEvaluator createEvaluator()
     {
-        return new AbstractEvaluator()
+        final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        final IEvaluator iEvaluator = NashornReflectEvaluator.loadEvaluator( contextClassLoader );
+        if( iEvaluator != null )
         {
+            return iEvaluator;
+        }
+
+        LOGGER.warn( "Cannot load evaluator, Java conditions and watches will not be executed." );
+        return new IEvaluator()
+        {
+
+            @Override
+            public boolean evaluate( final String expression, final Map<String, Object> values )
+            {
+                // return true for all expressions, essentially disabling conditions.
+                return true;
+            }
+
             @Override
             public Object evaluateExpression( final String expression, final Map<String, Object> values )
+                    throws Throwable
             {
-                return null;
+                // throw this exception to show the user that we cannot load the evaluator.
+                throw NO_EVALUATOR_EXCEPTION;
             }
         };
     }

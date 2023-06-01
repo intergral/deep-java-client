@@ -26,7 +26,14 @@ public abstract class AbstractEvaluator implements IEvaluator
     @Override
     public boolean evaluate( final String expression, final Map<String, Object> values )
     {
-        return objectToBoolean( evaluateExpression( expression, values ) );
+        try
+        {
+            return objectToBoolean( evaluateExpression( expression, values ) );
+        }
+        catch( Throwable e )
+        {
+            return false;
+        }
     }
 
 

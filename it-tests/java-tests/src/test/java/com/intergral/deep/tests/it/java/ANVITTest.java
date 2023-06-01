@@ -29,6 +29,7 @@ import com.intergral.deep.proto.tracepoint.v1.StackFrame;
 import com.intergral.deep.proto.tracepoint.v1.TracePointConfig;
 import com.intergral.deep.proto.tracepoint.v1.Variable;
 import com.intergral.deep.proto.tracepoint.v1.VariableID;
+import com.intergral.deep.proto.tracepoint.v1.WatchResult;
 import com.intergral.deep.tests.ResettableCountDownLatch;
 import com.intergral.deep.tests.grpc.TestPollService;
 import com.intergral.deep.tests.grpc.TestSnapshotService;
@@ -83,6 +84,8 @@ public abstract class ANVITTest
                         .setKey( "" ).setValue( AnyValue.newBuilder().build() ).build() ).build() )
                 .build();
         SnapshotResponse.newBuilder().build();
+        WatchResult.newBuilder().build();
+        final WatchResult.ResultCase goodResult = WatchResult.ResultCase.GOOD_RESULT;
         Snapshot.newBuilder()
                 .addFrames( StackFrame.newBuilder().addVariables( VariableID.newBuilder().build() ).build() )
                 .putVarLookup( "", Variable.newBuilder().build() )

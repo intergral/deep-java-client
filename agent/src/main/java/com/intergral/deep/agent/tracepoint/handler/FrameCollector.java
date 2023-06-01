@@ -17,9 +17,9 @@
 
 package com.intergral.deep.agent.tracepoint.handler;
 
+import com.intergral.deep.agent.api.plugin.IEvaluator;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.settings.Settings;
-import com.intergral.deep.agent.api.plugin.IEvaluator;
 import com.intergral.deep.agent.tracepoint.handler.bfs.Node;
 import com.intergral.deep.agent.tracepoint.inst.InstUtils;
 import com.intergral.deep.agent.types.TracePointConfig;
@@ -67,6 +67,8 @@ public class FrameCollector extends VariableProcessor
             frames.add( frame );
         }
 
+        final Map<String, Variable> closedLookup = closeLookup();
+
         return new IFrameResult()
         {
             @Override
@@ -78,12 +80,11 @@ public class FrameCollector extends VariableProcessor
             @Override
             public Map<String, Variable> variables()
             {
-                final Map<String, Variable> lookup = FrameCollector.super.varLookup;
-                if( lookup == null )
+                if( closedLookup == null )
                 {
                     return Collections.emptyMap();
                 }
-                return lookup;
+                return closedLookup;
             }
         };
     }
@@ -128,7 +129,7 @@ public class FrameCollector extends VariableProcessor
         return Collections.emptyMap();
     }
 
-    protected Collection<VariableID> processVars( final Map<String, Object> variables )
+    protected List<VariableID> processVars( final Map<String, Object> variables )
     {
         final List<VariableID> frameVars = new ArrayList<>();
 
@@ -177,19 +178,6 @@ public class FrameCollector extends VariableProcessor
     private boolean checkVarCount()
     {
         return varCache.size() <= this.frameConfig.maxVariables();
-    }
-
-    @Override
-    protected void appendChild( final String parentId, final VariableID variableId )
-    {
-        final Variable variable = this.varLookup.get( parentId );
-        variable.addChild( variableId );
-    }
-
-    @Override
-    protected void appendVariable( final String varId, final Variable variable )
-    {
-        this.varLookup.put( varId, variable );
     }
 
     @Override
@@ -250,20 +238,43 @@ public class FrameCollector extends VariableProcessor
 
     protected IExpressionResult evaluateWatchExpression( final String watch )
     {
-        return new IExpressionResult()
+        try
         {
-            @Override
-            public WatchResult result()
+            final Object result = this.evaluator.evaluateExpression( watch, this.variables );
+            final List<VariableID> variableIDS = processVars( Collections.singletonMap( watch, result ) );
+            final Map<String, Variable> watchLookup = closeLookup();
+            return new IExpressionResult()
             {
-                return null;
-            }
+                @Override
+                public WatchResult result()
+                {
+                    return new WatchResult( variableIDS.get( 0 ) );
+                }
 
-            @Override
-            public Map<String, Variable> variables()
+                @Override
+                public Map<String, Variable> variables()
+                {
+                    return watchLookup;
+                }
+            };
+        }
+        catch( Throwable t )
+        {
+            return new IExpressionResult()
             {
-                return null;
-            }
-        };
+                @Override
+                public WatchResult result()
+                {
+                    return new WatchResult( String.format( "%s: %s", t.getClass().getName(), t.getMessage() ) );
+                }
+
+                @Override
+                public Map<String, Variable> variables()
+                {
+                    return Collections.emptyMap();
+                }
+            };
+        }
     }
 
     protected Resource processAttributes( final TracePointConfig tracepoint )

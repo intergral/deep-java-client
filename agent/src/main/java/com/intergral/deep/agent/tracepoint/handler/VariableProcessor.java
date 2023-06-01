@@ -63,7 +63,15 @@ public abstract class VariableProcessor
     }
 
     protected final FrameConfig frameConfig = new FrameConfig();
-    protected Map<String, Variable> varLookup = new HashMap<>();
+    private Map<String, Variable> varLookup = new HashMap<>();
+
+    //todo i do not like this approach to getting an empty var look up for watches
+    protected Map<String, Variable> closeLookup()
+    {
+        final Map<String, Variable> lookup = varLookup;
+        varLookup = new HashMap<>();
+        return lookup;
+    }
 
     protected Set<Node> processChildNodes( final VariableID variableId, final Object value, final int depth )
     {
@@ -207,14 +215,21 @@ public abstract class VariableProcessor
         return Utils.valueOf( value );
     }
 
+    protected void appendChild( final String parentId, final VariableID variableId )
+    {
+        final Variable variable = this.varLookup.get( parentId );
+        variable.addChild( variableId );
+    }
+
+    protected void appendVariable( final String varId, final Variable variable )
+    {
+        this.varLookup.put( varId, variable );
+    }
+
     protected boolean checkDepth( final int depth )
     {
         return depth + 1 < this.frameConfig.maxDepth();
     }
-
-    protected abstract void appendChild( final String parentId, final VariableID variableId );
-
-    protected abstract void appendVariable( final String varId, final Variable variable );
 
     protected abstract String checkId( final String identity );
 

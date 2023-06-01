@@ -131,7 +131,7 @@ public class FrameProcessor extends FrameCollector implements IEventContext
     }
 
     @Override
-    public String evaluateExpression( final String expression )
+    public String evaluateExpression( final String expression ) throws Throwable
     {
         final Object o = this.evaluator.evaluateExpression( expression, this.variables );
         return Utils.valueOf( o );

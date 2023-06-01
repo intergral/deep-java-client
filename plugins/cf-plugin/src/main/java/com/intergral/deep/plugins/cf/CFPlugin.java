@@ -29,13 +29,25 @@ public class CFPlugin implements IPlugin
     @Override
     public Resource decorate( final ISettings settings, final IEventContext context )
     {
-        final String appName = context.evaluateExpression( "APPLICATION.applicationname" );
+        String appName = null;
+        try
+        {
+            appName = context.evaluateExpression( "APPLICATION.applicationname" );
+        }
+        catch( Throwable ignored )
+        {
+            // nothing we can do - so ignore
+        }
 
-        return Resource.create( new HashMap<String, Object>()
+        final HashMap<String, Object> cfVersion = new HashMap<String, Object>()
         {{
             put( "cf_version", Utils.loadCFVersion() );
-            put( "app_name", appName );
-        }} );
+        }};
+        if( appName != null )
+        {
+            cfVersion.put( "app_name", appName );
+        }
+        return Resource.create( cfVersion );
     }
 
     @Override

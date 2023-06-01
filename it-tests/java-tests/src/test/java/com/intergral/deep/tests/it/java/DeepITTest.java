@@ -21,6 +21,8 @@ import com.intergral.deep.proto.poll.v1.PollResponse;
 import com.intergral.deep.proto.poll.v1.ResponseType;
 import com.intergral.deep.proto.tracepoint.v1.Snapshot;
 import com.intergral.deep.proto.tracepoint.v1.TracePointConfig;
+import com.intergral.deep.proto.tracepoint.v1.Variable;
+import com.intergral.deep.proto.tracepoint.v1.WatchResult;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;
@@ -37,7 +39,10 @@ public class DeepITTest extends ANVITTest
                 .setCurrentHash( "" )
                 .setResponseType( ResponseType.UPDATE )
                 .addResponse( TracePointConfig.newBuilder()
-                        .setPath( "BPTestTarget.java" ).setLineNumber( 33 ).build() )
+                        .setPath( "BPTestTarget.java" )
+                        .setLineNumber( 33 )
+                        .addWatches( "this" )
+                        .build() )
                 .build();
         onNext( build );
 
@@ -67,5 +72,11 @@ public class DeepITTest extends ANVITTest
         final Snapshot snapshot = snapshotAtomicReference.get();
         assertEquals(snapshot.getVarLookupMap().get( "1" ).getChildren( 0 ).getName(), "name");
         assertEquals(snapshot.getVarLookupMap().get( "2" ).getValue(), "checkBPFires");
+
+        final WatchResult watches = snapshot.getWatches( 0 );
+        System.out.println(watches);
+
+        final Variable varLookupOrThrow = snapshot.getVarLookupOrThrow( "3" );
+        System.out.println(varLookupOrThrow);
     }
 }
