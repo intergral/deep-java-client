@@ -11,4 +11,7 @@ theme:
 
 nav:
   - Home: index.md
+  - Config: config/config.md
+  - Auth:
+      - Providers: auth/providers.md
   - Maven Site & Java Docs: https://intergral.github.io/deep-java-client/mvn/index.html
