@@ -52,11 +52,11 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
 
 public abstract class ACFTest {
 
+  private static final AtomicReference<Snapshot> snapshot = new AtomicReference<>();
   private static CountDownLatch loglatch;
   private static Server server;
   private static CountDownLatch snapshotlatch;
-  private static final AtomicReference<Snapshot> snapshot = new AtomicReference<>();
-  private final GenericContainer<?> CF;
+  private final GenericContainer<?> container;
   private TestPollService pollService;
 
 
@@ -83,7 +83,7 @@ public abstract class ACFTest {
 
     final String testHost = System.getProperty("nv.test.host", "172.17.0.1");
 
-    CF = new GenericContainer<>(new ImageFromDockerfile("cftest", true)
+    container = new GenericContainer<>(new ImageFromDockerfile("cftest", true)
         // add the nv jar into the context of the docker file
         .withFileFromPath("deep.jar", new File(property).toPath())
         .withFileFromPath("testFile.cfm", testFilePath.toFile().toPath())
@@ -97,9 +97,9 @@ public abstract class ACFTest {
                 .copy("testFile.cfm", "/app/CTA/tests/testFile.cfm")
                 // override jvm config for cf
                 .copy("jvm.config", "/opt/coldfusion/cfusion/bin/jvm.config")
-        )).
+        ))
         // consume logs to scan for cf start up
-            withLogConsumer(outputFrame -> {
+        .withLogConsumer(outputFrame -> {
           System.out.println(outputFrame.getUtf8String());
           if (outputFrame.getUtf8String().contains("ColdFusion started")) {
             loglatch.countDown();
@@ -148,7 +148,7 @@ public abstract class ACFTest {
         .addService(testSnapshotService.bindService())
         .build();
     server.start();
-    CF.start();
+    container.start();
 
     // await the initial deep grpc connection
     assertTrue(grpcConnectLatch.await(600, TimeUnit.SECONDS));
@@ -163,14 +163,14 @@ public abstract class ACFTest {
   @AfterEach
   void afterAll() {
     server.shutdownNow();
-    CF.stop();
+    container.stop();
   }
 
 
   @Test
-  void checkCfBP() throws Exception {
+  void checkCfTracepoint() throws Exception {
     final String uri =
-        "http://" + CF.getContainerIpAddress() + ":" + CF.getMappedPort(8500)
+        "http://" + container.getContainerIpAddress() + ":" + container.getMappedPort(8500)
             + "/CTA/tests/testFile.cfm";
     final Request build = new Request.Builder().url(uri).build();
 

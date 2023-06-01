@@ -17,9 +17,9 @@
 
 package com.intergral.deep.tests.it.cf;
 
-public class CF2018Test extends ACFTest {
+public class Cf2018Test extends ACFTest {
 
-  public CF2018Test() {
+  public Cf2018Test() {
     super("adobecoldfusion/coldfusion:latest-2018");
   }
 }

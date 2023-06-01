@@ -277,8 +277,8 @@
     </module>
     <module name="AbbreviationAsWordInName">
       <property name="ignoreFinal" value="false"/>
-      <property name="allowedAbbreviationLength" value="0"/>
-      <property name="allowedAbbreviations" value="API,CF,ID,JSP"/>
+      <property name="allowedAbbreviationLength" value="3"/>
+<!--      <property name="allowedAbbreviations" value="API,CF,ID,JSP,A"/>-->
       <property name="tokens"
         value="CLASS_DEF, ENUM_DEF, ANNOTATION_DEF, ANNOTATION_FIELD_DEF,
                     PARAMETER_DEF, VARIABLE_DEF, METHOD_DEF, PATTERN_VARIABLE_DEF, RECORD_DEF,

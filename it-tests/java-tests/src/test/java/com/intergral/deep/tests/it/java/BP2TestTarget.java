@@ -19,7 +19,7 @@ package com.intergral.deep.tests.it.java;
 
 import java.util.function.IntFunction;
 
-public class BPTestTarget2 {
+public class BP2TestTarget {
 
   public static String staticMethodTest(final String name) {
     final BPTestTarget bpTestTarget = new BPTestTarget(name);

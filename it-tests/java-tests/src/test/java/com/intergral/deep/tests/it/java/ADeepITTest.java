@@ -48,7 +48,7 @@ import net.bytebuddy.agent.ByteBuddyAgent;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
-public abstract class ANVITTest {
+public abstract class ADeepITTest {
 
   protected static ResettableCountDownLatch grpcConnectLatch;
   protected static Server server;

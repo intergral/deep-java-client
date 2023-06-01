@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
 
-public class DeepITTest extends ANVITTest {
+public class DeepITTest extends ADeepITTest {
 
   @Test
   void checkBPFires() throws Exception {
