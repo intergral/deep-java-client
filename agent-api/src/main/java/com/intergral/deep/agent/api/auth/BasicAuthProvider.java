@@ -18,34 +18,30 @@
 package com.intergral.deep.agent.api.auth;
 
 import com.intergral.deep.agent.api.settings.ISettings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class BasicAuthProvider implements IAuthProvider
-{
-    private final static Logger LOGGER = LoggerFactory.getLogger( BasicAuthProvider.class );
-    private final ISettings settings;
+public class BasicAuthProvider implements IAuthProvider {
 
-    public BasicAuthProvider( final ISettings settings )
-    {
-        this.settings = settings;
+  private static final Logger LOGGER = LoggerFactory.getLogger(BasicAuthProvider.class);
+  private final ISettings settings;
+
+  public BasicAuthProvider(final ISettings settings) {
+    this.settings = settings;
+  }
+
+  @Override
+  public Map<String, String> provide() {
+    final String userName = settings.getSettingAs("service.username", String.class);
+    final String password = settings.getSettingAs("service.password", String.class);
+    if (userName == null || password == null) {
+      return Collections.emptyMap();
     }
-
-    @Override
-    public Map<String, String> provide()
-    {
-        final String userName = settings.getSettingAs( "service.username", String.class );
-        final String password = settings.getSettingAs( "service.password", String.class );
-        if( userName == null || password == null )
-        {
-            return Collections.emptyMap();
-        }
-        final String encodedString = Base64.getEncoder()
-                .encodeToString( String.format( "%s:%s", userName, password ).getBytes() );
-        return Collections.singletonMap( "authorization", encodedString );
-    }
+    final String encodedString = Base64.getEncoder()
+        .encodeToString(String.format("%s:%s", userName, password).getBytes());
+    return Collections.singletonMap("authorization", encodedString);
+  }
 }

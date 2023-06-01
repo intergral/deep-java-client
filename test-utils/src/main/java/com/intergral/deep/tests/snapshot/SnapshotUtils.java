@@ -19,69 +19,60 @@ package com.intergral.deep.tests.snapshot;
 
 import com.intergral.deep.proto.tracepoint.v1.Variable;
 import com.intergral.deep.proto.tracepoint.v1.VariableID;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public class SnapshotUtils
-{
-    /**
-     * Scan a snapshot for a variable with a given name.
-     *
-     * @param name      the name to look for
-     * @param localVars the variables to scan (e.g. the local frame, or the children of another var)
-     * @param lookup    the lookup from the snapshot to get the var value from
-     * @return a {@link IVariableScan}
-     */
-    public static IVariableScan findVarByName( final String name,
-                                               final List<VariableID> localVars,
-                                               final Map<String, Variable> lookup )
-    {
-        final Optional<VariableID> first = localVars.stream()
-                .filter( variableID -> Objects.equals( variableID.getName(), name ) )
-                .findFirst();
-        if( !first.isPresent() )
-        {
-            return () -> false;
-        }
-        final VariableID variableID = first.get();
-        final Variable variable = lookup.get( variableID.getID() );
-        return new IVariableScan()
-        {
-            @Override
-            public boolean found()
-            {
-                return true;
-            }
+public class SnapshotUtils {
 
-            @Override
-            public Variable variable()
-            {
-                return variable;
-            }
+  /**
+   * Scan a snapshot for a variable with a given name.
+   *
+   * @param name      the name to look for
+   * @param localVars the variables to scan (e.g. the local frame, or the children of another var)
+   * @param lookup    the lookup from the snapshot to get the var value from
+   * @return a {@link IVariableScan}
+   */
+  public static IVariableScan findVarByName(final String name,
+      final List<VariableID> localVars,
+      final Map<String, Variable> lookup) {
+    final Optional<VariableID> first = localVars.stream()
+        .filter(variableID -> Objects.equals(variableID.getName(), name))
+        .findFirst();
+    if (!first.isPresent()) {
+      return () -> false;
+    }
+    final VariableID variableId = first.get();
+    final Variable variable = lookup.get(variableId.getID());
+    return new IVariableScan() {
+      @Override
+      public boolean found() {
+        return true;
+      }
 
-            @Override
-            public VariableID variableID()
-            {
-                return variableID;
-            }
-        };
+      @Override
+      public Variable variable() {
+        return variable;
+      }
+
+      @Override
+      public VariableID variableId() {
+        return variableId;
+      }
+    };
+  }
+
+  public interface IVariableScan {
+
+    boolean found();
+
+    default Variable variable() {
+      return null;
     }
 
-    public interface IVariableScan
-    {
-        boolean found();
-
-        default Variable variable()
-        {
-            return null;
-        }
-
-        default VariableID variableID()
-        {
-            return null;
-        }
+    default VariableID variableId() {
+      return null;
     }
+  }
 }

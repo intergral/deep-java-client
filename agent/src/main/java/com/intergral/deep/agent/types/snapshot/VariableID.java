@@ -19,39 +19,35 @@ package com.intergral.deep.agent.types.snapshot;
 
 import java.util.Set;
 
-public class VariableID
-{
-    private final String id;
-    private final String name;
-    private final Set<String> modifiers;
-    private final String originalName;
+public class VariableID {
 
-    public VariableID( final String id, final String name, final Set<String> modifiers, final String originalName )
-    {
+  private final String id;
+  private final String name;
+  private final Set<String> modifiers;
+  private final String originalName;
 
-        this.id = id;
-        this.name = name;
-        this.modifiers = modifiers;
-        this.originalName = originalName;
-    }
+  public VariableID(final String id, final String name, final Set<String> modifiers,
+      final String originalName) {
 
-    public String getId()
-    {
-        return this.id;
-    }
+    this.id = id;
+    this.name = name;
+    this.modifiers = modifiers;
+    this.originalName = originalName;
+  }
 
-    public Iterable<String> getModifiers()
-    {
-        return modifiers;
-    }
+  public String getId() {
+    return this.id;
+  }
 
-    public String getName()
-    {
-        return name;
-    }
+  public Iterable<String> getModifiers() {
+    return modifiers;
+  }
 
-    public String getOriginalName()
-    {
-        return originalName;
-    }
+  public String getName() {
+    return name;
+  }
+
+  public String getOriginalName() {
+    return originalName;
+  }
 }

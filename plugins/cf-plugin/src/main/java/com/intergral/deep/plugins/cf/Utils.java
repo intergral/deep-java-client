@@ -17,26 +17,21 @@
 
 package com.intergral.deep.plugins.cf;
 
-public class Utils
-{
-    public static boolean isCFServer()
-    {
-        return System.getProperty( "sun.java.command" ).contains( "coldfusion" );
-    }
+public class Utils {
 
-    public static String loadCFVersion()
-    {
-        try
-        {
-            return String.valueOf( Thread.currentThread()
-                    .getContextClassLoader()
-                    .loadClass( "coldfusion.Version" )
-                    .getMethod( "getMajor" )
-                    .invoke( null ) );
-        }
-        catch( Exception e )
-        {
-            return null;
-        }
+  public static boolean isCFServer() {
+    return System.getProperty("sun.java.command").contains("coldfusion");
+  }
+
+  public static String loadCFVersion() {
+    try {
+      return String.valueOf(Thread.currentThread()
+          .getContextClassLoader()
+          .loadClass("coldfusion.Version")
+          .getMethod("getMajor")
+          .invoke(null));
+    } catch (Exception e) {
+      return null;
     }
+  }
 }

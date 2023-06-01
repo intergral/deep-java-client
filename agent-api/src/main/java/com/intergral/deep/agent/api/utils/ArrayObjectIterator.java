@@ -20,27 +20,24 @@ package com.intergral.deep.agent.api.utils;
 import java.lang.reflect.Array;
 import java.util.Iterator;
 
-public class ArrayObjectIterator implements Iterator<Object>
-{
-    private final int length;
-    private final Object array;
-    private int index = 0;
+public class ArrayObjectIterator implements Iterator<Object> {
 
-    public ArrayObjectIterator( final Object value )
-    {
-        this.array = value;
-        this.length = Array.getLength( value );
-    }
+  private final int length;
+  private final Object array;
+  private int index = 0;
 
-    @Override
-    public boolean hasNext()
-    {
-        return index < length;
-    }
+  public ArrayObjectIterator(final Object value) {
+    this.array = value;
+    this.length = Array.getLength(value);
+  }
 
-    @Override
-    public Object next()
-    {
-        return Array.get( array, index++ );
-    }
+  @Override
+  public boolean hasNext() {
+    return index < length;
+  }
+
+  @Override
+  public Object next() {
+    return Array.get(array, index++);
+  }
 }

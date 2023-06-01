@@ -35,137 +35,113 @@ import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.PreferHeapByteBufAllocator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class GrpcService
-{
-    private final static Logger LOGGER = LoggerFactory.getLogger( GrpcService.class );
+public class GrpcService {
 
-    private final Settings settings;
-    private ManagedChannel channel;
+  private static final Logger LOGGER = LoggerFactory.getLogger(GrpcService.class);
 
-    public GrpcService( final Settings settings )
-    {
-        this.settings = settings;
+  private final Settings settings;
+  private ManagedChannel channel;
+
+  public GrpcService(final Settings settings) {
+    this.settings = settings;
+  }
+
+  public void start() {
+    try {
+      setupChannel();
+    } catch (Exception e) {
+      LOGGER.debug("Error setting up GRPC channel", e);
+    }
+  }
+
+  private void setupChannel() {
+    final String serviceHost = this.settings.getServiceHost();
+    final int servicePort = this.settings.getServicePort();
+    LOGGER.debug("Connecting to server {}:{}", serviceHost, servicePort);
+
+    // we have to set these as the service loaders are not available
+    NameResolverRegistry.getDefaultRegistry().register(new DnsNameResolverProvider());
+    LoadBalancerRegistry.getDefaultRegistry().register(new PickFirstLoadBalancerProvider());
+
+    // Create the channel pointing to the server
+    NettyChannelBuilder ncBuilder = NettyChannelBuilder.forAddress(serviceHost, servicePort)
+        .keepAliveTimeout(60, TimeUnit.SECONDS)
+        .keepAliveTime(30, TimeUnit.SECONDS)
+        .keepAliveWithoutCalls(true)
+        .enableRetry()
+        .executor(Executors.newFixedThreadPool(1))
+        .maxRetryAttempts(Integer.MAX_VALUE);
+
+    final ByteBufAllocator allocator;
+    if (this.settings.getSettingAs("grpc.allocator", String.class).equals("default")) {
+      allocator = ByteBufAllocator.DEFAULT;
+    } else if (this.settings.getSettingAs("grpc.allocator", String.class).equals("pooled")) {
+      allocator = PooledByteBufAllocator.DEFAULT;
+    } else {
+      allocator = UnpooledByteBufAllocator.DEFAULT;
     }
 
-    public void start()
-    {
-        try
-        {
-            setupChannel();
-        }
-        catch( Exception e )
-        {
-            LOGGER.debug( "Error setting up GRPC channel", e );
-        }
+    if (this.settings.getSettingAs("grpc.heap.allocator", Boolean.class)) {
+      ncBuilder.withOption(ChannelOption.ALLOCATOR, new PreferHeapByteBufAllocator(allocator));
+    } else {
+      ncBuilder.withOption(ChannelOption.ALLOCATOR, allocator);
     }
 
-    private void setupChannel()
-    {
-        final String serviceHost = this.settings.getServiceHost();
-        final int servicePort = this.settings.getServicePort();
-        LOGGER.debug( "Connecting to server {}:{}", serviceHost, servicePort );
-
-        // we have to set these as the service loaders are not available
-        NameResolverRegistry.getDefaultRegistry().register( new DnsNameResolverProvider() );
-        LoadBalancerRegistry.getDefaultRegistry().register( new PickFirstLoadBalancerProvider() );
-
-        // Create the channel pointing to the server
-        NettyChannelBuilder ncBuilder = NettyChannelBuilder.forAddress( serviceHost, servicePort )
-                .keepAliveTimeout( 60, TimeUnit.SECONDS )
-                .keepAliveTime( 30, TimeUnit.SECONDS )
-                .keepAliveWithoutCalls( true )
-                .enableRetry()
-                .executor( Executors.newFixedThreadPool( 1 ) )
-                .maxRetryAttempts( Integer.MAX_VALUE );
-
-        final ByteBufAllocator allocator;
-        if( this.settings.getSettingAs( "grpc.allocator", String.class ).equals( "default" ) )
-        {
-            allocator = ByteBufAllocator.DEFAULT;
-        }
-        else if( this.settings.getSettingAs( "grpc.allocator", String.class ).equals( "pooled" ) )
-        {
-            allocator = PooledByteBufAllocator.DEFAULT;
-        }
-        else
-        {
-            allocator = UnpooledByteBufAllocator.DEFAULT;
-        }
-
-        if( this.settings.getSettingAs( "grpc.heap.allocator", Boolean.class ) )
-        {
-            ncBuilder.withOption( ChannelOption.ALLOCATOR, new PreferHeapByteBufAllocator( allocator ) );
-        }
-        else
-        {
-            ncBuilder.withOption( ChannelOption.ALLOCATOR, allocator );
-        }
-
-        // Select secure or not
-        if( this.settings.getSettingAs( "service.secure", Boolean.class ) )
-        {
-            ncBuilder.useTransportSecurity();
-        }
-        else
-        {
-            ncBuilder.usePlaintext();
-        }
-
-        channel = ncBuilder.build();
+    // Select secure or not
+    if (this.settings.getSettingAs("service.secure", Boolean.class)) {
+      ncBuilder.useTransportSecurity();
+    } else {
+      ncBuilder.usePlaintext();
     }
 
-    private ManagedChannel getChannel()
-    {
-        if( this.channel == null )
-        {
-            try
-            {
-                setupChannel();
-            }
-            catch( Exception e )
-            {
-                LOGGER.debug( "Error setting up GRPC channel", e );
-            }
-        }
-        return channel;
+    channel = ncBuilder.build();
+  }
+
+  private ManagedChannel getChannel() {
+    if (this.channel == null) {
+      try {
+        setupChannel();
+      } catch (Exception e) {
+        LOGGER.debug("Error setting up GRPC channel", e);
+      }
     }
+    return channel;
+  }
 
-    public PollConfigGrpc.PollConfigBlockingStub pollService()
-    {
-        final PollConfigGrpc.PollConfigBlockingStub blockingStub = PollConfigGrpc.newBlockingStub( getChannel() );
+  public PollConfigGrpc.PollConfigBlockingStub pollService() {
+    final PollConfigGrpc.PollConfigBlockingStub blockingStub = PollConfigGrpc.newBlockingStub(
+        getChannel());
 
-        final Metadata metadata = buildMetaData();
+    final Metadata metadata = buildMetaData();
 
-        return blockingStub.withInterceptors( MetadataUtils.newAttachHeadersInterceptor(
-                metadata ) );
+    return blockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(
+        metadata));
+  }
+
+  public SnapshotServiceGrpc.SnapshotServiceStub snapshotService() {
+    final SnapshotServiceGrpc.SnapshotServiceStub snapshotServiceStub = SnapshotServiceGrpc.newStub(
+        getChannel());
+    final Metadata metadata = buildMetaData();
+
+    return snapshotServiceStub.withInterceptors(
+        MetadataUtils.newAttachHeadersInterceptor(metadata));
+  }
+
+  private Metadata buildMetaData() {
+    final IAuthProvider provider = AuthProvider.provider(this.settings);
+    final Map<String, String> headers = provider.provide();
+
+    final Metadata metadata = new Metadata();
+    for (Map.Entry<String, String> header : headers.entrySet()) {
+      metadata.put(Metadata.Key.of(header.getKey(), Metadata.ASCII_STRING_MARSHALLER),
+          header.getValue());
     }
-
-    public SnapshotServiceGrpc.SnapshotServiceStub snapshotService()
-    {
-        final SnapshotServiceGrpc.SnapshotServiceStub snapshotServiceStub = SnapshotServiceGrpc.newStub(
-                getChannel() );
-        final Metadata metadata = buildMetaData();
-
-        return snapshotServiceStub.withInterceptors( MetadataUtils.newAttachHeadersInterceptor( metadata ) );
-    }
-
-    private Metadata buildMetaData()
-    {
-        final IAuthProvider provider = AuthProvider.provider( this.settings );
-        final Map<String, String> headers = provider.provide();
-
-        final Metadata metadata = new Metadata();
-        for( Map.Entry<String, String> header : headers.entrySet() )
-        {
-            metadata.put( Metadata.Key.of( header.getKey(), Metadata.ASCII_STRING_MARSHALLER ), header.getValue() );
-        }
-        return metadata;
-    }
+    return metadata;
+  }
 }

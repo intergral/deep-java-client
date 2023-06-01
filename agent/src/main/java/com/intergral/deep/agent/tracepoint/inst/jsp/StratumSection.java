@@ -14,47 +14,42 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.intergral.deep.agent.tracepoint.inst.jsp;
 
-public class StratumSection
-{
-    private final String name;
-    private FileSection fileSection;
-    private LineSection lineSection;
+public class StratumSection {
+
+  private final String name;
+  private FileSection fileSection;
+  private LineSection lineSection;
 
 
-    public StratumSection( final String name )
-    {
-        this.name = name;
-    }
+  public StratumSection(final String name) {
+    this.name = name;
+  }
 
 
-    public String getName()
-    {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
 
-    public void setFileSection( final FileSection fileSection )
-    {
-        this.fileSection = fileSection;
-    }
+  public void setFileSection(final FileSection fileSection) {
+    this.fileSection = fileSection;
+  }
 
 
-    public FileSection getFileSection()
-    {
-        return fileSection;
-    }
+  public FileSection getFileSection() {
+    return fileSection;
+  }
 
 
-    public void setLineSection( final LineSection lineSection )
-    {
-        this.lineSection = lineSection;
-    }
+  public void setLineSection(final LineSection lineSection) {
+    this.lineSection = lineSection;
+  }
 
 
-    public LineSection getLineSection()
-    {
-        return lineSection;
-    }
+  public LineSection getLineSection() {
+    return lineSection;
+  }
 }

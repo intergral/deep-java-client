@@ -19,38 +19,32 @@ package com.intergral.deep.tests.it.java;
 
 import java.util.function.IntFunction;
 
-public class BPTestTarget2
-{
-    public static String staticMethodTest( final String name )
-    {
-        final BPTestTarget bpTestTarget = new BPTestTarget( name );
-        return bpTestTarget.getName();
-    }
+public class BPTestTarget2 {
+
+  public static String staticMethodTest(final String name) {
+    final BPTestTarget bpTestTarget = new BPTestTarget(name);
+    return bpTestTarget.getName();
+  }
 
 
-    public static String staticInnerClass()
-    {
-        return new IntFunction<String>()
-        {
-            @Override
-            public String apply( final int value )
-            {
-                return new BPTestTarget( String.valueOf( value ) ).getName();
-            }
-        }.apply( 2 );
-    }
+  public static String staticInnerClass() {
+    return new IntFunction<String>() {
+      @Override
+      public String apply(final int value) {
+        return new BPTestTarget(String.valueOf(value)).getName();
+      }
+    }.apply(2);
+  }
 
 
-    public static String staticLambdaClass(final String val)
-    {
-        return ((IntFunction<String>) value -> {
-            return new BPTestTarget( value + val ).getName();
-        }).apply( 2 );
-    }
+  public static String staticLambdaClass(final String val) {
+    return ((IntFunction<String>) value -> {
+      return new BPTestTarget(value + val).getName();
+    }).apply(2);
+  }
 
 
-    public static String staticLambdaClass2(final String val)
-    {
-        return ((IntFunction<String>) value -> new BPTestTarget( value + val ).getName()).apply( 2 );
-    }
+  public static String staticLambdaClass2(final String val) {
+    return ((IntFunction<String>) value -> new BPTestTarget(value + val).getName()).apply(2);
+  }
 }

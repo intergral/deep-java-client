@@ -18,16 +18,16 @@
 package com.intergral.deep.agent.tracepoint;
 
 import com.intergral.deep.agent.types.TracePointConfig;
-
 import java.util.Collection;
 
-public interface ITracepointConfig
-{
-    void noChange( final long tsNano );
+public interface ITracepointConfig {
 
-    void configUpdate( final long tsNano, final String hash, final Collection<TracePointConfig> tracepoints );
+  void noChange(final long tsNano);
 
-    String currentHash();
+  void configUpdate(final long tsNano, final String hash,
+      final Collection<TracePointConfig> tracepoints);
 
-    Collection<TracePointConfig> loadTracepointConfigs( final Collection<String> tracepointId );
+  String currentHash();
+
+  Collection<TracePointConfig> loadTracepointConfigs(final Collection<String> tracepointId);
 }

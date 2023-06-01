@@ -18,28 +18,27 @@
 package com.intergral.deep.agent.tracepoint.handler;
 
 import com.intergral.deep.agent.Utils;
+import com.intergral.deep.agent.api.plugin.IEvaluator;
 import com.intergral.deep.agent.push.PushService;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.tracepoint.TracepointConfigService;
 import com.intergral.deep.agent.tracepoint.cf.CFFrameProcessor;
 import com.intergral.deep.agent.tracepoint.cf.CFUtils;
 import com.intergral.deep.agent.tracepoint.evaluator.EvaluatorService;
-import com.intergral.deep.agent.api.plugin.IEvaluator;
 import com.intergral.deep.agent.tracepoint.inst.asm.Visitor;
 import com.intergral.deep.agent.types.TracePointConfig;
 import com.intergral.deep.agent.types.snapshot.EventSnapshot;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class Callback
-{
-//    @SuppressWarnings("AnonymousHasLambdaAlternative")
+public class Callback {
+
+  //    @SuppressWarnings("AnonymousHasLambdaAlternative")
 //    public static final ThreadLocal<Deque<CallbackHook>> CALLBACKS = new ThreadLocal<Deque<CallbackHook>>()
 //    {
 //        @Override
@@ -48,158 +47,131 @@ public class Callback
 //            return new ArrayDeque<>();
 //        }
 //    };
-    private static final Logger LOGGER = LoggerFactory.getLogger( Callback.class );
-    @SuppressWarnings("AnonymousHasLambdaAlternative")
-    private static final ThreadLocal<Boolean> FIRING = new ThreadLocal<Boolean>()
-    {
-        @Override
-        protected Boolean initialValue()
-        {
-            return Boolean.FALSE;
-        }
-    };
-    private static Settings SETTINGS;
+  private static final Logger LOGGER = LoggerFactory.getLogger(Callback.class);
+  @SuppressWarnings("AnonymousHasLambdaAlternative")
+  private static final ThreadLocal<Boolean> FIRING = new ThreadLocal<Boolean>() {
+    @Override
+    protected Boolean initialValue() {
+      return Boolean.FALSE;
+    }
+  };
+  private static Settings SETTINGS;
 
-    private static TracepointConfigService BREAKPOINT_SERVICE;
-    private static PushService PUSH_SERVICE;
-    private static int offset;
+  private static TracepointConfigService BREAKPOINT_SERVICE;
+  private static PushService PUSH_SERVICE;
+  private static int offset;
 
-    public static void init( final Settings settings,
-                             final TracepointConfigService breakpointService,
-                             final PushService pushService )
-    {
-        Callback.SETTINGS = settings;
-        Callback.BREAKPOINT_SERVICE = breakpointService;
-        Callback.PUSH_SERVICE = pushService;
-        if( Visitor.CALLBACK_CLASS == Callback.class )
-        {
-            offset = 3;
-        }
-        else
-        {
-            offset = 4;
-        }
+  public static void init(final Settings settings,
+      final TracepointConfigService breakpointService,
+      final PushService pushService) {
+    Callback.SETTINGS = settings;
+    Callback.BREAKPOINT_SERVICE = breakpointService;
+    Callback.PUSH_SERVICE = pushService;
+    if (Visitor.CALLBACK_CLASS == Callback.class) {
+      offset = 3;
+    } else {
+      offset = 4;
+    }
+  }
+
+
+  /**
+   * The main entry point for CF ASM injected breakpoints
+   *
+   * @param bpIds     the bp ids to trigger
+   * @param filename  the filename of the breakpoint hit
+   * @param lineNo    the line number of the breakpoint hit
+   * @param variables the map of local variables.
+   */
+  public static void callBackCF(final List<String> bpIds,
+      final String filename,
+      final int lineNo,
+      final Map<String, Object> variables) {
+    try {
+      final IEvaluator evaluator = CFUtils.findCfEval(variables);
+      commonCallback(bpIds, filename, lineNo, variables, evaluator, CFFrameProcessor::new);
+    } catch (Throwable t) {
+      LOGGER.debug("Unable to process tracepoint {}:{}", filename, lineNo, t);
+    }
+  }
+
+
+  /**
+   * The main entry point for non CF ASM injected breakpoints
+   *
+   * @param bpIds     the bp ids to trigger
+   * @param filename  the filename of the breakpoint hit
+   * @param lineNo    the line number of the breakpoint hit
+   * @param variables the map of local variables.
+   */
+  public static void callBack(final List<String> bpIds,
+      final String filename,
+      final int lineNo,
+      final Map<String, Object> variables) {
+    try {
+      final IEvaluator evaluator = EvaluatorService.createEvaluator();
+      commonCallback(bpIds, filename, lineNo, variables, evaluator, FrameProcessor::new);
+    } catch (Throwable t) {
+      LOGGER.debug("Unable to process tracepoint {}:{}", filename, lineNo, t);
+    }
+  }
+
+
+  private static void commonCallback(final List<String> tracepointIds,
+      final String filename,
+      final int lineNo,
+      final Map<String, Object> variables,
+      final IEvaluator evaluator, final FrameProcessor.IFactory factory) {
+    final long[] lineStart = Utils.currentTimeNanos();
+    if (FIRING.get()) {
+      LOGGER.debug("hit - skipping as we are already firing");
+      return;
     }
 
+    try {
+      FIRING.set(true);
+      LOGGER.trace("callBack for {}:{} -> {}", filename, lineNo, tracepointIds);
 
-    /**
-     * The main entry point for CF ASM injected breakpoints
-     *
-     * @param bpIds     the bp ids to trigger
-     * @param filename  the filename of the breakpoint hit
-     * @param lineNo    the line number of the breakpoint hit
-     * @param variables the map of local variables.
-     */
-    public static void callBackCF( final List<String> bpIds,
-                                   final String filename,
-                                   final int lineNo,
-                                   final Map<String, Object> variables )
-    {
-        try
-        {
-            final IEvaluator evaluator = CFUtils.findCfEval( variables );
-            commonCallback( bpIds, filename, lineNo, variables, evaluator, CFFrameProcessor::new );
+      // possible race condition but unlikely
+      if (Callback.BREAKPOINT_SERVICE == null) {
+        return;
+      }
+
+      final Collection<TracePointConfig> tracePointConfigs = Callback.BREAKPOINT_SERVICE.loadTracepointConfigs(
+          tracepointIds);
+
+      StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+      if (stack.length > offset) {
+        // Remove callBackProxy() + callBack() + commonCallback() + getStackTrace() entries to get to the real bp location
+        stack = Arrays.copyOfRange(stack, offset, stack.length);
+      }
+
+      final FrameProcessor frameProcessor = factory.provide(Callback.SETTINGS,
+          evaluator,
+          variables,
+          tracePointConfigs,
+          lineStart,
+          stack);
+
+      if (frameProcessor.canCollect()) {
+        frameProcessor.configureSelf();
+
+        try {
+          final Collection<EventSnapshot> snapshots = frameProcessor.collect();
+          for (EventSnapshot snapshot : snapshots) {
+            Callback.PUSH_SERVICE.pushSnapshot(snapshot, frameProcessor);
+          }
+        } catch (Exception e) {
+          LOGGER.debug("Error processing snapshot", e);
         }
-        catch( Throwable t )
-        {
-            LOGGER.debug( "Unable to process tracepoint {}:{}", filename, lineNo, t );
-        }
+      }
+    } finally {
+      FIRING.set(false);
     }
+  }
 
-
-    /**
-     * The main entry point for non CF ASM injected breakpoints
-     *
-     * @param bpIds     the bp ids to trigger
-     * @param filename  the filename of the breakpoint hit
-     * @param lineNo    the line number of the breakpoint hit
-     * @param variables the map of local variables.
-     */
-    public static void callBack( final List<String> bpIds,
-                                 final String filename,
-                                 final int lineNo,
-                                 final Map<String, Object> variables )
-    {
-        try
-        {
-            final IEvaluator evaluator = EvaluatorService.createEvaluator();
-            commonCallback( bpIds, filename, lineNo, variables, evaluator, FrameProcessor::new );
-        }
-        catch( Throwable t )
-        {
-            LOGGER.debug( "Unable to process tracepoint {}:{}", filename, lineNo, t );
-        }
-    }
-
-
-    private static void commonCallback( final List<String> tracepointIds,
-                                        final String filename,
-                                        final int lineNo,
-                                        final Map<String, Object> variables,
-                                        final IEvaluator evaluator, final FrameProcessor.IFactory factory )
-    {
-        final long[] lineStart = Utils.currentTimeNanos();
-        if( FIRING.get() )
-        {
-            LOGGER.debug( "hit - skipping as we are already firing" );
-            return;
-        }
-
-        try
-        {
-            FIRING.set( true );
-            LOGGER.trace( "callBack for {}:{} -> {}", filename, lineNo, tracepointIds );
-
-            // possible race condition but unlikely
-            if( Callback.BREAKPOINT_SERVICE == null )
-            {
-                return;
-            }
-
-            final Collection<TracePointConfig> tracePointConfigs = Callback.BREAKPOINT_SERVICE.loadTracepointConfigs(
-                    tracepointIds );
-
-            StackTraceElement[] stack = Thread.currentThread().getStackTrace();
-            if( stack.length > offset )
-            {
-                // Remove callBackProxy() + callBack() + commonCallback() + getStackTrace() entries to get to the real bp location
-                stack = Arrays.copyOfRange( stack, offset, stack.length );
-            }
-
-            final FrameProcessor frameProcessor = factory.provide( Callback.SETTINGS,
-                    evaluator,
-                    variables,
-                    tracePointConfigs,
-                    lineStart,
-                    stack );
-
-            if( frameProcessor.canCollect() )
-            {
-                frameProcessor.configureSelf();
-
-                try
-                {
-                    final Collection<EventSnapshot> snapshots = frameProcessor.collect();
-                    for( EventSnapshot snapshot : snapshots )
-                    {
-                        Callback.PUSH_SERVICE.pushSnapshot( snapshot, frameProcessor );
-                    }
-                }
-                catch( Exception e )
-                {
-                    LOGGER.debug( "Error processing snapshot", e );
-                }
-            }
-        }
-        finally
-        {
-            FIRING.set( false );
-        }
-    }
-
-    // the below methods are here as they are called from instrumented classes. This is a throwback to NV that we will address in later releases
-    public static void callBackException( final Throwable t )
-    {
+  // the below methods are here as they are called from instrumented classes. This is a throwback to NV that we will address in later releases
+  public static void callBackException(final Throwable t) {
 //        System.out.println( "callBackException" );
 //        try
 //        {
@@ -215,11 +187,11 @@ public class Callback
 //            LOGGER.debug( "Error processing callback", tt );
 //        }
 
-    }
+  }
 
 
-    public static void callBackFinally( final Set<String> breakpointIds, final Map<String, Object> map )
-    {
+  public static void callBackFinally(final Set<String> breakpointIds,
+      final Map<String, Object> map) {
 //        System.out.println( "callBackFinally" );
 //        for( String breakpointId : breakpointIds )
 //        {
@@ -266,8 +238,7 @@ public class Callback
 //                LOGGER.debug( "Error processing callback", t );
 //            }
 //        }
-    }
-
+  }
 
 //    public static class CallbackHook
 //    {

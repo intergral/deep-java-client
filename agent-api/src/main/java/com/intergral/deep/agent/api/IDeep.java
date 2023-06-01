@@ -17,7 +17,7 @@
 
 package com.intergral.deep.agent.api;
 
-public interface IDeep
-{
-    String getVersion();
+public interface IDeep {
+
+  String getVersion();
 }

@@ -18,47 +18,39 @@
 package com.intergral.deep.agent.api.auth;
 
 import com.intergral.deep.agent.api.settings.ISettings;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.Map;
 
-public class AuthProvider
-{
-    private final static NoopProvider NOOP_PROVIDER = new NoopProvider();
+public class AuthProvider {
 
-    public static IAuthProvider provider( final ISettings settings )
-    {
-        final String serviceAuthProvider = settings.getSettingAs( "service.auth.provider", String.class );
-        if( serviceAuthProvider == null || serviceAuthProvider.trim().isEmpty() )
-        {
-            return NOOP_PROVIDER;
-        }
-        try
-        {
-            final Class<?> aClass = Class.forName( serviceAuthProvider );
-            final Constructor<?> constructor = aClass.getConstructor( ISettings.class );
-            final Object newInstance = constructor.newInstance( settings );
-            return (IAuthProvider) newInstance;
-        }
-        catch( ClassNotFoundException |
-               NoSuchMethodException |
-               InvocationTargetException |
-               InstantiationException |
-               IllegalAccessException e )
-        {
-            throw new RuntimeException( e );
-        }
+  private static final NoopProvider NOOP_PROVIDER = new NoopProvider();
+
+  public static IAuthProvider provider(final ISettings settings) {
+    final String serviceAuthProvider = settings.getSettingAs("service.auth.provider", String.class);
+    if (serviceAuthProvider == null || serviceAuthProvider.trim().isEmpty()) {
+      return NOOP_PROVIDER;
     }
-
-    private static class NoopProvider implements IAuthProvider
-    {
-
-        @Override
-        public Map<String, String> provide()
-        {
-            return Collections.emptyMap();
-        }
+    try {
+      final Class<?> aClass = Class.forName(serviceAuthProvider);
+      final Constructor<?> constructor = aClass.getConstructor(ISettings.class);
+      final Object newInstance = constructor.newInstance(settings);
+      return (IAuthProvider) newInstance;
+    } catch (ClassNotFoundException
+             | NoSuchMethodException
+             | InvocationTargetException
+             | InstantiationException
+             | IllegalAccessException e) {
+      throw new RuntimeException(e);
     }
+  }
+
+  private static class NoopProvider implements IAuthProvider {
+
+    @Override
+    public Map<String, String> provide() {
+      return Collections.emptyMap();
+    }
+  }
 }

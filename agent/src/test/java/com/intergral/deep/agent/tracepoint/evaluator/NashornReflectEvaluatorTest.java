@@ -17,74 +17,68 @@
 
 package com.intergral.deep.agent.tracepoint.evaluator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.intergral.deep.Person;
 import com.intergral.deep.agent.api.plugin.IEvaluator;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-
-import javax.script.ScriptEngineFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.script.ScriptEngineFactory;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+public class NashornReflectEvaluatorTest {
 
-public class NashornReflectEvaluatorTest
-{
-    public final Person person = new Person( "bob" );
-    private final String name = "qqt";
+  public final Person person = new Person("bob");
+  private final String name = "qqt";
 
-    @Test
-    void evalExpression() throws Throwable
-    {
-        final IEvaluator iEvaluator = NashornReflectEvaluator.loadEvaluator( NashornReflectEvaluatorTest.class.getClassLoader() );
+  @Test
+  void evalExpression() throws Throwable {
+    final IEvaluator iEvaluator = NashornReflectEvaluator.loadEvaluator(
+        NashornReflectEvaluatorTest.class.getClassLoader());
 
-        final Map<String, Object> vars = new HashMap<>();
-        vars.put( "this", NashornReflectEvaluatorTest.this );
+    final Map<String, Object> vars = new HashMap<>();
+    vars.put("this", NashornReflectEvaluatorTest.this);
 
-        final Object o = iEvaluator.evaluateExpression( "this.person.name", vars );
+    final Object o = iEvaluator.evaluateExpression("this.person.name", vars);
 
-        assertEquals( "bob", String.valueOf( o ) );
+    assertEquals("bob", String.valueOf(o));
+  }
+
+  /**
+   * This test is more of a note for using nashorn and allows for testing features etc.
+   */
+  @Test
+  @Disabled
+  void nashornRandomUsage() throws Exception {
+    final HashMap<String, String> hashMap = new HashMap<String, String>() {{
+      put("name", "ben");
+    }};
+    javax.script.ScriptEngineManager mgr = new javax.script.ScriptEngineManager();
+    final List<ScriptEngineFactory> engineFactories = mgr.getEngineFactories();
+
+    for (javax.script.ScriptEngineFactory engineFactory : engineFactories) {
+      System.out.println(engineFactory.getNames());
     }
 
-    /**
-     * This test is more of a note for using nashorn and allows for testing features etc.
-     */
-    @Test
-    @Disabled
-    void nashornRandomUsage() throws Exception
-    {
-        final HashMap<String, String> hashMap = new HashMap<String, String>()
-        {{
-            put( "name", "ben" );
-        }};
-        javax.script.ScriptEngineManager mgr = new javax.script.ScriptEngineManager();
-        final List<ScriptEngineFactory> engineFactories = mgr.getEngineFactories();
-
-        for( javax.script.ScriptEngineFactory engineFactory : engineFactories )
-        {
-            System.out.println( engineFactory.getNames() );
-        }
-
-        javax.script.ScriptEngine engine = mgr.getEngineByName( "JavaScript" );
-        final javax.script.Bindings bindings = engine.createBindings();
+    javax.script.ScriptEngine engine = mgr.getEngineByName("JavaScript");
+    final javax.script.Bindings bindings = engine.createBindings();
 //        bindings.put( "obj", hashMap );
 //        bindings.put( "person", new Person( new Person( "mary" ), "bob" ) );
-        bindings.putAll( new HashMap<String, Object>()
-        {{
-            put( "obj", hashMap );
-            put( "person", new Person( new Person( "mary" ), "qwe" ) );
-            put( "qq", NashornReflectEvaluatorTest.this );
-        }} );
+    bindings.putAll(new HashMap<String, Object>() {{
+      put("obj", hashMap);
+      put("person", new Person(new Person("mary"), "qwe"));
+      put("qq", NashornReflectEvaluatorTest.this);
+    }});
 
-
-        System.out.println( engine.eval( "person", bindings ) );
-        System.out.println( engine.eval( "person.name", bindings ) );
-        System.out.println( engine.eval( "person.getParent()", bindings ) );
+    System.out.println(engine.eval("person", bindings));
+    System.out.println(engine.eval("person.name", bindings));
+    System.out.println(engine.eval("person.getParent()", bindings));
 //        System.out.println( engine.eval( "System.exit()", bindings ) );
-        final Object eval = engine.eval( "qq", bindings );
-        System.out.println( eval );
-        System.out.println( engine.eval( "qq.name", bindings ) );
-        System.out.println( engine.eval( "person.parent.name == 'mary'", bindings ) );
-    }
+    final Object eval = engine.eval("qq", bindings);
+    System.out.println(eval);
+    System.out.println(engine.eval("qq.name", bindings));
+    System.out.println(engine.eval("person.parent.name == 'mary'", bindings));
+  }
 }

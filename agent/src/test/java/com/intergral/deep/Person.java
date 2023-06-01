@@ -17,42 +17,37 @@
 
 package com.intergral.deep;
 
-public class Person
-{
-    private final Person parent;
-    private final String name;
+public class Person {
+
+  private final Person parent;
+  private final String name;
 
 
-    public Person( final String name )
-    {
-        this( null, name );
-    }
+  public Person(final String name) {
+    this(null, name);
+  }
 
 
-    public Person( final Person parent, final String name )
-    {
-        this.parent = parent;
-        this.name = name;
-    }
+  public Person(final Person parent, final String name) {
+    this.parent = parent;
+    this.name = name;
+  }
 
 
-    public Person getParent()
-    {
-        return parent;
-    }
+  public Person getParent() {
+    return parent;
+  }
 
 
-    public String getName()
-    {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    @Override
-    public String toString()
-    {
-        return "Person{" +
-                "parent=" + parent +
-                ", name='" + name + '\'' +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "Person{" +
+        "parent=" + parent +
+        ", name='" + name + '\'' +
+        '}';
+  }
 }

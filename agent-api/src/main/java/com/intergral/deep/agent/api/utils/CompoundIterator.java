@@ -19,61 +19,51 @@ package com.intergral.deep.agent.api.utils;
 
 import java.util.Iterator;
 
-public class CompoundIterator<T> implements Iterator<T>
-{
-    private final Iterator<T>[] iterators;
-    private int currentIterator = 0;
+public class CompoundIterator<T> implements Iterator<T> {
 
-    @SafeVarargs
-    public CompoundIterator( final Iterator<T>... iterators )
-    {
-        this.iterators = iterators;
+  private final Iterator<T>[] iterators;
+  private int currentIterator = 0;
+
+  @SafeVarargs
+  public CompoundIterator(final Iterator<T>... iterators) {
+    this.iterators = iterators;
+  }
+
+  @Override
+  public boolean hasNext() {
+    checkCurrent();
+    return getCurrent().hasNext();
+  }
+
+  private Iterator<T> getCurrent() {
+    if (currentIterator < iterators.length) {
+      return iterators[currentIterator];
     }
+    return new Iterator<T>() {
+      @Override
+      public boolean hasNext() {
+        return false;
+      }
 
-    @Override
-    public boolean hasNext()
-    {
-        checkCurrent();
-        return getCurrent().hasNext();
+      @Override
+      public T next() {
+        return null;
+      }
+    };
+  }
+
+  @Override
+  public T next() {
+    final T next = getCurrent().next();
+    checkCurrent();
+    return next;
+  }
+
+  private void checkCurrent() {
+    final Iterator<T> current = getCurrent();
+    if (current.hasNext()) {
+      return;
     }
-
-    private Iterator<T> getCurrent()
-    {
-        if( currentIterator < iterators.length )
-        {
-            return iterators[currentIterator];
-        }
-        return new Iterator<T>()
-        {
-            @Override
-            public boolean hasNext()
-            {
-                return false;
-            }
-
-            @Override
-            public T next()
-            {
-                return null;
-            }
-        };
-    }
-
-    @Override
-    public T next()
-    {
-        final T next = getCurrent().next();
-        checkCurrent();
-        return next;
-    }
-
-    private void checkCurrent()
-    {
-        final Iterator<T> current = getCurrent();
-        if( current.hasNext() )
-        {
-            return;
-        }
-        currentIterator++;
-    }
+    currentIterator++;
+  }
 }

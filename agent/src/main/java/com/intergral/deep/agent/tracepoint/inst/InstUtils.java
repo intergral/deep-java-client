@@ -17,54 +17,44 @@
 
 package com.intergral.deep.agent.tracepoint.inst;
 
-public class InstUtils
-{
+public class InstUtils {
 
-    public static String externalClassName( final String className )
-    {
-        return className.replaceAll( "/", "." );
+  public static String externalClassName(final String className) {
+    return className.replaceAll("/", ".");
+  }
+
+
+  public static String fileName(final String relPath) {
+    final int lastIndexOf = relPath.lastIndexOf('/');
+    if (lastIndexOf == -1) {
+      return relPath;
     }
+    return relPath.substring(lastIndexOf + 1);
+  }
 
 
-    public static String fileName( final String relPath )
-    {
-        final int lastIndexOf = relPath.lastIndexOf( '/' );
-        if( lastIndexOf == -1 )
-        {
-            return relPath;
-        }
-        return relPath.substring( lastIndexOf + 1 );
+  public static String internalClassStripInner(final Class<?> allLoadedClass) {
+    return internalClassStripInner(allLoadedClass.getName());
+  }
+
+
+  public static String internalClassStripInner(final String allLoadedClass) {
+    final int index = allLoadedClass.indexOf('$');
+    if (index == -1) {
+      return internalClass(allLoadedClass);
     }
+    return internalClass(allLoadedClass.substring(0, index));
+  }
 
+  public static String internalClass(final String clazz) {
+    return clazz.replaceAll("\\.", "/");
+  }
 
-    public static String internalClassStripInner( final Class<?> allLoadedClass )
-    {
-        return internalClassStripInner( allLoadedClass.getName() );
-    }
+  public static String internalClass(final Class<?> clazz) {
+    return internalClass(clazz.getName());
+  }
 
-
-    public static String internalClassStripInner( final String allLoadedClass )
-    {
-        final int index = allLoadedClass.indexOf( '$' );
-        if( index == -1 )
-        {
-            return internalClass( allLoadedClass );
-        }
-        return internalClass( allLoadedClass.substring( 0, index ) );
-    }
-
-    public static String internalClass( final String clazz )
-    {
-        return clazz.replaceAll( "\\.", "/" );
-    }
-
-    public static String internalClass( final Class<?> clazz )
-    {
-        return internalClass( clazz.getName() );
-    }
-
-    public static String shortClassName( final String className )
-    {
-        return className.substring( className.lastIndexOf( '.' ) + 1 );
-    }
+  public static String shortClassName(final String className) {
+    return className.substring(className.lastIndexOf('.') + 1);
+  }
 }

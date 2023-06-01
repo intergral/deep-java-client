@@ -21,26 +21,23 @@ import com.intergral.deep.agent.api.plugin.IEventContext;
 import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
-
 import java.util.HashMap;
 import java.util.Map;
 
-public class JavaPlugin implements IPlugin
-{
-    private final Map<String, String> basic = new HashMap<>();
+public class JavaPlugin implements IPlugin {
 
-    public JavaPlugin()
-    {
-        this.basic.put( "java_version", System.getProperty( "java.version" ) );
-    }
+  private final Map<String, String> basic = new HashMap<>();
 
-    @Override
-    public Resource decorate( final ISettings settings, final IEventContext snapshot )
-    {
-        final Map<String, Object> javaMap = new HashMap<>( this.basic );
-        final Thread thread = Thread.currentThread();
+  public JavaPlugin() {
+    this.basic.put("java_version", System.getProperty("java.version"));
+  }
 
-        javaMap.put( "thread_name", thread.getName() );
-        return Resource.create( javaMap );
-    }
+  @Override
+  public Resource decorate(final ISettings settings, final IEventContext snapshot) {
+    final Map<String, Object> javaMap = new HashMap<>(this.basic);
+    final Thread thread = Thread.currentThread();
+
+    javaMap.put("thread_name", thread.getName());
+    return Resource.create(javaMap);
+  }
 }

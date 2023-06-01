@@ -17,44 +17,45 @@
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>com.intergral.deep.examples</groupId>
-        <artifactId>examples</artifactId>
-        <version>1.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.intergral.deep.examples</groupId>
+    <artifactId>examples</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
 
-    <artifactId>dynamic-load</artifactId>
-    <name>Dynamic Load</name>
-    <description>This example uses the dynamic load approach. We do not specify the agent (-javaagent) instead we
-        dynamically unpack and attach the agent to the running JVM.
-    </description>
+  <artifactId>dynamic-load</artifactId>
+  <name>Dynamic Load</name>
+  <description>This example uses the dynamic load approach. We do not specify the agent (-javaagent)
+    instead we
+    dynamically unpack and attach the agent to the running JVM.
+  </description>
 
-    <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+  <properties>
+    <maven.compiler.source>8</maven.compiler.source>
+    <maven.compiler.target>8</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
 
-    <dependencies>
-        <!--
-        We need to include this dependency in the application that we ship. This includes the full deep agent.
-        -->
-        <dependency>
-            <groupId>com.intergral.deep</groupId>
-            <artifactId>deep</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <!-- This dependency is provided by the above. We simply have a dependency to allow compilation-->
-        <dependency>
-            <groupId>com.intergral.deep</groupId>
-            <artifactId>agent</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
+  <dependencies>
+    <!--
+    We need to include this dependency in the application that we ship. This includes the full deep agent.
+    -->
+    <dependency>
+      <groupId>com.intergral.deep</groupId>
+      <artifactId>deep</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
+    <!-- This dependency is provided by the above. We simply have a dependency to allow compilation-->
+    <dependency>
+      <groupId>com.intergral.deep</groupId>
+      <artifactId>agent</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
 </project>

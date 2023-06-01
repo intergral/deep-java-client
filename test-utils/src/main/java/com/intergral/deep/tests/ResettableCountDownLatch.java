@@ -20,51 +20,44 @@ package com.intergral.deep.tests;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public class ResettableCountDownLatch
-{
-    private final int initialCount;
-    private volatile CountDownLatch latch;
+public class ResettableCountDownLatch {
+
+  private final int initialCount;
+  private volatile CountDownLatch latch;
 
 
-    public ResettableCountDownLatch( int count )
-    {
-        initialCount = count;
-        latch = new CountDownLatch( count );
-    }
+  public ResettableCountDownLatch(int count) {
+    initialCount = count;
+    latch = new CountDownLatch(count);
+  }
 
 
-    public void reset()
-    {
-        latch = new CountDownLatch( initialCount );
-    }
+  public void reset() {
+    latch = new CountDownLatch(initialCount);
+  }
 
 
-    public void reset( int count )
-    {
-        latch = new CountDownLatch( count );
-    }
+  public void reset(int count) {
+    latch = new CountDownLatch(count);
+  }
 
 
-    public long getCount()
-    {
-        return latch.getCount();
-    }
+  public long getCount() {
+    return latch.getCount();
+  }
 
 
-    public void countDown()
-    {
-        latch.countDown();
-    }
+  public void countDown() {
+    latch.countDown();
+  }
 
 
-    public void await() throws InterruptedException
-    {
-        latch.await();
-    }
+  public void await() throws InterruptedException {
+    latch.await();
+  }
 
 
-    public boolean await( long timeout, TimeUnit unit ) throws InterruptedException
-    {
-        return latch.await( timeout, unit );
-    }
+  public boolean await(long timeout, TimeUnit unit) throws InterruptedException {
+    return latch.await(timeout, unit);
+  }
 }

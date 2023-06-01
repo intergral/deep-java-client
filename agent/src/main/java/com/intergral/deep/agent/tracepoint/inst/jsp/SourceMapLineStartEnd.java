@@ -14,35 +14,32 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.intergral.deep.agent.tracepoint.inst.jsp;
 
-public class SourceMapLineStartEnd
-{
-    private final int start;
-    private int end;
+public class SourceMapLineStartEnd {
+
+  private final int start;
+  private int end;
 
 
-    public SourceMapLineStartEnd( final int start )
-    {
-        this.start = start;
-        this.end = start;
-    }
+  public SourceMapLineStartEnd(final int start) {
+    this.start = start;
+    this.end = start;
+  }
 
 
-    public void setEnd( int end )
-    {
-        this.end = end;
-    }
+  public void setEnd(int end) {
+    this.end = end;
+  }
 
 
-    public int getStart()
-    {
-        return start;
-    }
+  public int getStart() {
+    return start;
+  }
 
 
-    public int getEnd()
-    {
-        return end;
-    }
+  public int getEnd() {
+    return end;
+  }
 }

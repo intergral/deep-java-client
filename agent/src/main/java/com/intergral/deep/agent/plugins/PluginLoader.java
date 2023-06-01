@@ -19,40 +19,33 @@ package com.intergral.deep.agent.plugins;
 
 import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.settings.Settings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class PluginLoader
-{
-    private final static Logger LOGGER = LoggerFactory.getLogger( PluginLoader.class );
+public class PluginLoader {
 
-    public static List<IPlugin> loadPlugins( final Settings settings )
-    {
-        final List<String> plugins = settings.getAsList( "plugins" );
-        final List<IPlugin> loadedPlugins = new ArrayList<>();
-        for( String plugin : plugins )
-        {
-            try
-            {
-                final Class<?> aClass = Class.forName( plugin );
-                final Constructor<?> constructor = aClass.getConstructor();
-                final Object newInstance = constructor.newInstance();
-                final IPlugin asPlugin = (IPlugin) newInstance;
-                if( asPlugin.isActive( settings ) )
-                {
-                    loadedPlugins.add( asPlugin );
-                }
-            }
-            catch( Exception e )
-            {
-                LOGGER.error( "Cannot load plugin {}", plugin, e );
-            }
+  private static final Logger LOGGER = LoggerFactory.getLogger(PluginLoader.class);
+
+  public static List<IPlugin> loadPlugins(final Settings settings) {
+    final List<String> plugins = settings.getAsList("plugins");
+    final List<IPlugin> loadedPlugins = new ArrayList<>();
+    for (String plugin : plugins) {
+      try {
+        final Class<?> aClass = Class.forName(plugin);
+        final Constructor<?> constructor = aClass.getConstructor();
+        final Object newInstance = constructor.newInstance();
+        final IPlugin asPlugin = (IPlugin) newInstance;
+        if (asPlugin.isActive(settings)) {
+          loadedPlugins.add(asPlugin);
         }
-        return loadedPlugins;
+      } catch (Exception e) {
+        LOGGER.error("Cannot load plugin {}", plugin, e);
+      }
     }
+    return loadedPlugins;
+  }
 
 }

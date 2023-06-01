@@ -36,10 +36,6 @@ import com.intergral.deep.tests.grpc.TestSnapshotService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
-import net.bytebuddy.agent.ByteBuddyAgent;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
@@ -48,138 +44,126 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import net.bytebuddy.agent.ByteBuddyAgent;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 
-public abstract class ANVITTest
-{
-    protected static ResettableCountDownLatch grpcConnectLatch;
-    protected static Server server;
-    protected static ResettableCountDownLatch snapshotlatch;
-    protected static PollResponse nextResponse;
-    protected static Object nerdVision;
+public abstract class ANVITTest {
 
-    protected static AtomicReference<Snapshot> snapshotAtomicReference = new AtomicReference<>();
-    private static TestPollService pollService;
-    private static TestSnapshotService snapshotService;
+  protected static ResettableCountDownLatch grpcConnectLatch;
+  protected static Server server;
+  protected static ResettableCountDownLatch snapshotlatch;
+  protected static PollResponse nextResponse;
+  protected static Object nerdVision;
+
+  protected static AtomicReference<Snapshot> snapshotAtomicReference = new AtomicReference<>();
+  private static TestPollService pollService;
+  private static TestSnapshotService snapshotService;
 
 
-    @BeforeAll
-    static void beforeAll() throws Exception
-    {
-        snapshotlatch = new ResettableCountDownLatch( 1 );
-        grpcConnectLatch = new ResettableCountDownLatch( 1 );
+  @BeforeAll
+  static void beforeAll() throws Exception {
+    snapshotlatch = new ResettableCountDownLatch(1);
+    grpcConnectLatch = new ResettableCountDownLatch(1);
 
-        if( nerdVision != null )
-        {
-            return;
+    if (nerdVision != null) {
+      return;
+    }
+    // we have to be careful with the class loading when testing the agent in our own tests
+    // we build all the message objects here to ensure we load into the correct classloader
+    final PollResponse build = PollResponse.newBuilder()
+        .setCurrentHash("")
+        .setResponseType(ResponseType.UPDATE)
+        .addResponse(TracePointConfig.newBuilder().setPath("").setLineNumber(1).build())
+        .build();
+    final PollRequest pollRequest = PollRequest.newBuilder()
+        .setResource(Resource.newBuilder().addAttributes(KeyValue.newBuilder()
+            .setKey("").setValue(AnyValue.newBuilder().build()).build()).build())
+        .build();
+    SnapshotResponse.newBuilder().build();
+    WatchResult.newBuilder().build();
+    final WatchResult.ResultCase goodResult = WatchResult.ResultCase.GOOD_RESULT;
+    Snapshot.newBuilder()
+        .addFrames(StackFrame.newBuilder().addVariables(VariableID.newBuilder().build()).build())
+        .putVarLookup("", Variable.newBuilder().build())
+        .build();
+
+    pollService = new TestPollService(new TestPollService.ICallback() {
+      @Override
+      public void poll(final PollRequest request, final StreamObserver<PollResponse> observer) {
+        if (nextResponse != null) {
+          observer.onNext(nextResponse);
         }
-        // we have to be careful with the class loading when testing the agent in our own tests
-        // we build all the message objects here to ensure we load into the correct classloader
-        final PollResponse build = PollResponse.newBuilder()
-                .setCurrentHash( "" )
-                .setResponseType( ResponseType.UPDATE )
-                .addResponse( TracePointConfig.newBuilder().setPath( "" ).setLineNumber( 1 ).build() )
-                .build();
-        final PollRequest pollRequest = PollRequest.newBuilder()
-                .setResource( Resource.newBuilder().addAttributes( KeyValue.newBuilder()
-                        .setKey( "" ).setValue( AnyValue.newBuilder().build() ).build() ).build() )
-                .build();
-        SnapshotResponse.newBuilder().build();
-        WatchResult.newBuilder().build();
-        final WatchResult.ResultCase goodResult = WatchResult.ResultCase.GOOD_RESULT;
-        Snapshot.newBuilder()
-                .addFrames( StackFrame.newBuilder().addVariables( VariableID.newBuilder().build() ).build() )
-                .putVarLookup( "", Variable.newBuilder().build() )
-                .build();
+        observer.onCompleted();
+        grpcConnectLatch.countDown();
+      }
+    });
 
+    snapshotService = new TestSnapshotService(new TestSnapshotService.ICallback() {
+      @Override
+      public void send(final Snapshot request,
+          final StreamObserver<SnapshotResponse> responseObserver) {
+        System.out.println("send");
+        snapshotAtomicReference.set(request);
+        responseObserver.onCompleted();
+        snapshotlatch.countDown();
+      }
+    });
 
-        pollService = new TestPollService( new TestPollService.ICallback()
-        {
-            @Override
-            public void poll( final PollRequest request, final StreamObserver<PollResponse> observer )
-            {
-                if( nextResponse != null )
-                {
-                    observer.onNext( nextResponse );
-                }
-                observer.onCompleted();
-                grpcConnectLatch.countDown();
-            }
-        } );
+    server = ServerBuilder.forPort(9898)
+        .addService(pollService.bindService())
+        .addService(snapshotService.bindService())
+        .build();
+    server.start();
 
+    final String nvPath = System.getProperty("mvn.agentPath",
+        "/home/bdonnell/repo/github/intergral/deep-java-client/deep-java-client/agent/target/agent-1.0-SNAPSHOT.jar");
 
-        snapshotService = new TestSnapshotService( new TestSnapshotService.ICallback()
-        {
-            @Override
-            public void send( final Snapshot request, final StreamObserver<SnapshotResponse> responseObserver )
-            {
-                System.out.println( "send" );
-                snapshotAtomicReference.set( request );
-                responseObserver.onCompleted();
-                snapshotlatch.countDown();
-            }
-        } );
+    final Map<String, String> config = new HashMap<>();
+    config.put("service.url", "localhost:9898");
+    config.put("service.secure", "false");
+    config.put("logging.level", "FINE");
+    config.put("deep.path", nvPath);
+    config.put("transform.path",
+        "/home/bdonnell/repo/github/intergral/deep-java-client/deep-java-client/dispath");
 
-        server = ServerBuilder.forPort( 9898 )
-                .addService( pollService.bindService() )
-                .addService( snapshotService.bindService() )
-                .build();
-        server.start();
+    ByteBuddyAgent.attach(new File(nvPath), getPid(), configAsArgs(config));
 
-        final String nvPath = System.getProperty( "mvn.agentPath",
-                "/home/bdonnell/repo/github/intergral/deep-java-client/deep-java-client/agent/target/agent-1.0-SNAPSHOT.jar" );
+    final Class<?> aClass = Class.forName("com.intergral.deep.agent.AgentImpl");
+    final Method registerBreakpointService = aClass.getDeclaredMethod("loadDeepAPI");
+    final Object invoke = registerBreakpointService.invoke(null);
 
-        final Map<String, String> config = new HashMap<>();
-        config.put( "service.url", "localhost:9898" );
-        config.put( "service.secure", "false" );
-        config.put( "logging.level", "FINE" );
-        config.put( "deep.path", nvPath );
-        config.put( "transform.path",
-                "/home/bdonnell/repo/github/intergral/deep-java-client/deep-java-client/dispath" );
+    nerdVision = invoke;
+  }
 
-        ByteBuddyAgent.attach( new File( nvPath ), getPid(), configAsArgs( config ) );
+  static String getPid() {
+    String nameOfRunningVM = ManagementFactory.getRuntimeMXBean().getName();
+    return nameOfRunningVM.substring(0, nameOfRunningVM.indexOf('@'));
+  }
 
-        final Class<?> aClass = Class.forName( "com.intergral.deep.agent.AgentImpl" );
-        final Method registerBreakpointService = aClass.getDeclaredMethod( "loadDeepAPI" );
-        final Object invoke = registerBreakpointService.invoke( null );
-
-        nerdVision = invoke;
+  static String configAsArgs(final Map<String, String> config) {
+    final StringBuilder stringBuilder = new StringBuilder();
+    for (Map.Entry<String, String> entry : config.entrySet()) {
+      if (stringBuilder.length() != 0) {
+        stringBuilder.append(',');
+      }
+      stringBuilder.append(entry.getKey()).append('=').append(entry.getValue());
     }
+    return stringBuilder.toString();
+  }
 
-    static String getPid()
-    {
-        String nameOfRunningVM = ManagementFactory.getRuntimeMXBean().getName();
-        return nameOfRunningVM.substring( 0, nameOfRunningVM.indexOf( '@' ) );
-    }
+  public static <T> Set<T> setOf(final T frame) {
+    return Collections.singleton(frame);
+  }
 
-    static String configAsArgs( final Map<String, String> config )
-    {
-        final StringBuilder stringBuilder = new StringBuilder();
-        for( Map.Entry<String, String> entry : config.entrySet() )
-        {
-            if( stringBuilder.length() != 0 )
-            {
-                stringBuilder.append( ',' );
-            }
-            stringBuilder.append( entry.getKey() ).append( '=' ).append( entry.getValue() );
-        }
-        return stringBuilder.toString();
-    }
+  @BeforeEach
+  void setUp() {
+    snapshotlatch = new ResettableCountDownLatch(1);
+    grpcConnectLatch = new ResettableCountDownLatch(1);
 
-    public static <T> Set<T> setOf( final T frame )
-    {
-        return Collections.singleton( frame );
-    }
+  }
 
-    @BeforeEach
-    void setUp()
-    {
-        snapshotlatch = new ResettableCountDownLatch( 1 );
-        grpcConnectLatch = new ResettableCountDownLatch( 1 );
-
-    }
-
-    protected void onNext( final PollResponse response )
-    {
-        nextResponse = response;
-    }
+  protected void onNext(final PollResponse response) {
+    nextResponse = response;
+  }
 }

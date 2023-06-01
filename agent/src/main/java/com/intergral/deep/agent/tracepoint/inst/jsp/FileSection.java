@@ -14,36 +14,33 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.intergral.deep.agent.tracepoint.inst.jsp;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class FileSection
-{
-    private final HashMap<Integer, FileSectionEntry> entries = new HashMap<>();
+public class FileSection {
+
+  private final HashMap<Integer, FileSectionEntry> entries = new HashMap<>();
 
 
-    public void put( final int id, final FileSectionEntry entry )
-    {
-        entries.put( id, entry );
+  public void put(final int id, final FileSectionEntry entry) {
+    entries.put(id, entry);
+  }
+
+
+  public FileSectionEntry get(final int id) {
+    return entries.get(id);
+  }
+
+
+  public List<String> getFilenames() {
+    final List<String> filenames = new ArrayList<>();
+    for (final FileSectionEntry entry : entries.values()) {
+      filenames.add(entry.getSourceName());
     }
-
-
-    public FileSectionEntry get( final int id )
-    {
-        return entries.get( id );
-    }
-
-
-    public List<String> getFilenames()
-    {
-        final List<String> filenames = new ArrayList<>();
-        for( final FileSectionEntry entry : entries.values() )
-        {
-            filenames.add( entry.getSourceName() );
-        }
-        return filenames;
-    }
+    return filenames;
+  }
 }

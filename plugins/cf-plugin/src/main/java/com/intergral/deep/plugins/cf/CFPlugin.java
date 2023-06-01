@@ -21,42 +21,32 @@ import com.intergral.deep.agent.api.plugin.IEventContext;
 import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
-
 import java.util.HashMap;
 
-public class CFPlugin implements IPlugin
-{
-    @Override
-    public Resource decorate( final ISettings settings, final IEventContext context )
-    {
-        String appName = null;
-        try
-        {
-            appName = context.evaluateExpression( "APPLICATION.applicationname" );
-        }
-        catch( Throwable ignored )
-        {
-            // nothing we can do - so ignore
-        }
+public class CFPlugin implements IPlugin {
 
-        final HashMap<String, Object> cfVersion = new HashMap<String, Object>()
-        {{
-            put( "cf_version", Utils.loadCFVersion() );
-        }};
-        if( appName != null )
-        {
-            cfVersion.put( "app_name", appName );
-        }
-        return Resource.create( cfVersion );
+  @Override
+  public Resource decorate(final ISettings settings, final IEventContext context) {
+    String appName = null;
+    try {
+      appName = context.evaluateExpression("APPLICATION.applicationname");
+    } catch (Throwable ignored) {
+      // nothing we can do - so ignore
     }
 
-    @Override
-    public boolean isActive( final ISettings settings )
-    {
-        if( !Utils.isCFServer() )
-        {
-            return false;
-        }
-        return IPlugin.super.isActive( settings );
+    final HashMap<String, Object> cfAttributes = new HashMap<>();
+    cfAttributes.put("cf_version", Utils.loadCFVersion());
+    if (appName != null) {
+      cfAttributes.put("app_name", appName);
     }
+    return Resource.create(cfAttributes);
+  }
+
+  @Override
+  public boolean isActive(final ISettings settings) {
+    if (!Utils.isCFServer()) {
+      return false;
+    }
+    return IPlugin.super.isActive(settings);
+  }
 }

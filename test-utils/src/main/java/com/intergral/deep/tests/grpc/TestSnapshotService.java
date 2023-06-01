@@ -22,23 +22,22 @@ import com.intergral.deep.proto.tracepoint.v1.SnapshotResponse;
 import com.intergral.deep.proto.tracepoint.v1.SnapshotServiceGrpc;
 import io.grpc.stub.StreamObserver;
 
-public class TestSnapshotService extends SnapshotServiceGrpc.SnapshotServiceImplBase
-{
-    private final ICallback callback;
+public class TestSnapshotService extends SnapshotServiceGrpc.SnapshotServiceImplBase {
 
-    public TestSnapshotService( final ICallback callback )
-    {
-        this.callback = callback;
-    }
+  private final ICallback callback;
 
-    @Override
-    public void send( final Snapshot request, final StreamObserver<SnapshotResponse> responseObserver )
-    {
-        this.callback.send( request, responseObserver );
-    }
+  public TestSnapshotService(final ICallback callback) {
+    this.callback = callback;
+  }
 
-    public interface ICallback
-    {
-        void send( final Snapshot request, final StreamObserver<SnapshotResponse> responseObserver );
-    }
+  @Override
+  public void send(final Snapshot request,
+      final StreamObserver<SnapshotResponse> responseObserver) {
+    this.callback.send(request, responseObserver);
+  }
+
+  public interface ICallback {
+
+    void send(final Snapshot request, final StreamObserver<SnapshotResponse> responseObserver);
+  }
 }

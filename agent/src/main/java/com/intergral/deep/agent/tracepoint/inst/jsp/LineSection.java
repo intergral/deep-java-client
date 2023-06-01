@@ -14,6 +14,7 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.intergral.deep.agent.tracepoint.inst.jsp;
 
 import java.util.ArrayList;
@@ -21,20 +22,18 @@ import java.util.Iterator;
 import java.util.List;
 
 
-public class LineSection
-{
-    private final List<LineSectionEntry> entries = new ArrayList<>();
+public class LineSection {
+
+  private final List<LineSectionEntry> entries = new ArrayList<>();
 
 
-    public void add( final LineSectionEntry entry )
-    {
-        entries.add( entry );
-    }
+  public void add(final LineSectionEntry entry) {
+    entries.add(entry);
+  }
 
 
-    public Iterator<LineSectionEntry> iterator()
-    {
-        return entries.iterator();
-    }
+  public Iterator<LineSectionEntry> iterator() {
+    return entries.iterator();
+  }
 
 }

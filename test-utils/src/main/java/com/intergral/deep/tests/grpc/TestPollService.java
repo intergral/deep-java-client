@@ -22,23 +22,21 @@ import com.intergral.deep.proto.poll.v1.PollRequest;
 import com.intergral.deep.proto.poll.v1.PollResponse;
 import io.grpc.stub.StreamObserver;
 
-public class TestPollService extends PollConfigGrpc.PollConfigImplBase
-{
-    private final ICallback callback;
+public class TestPollService extends PollConfigGrpc.PollConfigImplBase {
 
-    public TestPollService( final ICallback callback )
-    {
-        this.callback = callback;
-    }
+  private final ICallback callback;
 
-    @Override
-    public void poll( final PollRequest request, final StreamObserver<PollResponse> responseObserver )
-    {
-        this.callback.poll( request, responseObserver );
-    }
+  public TestPollService(final ICallback callback) {
+    this.callback = callback;
+  }
 
-    public interface ICallback
-    {
-        void poll( final PollRequest request, final StreamObserver<PollResponse> responseObserver );
-    }
+  @Override
+  public void poll(final PollRequest request, final StreamObserver<PollResponse> responseObserver) {
+    this.callback.poll(request, responseObserver);
+  }
+
+  public interface ICallback {
+
+    void poll(final PollRequest request, final StreamObserver<PollResponse> responseObserver);
+  }
 }

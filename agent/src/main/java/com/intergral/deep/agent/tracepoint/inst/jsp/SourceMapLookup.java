@@ -14,30 +14,27 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.intergral.deep.agent.tracepoint.inst.jsp;
 
-public class SourceMapLookup
-{
+public class SourceMapLookup {
 
-    private final String filename;
-    private final int lineNumber;
-
-
-    public SourceMapLookup( final String filename, final int lineNumber )
-    {
-        this.filename = filename;
-        this.lineNumber = lineNumber;
-    }
+  private final String filename;
+  private final int lineNumber;
 
 
-    public String getFilename()
-    {
-        return filename;
-    }
+  public SourceMapLookup(final String filename, final int lineNumber) {
+    this.filename = filename;
+    this.lineNumber = lineNumber;
+  }
 
 
-    public int getLineNumber()
-    {
-        return lineNumber;
-    }
+  public String getFilename() {
+    return filename;
+  }
+
+
+  public int getLineNumber() {
+    return lineNumber;
+  }
 }

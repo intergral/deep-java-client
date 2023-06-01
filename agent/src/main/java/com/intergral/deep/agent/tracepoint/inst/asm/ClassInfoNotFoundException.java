@@ -14,29 +14,28 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.intergral.deep.agent.tracepoint.inst.asm;
 
-public class ClassInfoNotFoundException extends RuntimeException
-{
-    private final String type;
+public class ClassInfoNotFoundException extends RuntimeException {
+
+  private final String type;
 
 
-    public ClassInfoNotFoundException( final String message, final String type, final Throwable cause )
-    {
-        super( message, cause );
-        this.type = type;
-    }
+  public ClassInfoNotFoundException(final String message, final String type,
+      final Throwable cause) {
+    super(message, cause);
+    this.type = type;
+  }
 
 
-    public ClassInfoNotFoundException( final String message, final String type )
-    {
-        super( message );
-        this.type = type;
-    }
+  public ClassInfoNotFoundException(final String message, final String type) {
+    super(message);
+    this.type = type;
+  }
 
 
-    public String getType()
-    {
-        return type;
-    }
+  public String getType() {
+    return type;
+  }
 }

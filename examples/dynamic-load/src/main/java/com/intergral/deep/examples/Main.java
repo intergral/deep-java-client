@@ -21,47 +21,41 @@ package com.intergral.deep.examples;
 import com.intergral.deep.Deep;
 import com.intergral.deep.agent.api.IDeep;
 import com.intergral.deep.agent.api.reflection.IReflection;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class Main
-{
-    public static void main( String[] args ) throws Throwable
-    {
-        // this is only needed in this example as we are using a local built module
-        // if using the dependency from maven you do not need to set the path
-        Path jarPath = Paths.get( Main.class.getResource( "/" ).toURI() )
-                .getParent()
-                .getParent()
-                .getParent()
-                .getParent()
-                .resolve( "agent/target/deep-1.0-SNAPSHOT.jar" );
-        System.setProperty( "deep.jar.path", jarPath.toString() );
+public class Main {
 
-        Deep.config()
-                .setValue( "service.url", "localhost:43315" )
-                .setValue( "service.secure", false )
-                .start();
+  public static void main(String[] args) throws Throwable {
+    // this is only needed in this example as we are using a local built module
+    // if using the dependency from maven you do not need to set the path
+    Path jarPath = Paths.get(Main.class.getResource("/").toURI())
+        .getParent()
+        .getParent()
+        .getParent()
+        .getParent()
+        .resolve("agent/target/deep-1.0-SNAPSHOT.jar");
+    System.setProperty("deep.jar.path", jarPath.toString());
 
-        final Deep instance = Deep.getInstance();
-        System.out.println( instance.<IDeep>api().getVersion() );
-        System.out.println( instance.<IReflection>reflection() );
+    Deep.config()
+        .setValue("service.url", "localhost:43315")
+        .setValue("service.secure", false)
+        .start();
 
-        final SimpleTest ts = new SimpleTest( "This is a test", 2 );
-        for( ; ; )
-        {
-            try
-            {
-                ts.message( ts.newId() );
-            }
-            catch( Exception e )
-            {
-                e.printStackTrace();
-            }
+    final Deep instance = Deep.getInstance();
+    System.out.println(instance.<IDeep>api().getVersion());
+    System.out.println(instance.<IReflection>reflection());
 
-            Thread.sleep( 1000 );
-        }
+    final SimpleTest ts = new SimpleTest("This is a test", 2);
+    for (; ; ) {
+      try {
+        ts.message(ts.newId());
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
 
+      Thread.sleep(1000);
     }
+
+  }
 }

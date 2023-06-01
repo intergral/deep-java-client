@@ -17,23 +17,18 @@
 package com.intergral.deep.examples;
 
 
-public class Main
-{
-    public static void main( String[] args ) throws Throwable
-    {
-        final SimpleTest ts = new SimpleTest( "This is a test", 2 );
-        for( ; ; )
-        {
-            try
-            {
-                ts.message( ts.newId() );
-            }
-            catch( Exception e )
-            {
-                e.printStackTrace();
-            }
+public class Main {
 
-            Thread.sleep( 1000 );
-        }
+  public static void main(String[] args) throws Throwable {
+    final SimpleTest ts = new SimpleTest("This is a test", 2);
+    for (; ; ) {
+      try {
+        ts.message(ts.newId());
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+
+      Thread.sleep(1000);
     }
+  }
 }

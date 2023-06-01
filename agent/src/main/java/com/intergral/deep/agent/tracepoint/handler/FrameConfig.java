@@ -19,108 +19,95 @@ package com.intergral.deep.agent.tracepoint.handler;
 
 import com.intergral.deep.agent.types.TracePointConfig;
 
-public class FrameConfig
-{
-    private final static int DEFAULT_MAX_VAR_DEPTH = 5;
-    private final static int DEFAULT_MAX_VARIABLES = 1000;
-    private final static int DEFAULT_MAX_COLLECTION_SIZE = 10;
-    private final static int DEFAULT_MAX_STRING_LENGTH = 1024;
-    private final static int DEFAULT_MAX_WATCH_VARS = 100;
-    private final static int DEFAULT_MAX_TP_PROCESS_TIME = 100;
+public class FrameConfig {
 
-    private String frameType = null;
-    private String stackType = null;
-    private int maxVarDepth = -1;
-    private int maxVariables = -1;
-    private int maxCollectionSize = -1;
-    private int maxStrLength = -1;
-    private int maxWatchVars = -1;
-    private int maxTpProcessTime = -1;
+  private static final int DEFAULT_MAX_VAR_DEPTH = 5;
+  private static final int DEFAULT_MAX_VARIABLES = 1000;
+  private static final int DEFAULT_MAX_COLLECTION_SIZE = 10;
+  private static final int DEFAULT_MAX_STRING_LENGTH = 1024;
+  private static final int DEFAULT_MAX_WATCH_VARS = 100;
+  private static final int DEFAULT_MAX_TP_PROCESS_TIME = 100;
 
-    public void process( final TracePointConfig tracePointConfig )
-    {
-        maxVarDepth = Math.max( tracePointConfig.getArg( "MAX_VAR_DEPTH", Integer.class, -1 ), maxVarDepth );
-        maxVariables = Math.max( tracePointConfig.getArg( "MAX_VARIABLES", Integer.class, -1 ), maxVariables );
-        maxCollectionSize = Math.max( tracePointConfig.getArg( "MAX_COLLECTION_SIZE", Integer.class, -1 ),
-                maxCollectionSize );
-        maxStrLength = Math.max( tracePointConfig.getArg( "MAX_STRING_LENGTH", Integer.class, -1 ), maxStrLength );
-        maxWatchVars = Math.max( tracePointConfig.getArg( "MAX_WATCH_VARS", Integer.class, -1 ), maxWatchVars );
-        maxTpProcessTime = Math.max( tracePointConfig.getArg( "MAX_TP_PROCESS_TIME", Integer.class, -1 ),
-                maxTpProcessTime );
+  private String frameType = null;
+  private String stackType = null;
+  private int maxVarDepth = -1;
+  private int maxVariables = -1;
+  private int maxCollectionSize = -1;
+  private int maxStrLength = -1;
+  private int maxWatchVars = -1;
+  private int maxTpProcessTime = -1;
 
-        final String frameType = tracePointConfig.getFrameType();
-        if( frameType != null )
-        {
-            if( this.frameType == null )
-            {
-                this.frameType = frameType;
-            }
-            else if( TracePointConfig.frameTypeOrdinal( frameType ) >
-                    TracePointConfig.frameTypeOrdinal( this.frameType ) )
-            {
-                this.frameType = frameType;
-            }
-        }
+  public void process(final TracePointConfig tracePointConfig) {
+    maxVarDepth = Math.max(tracePointConfig.getArg("MAX_VAR_DEPTH", Integer.class, -1),
+        maxVarDepth);
+    maxVariables = Math.max(tracePointConfig.getArg("MAX_VARIABLES", Integer.class, -1),
+        maxVariables);
+    maxCollectionSize = Math.max(tracePointConfig.getArg("MAX_COLLECTION_SIZE", Integer.class, -1),
+        maxCollectionSize);
+    maxStrLength = Math.max(tracePointConfig.getArg("MAX_STRING_LENGTH", Integer.class, -1),
+        maxStrLength);
+    maxWatchVars = Math.max(tracePointConfig.getArg("MAX_WATCH_VARS", Integer.class, -1),
+        maxWatchVars);
+    maxTpProcessTime = Math.max(tracePointConfig.getArg("MAX_TP_PROCESS_TIME", Integer.class, -1),
+        maxTpProcessTime);
 
-        final String stackType = tracePointConfig.getStackType();
-        if( stackType != null )
-        {
-            if( this.stackType == null )
-            {
-                this.stackType = stackType;
-            }
-            else if( stackType.equals( TracePointConfig.STACK ) )
-            {
-                this.stackType = stackType;
-            }
-        }
+    final String frameType = tracePointConfig.getFrameType();
+    if (frameType != null) {
+      if (this.frameType == null) {
+        this.frameType = frameType;
+      } else if (TracePointConfig.frameTypeOrdinal(frameType)
+          > TracePointConfig.frameTypeOrdinal(this.frameType)) {
+        this.frameType = frameType;
+      }
     }
 
-    public void close()
-    {
-        maxVarDepth = maxVarDepth == -1 ? DEFAULT_MAX_VAR_DEPTH : maxVarDepth;
-        maxVariables = maxVariables == -1 ? DEFAULT_MAX_VARIABLES : maxVariables;
-        maxCollectionSize = maxCollectionSize == -1 ? DEFAULT_MAX_COLLECTION_SIZE : maxCollectionSize;
-        maxStrLength = maxStrLength == -1 ? DEFAULT_MAX_STRING_LENGTH : maxStrLength;
-        maxWatchVars = maxWatchVars == -1 ? DEFAULT_MAX_WATCH_VARS : maxWatchVars;
-        maxTpProcessTime = maxTpProcessTime == -1 ? DEFAULT_MAX_TP_PROCESS_TIME : maxTpProcessTime;
+    final String stackType = tracePointConfig.getStackType();
+    if (stackType != null) {
+      if (this.stackType == null) {
+        this.stackType = stackType;
+      } else if (stackType.equals(TracePointConfig.STACK)) {
+        this.stackType = stackType;
+      }
+    }
+  }
 
-        frameType = frameType == null ? TracePointConfig.SINGLE_FRAME_TYPE : frameType;
-        stackType = stackType == null ? TracePointConfig.STACK : stackType;
+  public void close() {
+    maxVarDepth = maxVarDepth == -1 ? DEFAULT_MAX_VAR_DEPTH : maxVarDepth;
+    maxVariables = maxVariables == -1 ? DEFAULT_MAX_VARIABLES : maxVariables;
+    maxCollectionSize = maxCollectionSize == -1 ? DEFAULT_MAX_COLLECTION_SIZE : maxCollectionSize;
+    maxStrLength = maxStrLength == -1 ? DEFAULT_MAX_STRING_LENGTH : maxStrLength;
+    maxWatchVars = maxWatchVars == -1 ? DEFAULT_MAX_WATCH_VARS : maxWatchVars;
+    maxTpProcessTime = maxTpProcessTime == -1 ? DEFAULT_MAX_TP_PROCESS_TIME : maxTpProcessTime;
+
+    frameType = frameType == null ? TracePointConfig.SINGLE_FRAME_TYPE : frameType;
+    stackType = stackType == null ? TracePointConfig.STACK : stackType;
+  }
+
+  public boolean shouldCollectVars(final int currentFrameIndex) {
+    if (this.frameType.equals(TracePointConfig.NO_FRAME_TYPE)) {
+      return false;
     }
 
-    public boolean shouldCollectVars( final int currentFrameIndex )
-    {
-        if( this.frameType.equals( TracePointConfig.NO_FRAME_TYPE ) )
-        {
-            return false;
-        }
-
-        if( currentFrameIndex == 0 )
-        {
-            return true;
-        }
-
-        return this.frameType.equals( TracePointConfig.ALL_FRAME_TYPE );
+    if (currentFrameIndex == 0) {
+      return true;
     }
 
-    public int maxVariables()
-    {
-        return this.maxVariables;
-    }
+    return this.frameType.equals(TracePointConfig.ALL_FRAME_TYPE);
+  }
 
-    public int maxStringLength()
-    {
-        return this.maxStrLength;
-    }
+  public int maxVariables() {
+    return this.maxVariables;
+  }
 
-    public int maxDepth()
-    {
-        return this.maxVarDepth;
-    }
+  public int maxStringLength() {
+    return this.maxStrLength;
+  }
 
-    public int maxCollectionSize()
-    {
-        return this.maxCollectionSize;
-    }
+  public int maxDepth() {
+    return this.maxVarDepth;
+  }
+
+  public int maxCollectionSize() {
+    return this.maxCollectionSize;
+  }
 }

@@ -17,27 +17,29 @@
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>com.intergral.deep</groupId>
-        <artifactId>deep-java-client</artifactId>
-        <version>1.0-SNAPSHOT</version>
-    </parent>
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.intergral.deep</groupId>
+    <artifactId>deep-java-client</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
 
-    <packaging>pom</packaging>
-    <modules>
-        <module>java-plugin</module>
-        <module>cf-plugin</module>
-    </modules>
+  <packaging>pom</packaging>
+  <modules>
+    <module>java-plugin</module>
+    <module>cf-plugin</module>
+  </modules>
 
-    <groupId>com.intergral.deep.plugins</groupId>
-    <artifactId>plugins</artifactId>
-    <name>Plugins</name>
-    <description>A set of extensions that add specific functionality to deep given the environment we are running in.</description>
+  <groupId>com.intergral.deep.plugins</groupId>
+  <artifactId>plugins</artifactId>
+  <name>Plugins</name>
+  <description>A set of extensions that add specific functionality to deep given the environment we
+    are running in.
+  </description>
 
-    <properties>
-    </properties>
+  <properties>
+  </properties>
 
 </project>

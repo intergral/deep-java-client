@@ -19,12 +19,12 @@ package com.intergral.deep.agent.api.auth;
 
 import java.util.Map;
 
-public interface IAuthProvider
-{
-    /**
-     * Provide the headers that should be attached to the GRPC calls
-     *
-     * @return a Map of the header values
-     */
-    Map<String, String> provide();
+public interface IAuthProvider {
+
+  /**
+   * Provide the headers that should be attached to the GRPC calls
+   *
+   * @return a Map of the header values
+   */
+  Map<String, String> provide();
 }

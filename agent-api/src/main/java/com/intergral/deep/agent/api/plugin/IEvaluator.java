@@ -19,9 +19,10 @@ package com.intergral.deep.agent.api.plugin;
 
 import java.util.Map;
 
-public interface IEvaluator
-{
-    boolean evaluate( final String expression, final Map<String, Object> values );
+public interface IEvaluator {
 
-    Object evaluateExpression( final String expression, final Map<String, Object> values ) throws Throwable;
+  boolean evaluate(final String expression, final Map<String, Object> values);
+
+  Object evaluateExpression(final String expression, final Map<String, Object> values)
+      throws Throwable;
 }

@@ -18,35 +18,31 @@
 package com.intergral.deep.agent.resource;
 
 import com.intergral.deep.agent.api.spi.Ordered;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ServiceLoader;
 
-public class SpiUtil
-{
+public class SpiUtil {
 
-    static <T extends Ordered> List<T> loadOrdered( Class<T> spiClass, ClassLoader serviceClassLoader )
-    {
-        return loadOrdered( spiClass, serviceClassLoader, ServiceLoader::load );
-    }
+  static <T extends Ordered> List<T> loadOrdered(Class<T> spiClass,
+      ClassLoader serviceClassLoader) {
+    return loadOrdered(spiClass, serviceClassLoader, ServiceLoader::load);
+  }
 
-    // VisibleForTesting
-    static <T extends Ordered> List<T> loadOrdered(
-            Class<T> spiClass, ClassLoader serviceClassLoader, ServiceLoaderFinder serviceLoaderFinder )
-    {
-        List<T> result = new ArrayList<>();
-        for( T service : serviceLoaderFinder.load( spiClass, serviceClassLoader ) )
-        {
-            result.add( service );
-        }
-        result.sort( Comparator.comparing( Ordered::order ) );
-        return result;
+  // VisibleForTesting
+  static <T extends Ordered> List<T> loadOrdered(
+      Class<T> spiClass, ClassLoader serviceClassLoader, ServiceLoaderFinder serviceLoaderFinder) {
+    List<T> result = new ArrayList<>();
+    for (T service : serviceLoaderFinder.load(spiClass, serviceClassLoader)) {
+      result.add(service);
     }
+    result.sort(Comparator.comparing(Ordered::order));
+    return result;
+  }
 
-    interface ServiceLoaderFinder
-    {
-        <S> Iterable<S> load( Class<S> spiClass, ClassLoader classLoader );
-    }
+  interface ServiceLoaderFinder {
+
+    <S> Iterable<S> load(Class<S> spiClass, ClassLoader classLoader);
+  }
 }

@@ -18,14 +18,13 @@
 package com.intergral.deep.agent.api.settings;
 
 import com.intergral.deep.agent.api.resource.Resource;
-
 import java.util.Map;
 
-public interface ISettings
-{
-    <T> T getSettingAs( String key, Class<T> clazz );
+public interface ISettings {
 
-    Map<String, String> getMap( String attributeProperty );
+  <T> T getSettingAs(String key, Class<T> clazz);
 
-    Resource getResource();
+  Map<String, String> getMap(String attributeProperty);
+
+  Resource getResource();
 }

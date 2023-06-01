@@ -20,18 +20,17 @@ package com.intergral.deep.agent.api.plugin;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
 
-public interface IPlugin
-{
-    Resource decorate( final ISettings settings, final IEventContext snapshot );
+public interface IPlugin {
 
-    default boolean isActive( final ISettings settings )
-    {
-        final String simpleName = this.getClass().getSimpleName();
-        final Boolean settingAs = settings.getSettingAs( String.format( "%s.active", simpleName ), Boolean.class );
-        if( settingAs == null )
-        {
-            return true;
-        }
-        return settingAs;
+  Resource decorate(final ISettings settings, final IEventContext snapshot);
+
+  default boolean isActive(final ISettings settings) {
+    final String simpleName = this.getClass().getSimpleName();
+    final Boolean settingAs = settings.getSettingAs(String.format("%s.active", simpleName),
+        Boolean.class);
+    if (settingAs == null) {
+      return true;
     }
+    return settingAs;
+  }
 }

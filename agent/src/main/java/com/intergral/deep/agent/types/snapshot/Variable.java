@@ -20,50 +20,44 @@ package com.intergral.deep.agent.types.snapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Variable
-{
-    private final String varType;
-    private final String valString;
-    private final String identityCode;
-    private final boolean truncated;
-    private final List<VariableID> children = new ArrayList<>();
+public class Variable {
 
-    public Variable( final String varType, final String valString, final String identityCode, final boolean truncated )
-    {
+  private final String varType;
+  private final String valString;
+  private final String identityCode;
+  private final boolean truncated;
+  private final List<VariableID> children = new ArrayList<>();
 
-        this.varType = varType;
-        this.valString = valString;
-        this.identityCode = identityCode;
-        this.truncated = truncated;
-    }
+  public Variable(final String varType, final String valString, final String identityCode,
+      final boolean truncated) {
 
-    public void addChild( final VariableID variableId )
-    {
-        this.children.add( variableId );
-    }
+    this.varType = varType;
+    this.valString = valString;
+    this.identityCode = identityCode;
+    this.truncated = truncated;
+  }
 
-    public String getVarType()
-    {
-        return varType;
-    }
+  public void addChild(final VariableID variableId) {
+    this.children.add(variableId);
+  }
 
-    public String getValString()
-    {
-        return valString;
-    }
+  public String getVarType() {
+    return varType;
+  }
 
-    public String getIdentityCode()
-    {
-        return identityCode;
-    }
+  public String getValString() {
+    return valString;
+  }
 
-    public boolean isTruncated()
-    {
-        return truncated;
-    }
+  public String getIdentityCode() {
+    return identityCode;
+  }
 
-    public List<VariableID> getChildren()
-    {
-        return children;
-    }
+  public boolean isTruncated() {
+    return truncated;
+  }
+
+  public List<VariableID> getChildren() {
+    return children;
+  }
 }

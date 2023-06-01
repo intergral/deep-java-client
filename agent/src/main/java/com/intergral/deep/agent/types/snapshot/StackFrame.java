@@ -19,62 +19,54 @@ package com.intergral.deep.agent.types.snapshot;
 
 import java.util.Collection;
 
-public class StackFrame
-{
-    private final String className;
-    private final String fileName;
-    private final String methodName;
-    private final int lineNumber;
-    private final boolean appFrame;
-    private final boolean nativeFrame;
-    private final Collection<VariableID> frameVariables;
+public class StackFrame {
 
-    public StackFrame( final String fileName, final int lineNumber, final String className,
-                       final String methodName, final boolean appFrame, final boolean nativeFrame,
-                       final Collection<VariableID> frameVariables )
-    {
+  private final String className;
+  private final String fileName;
+  private final String methodName;
+  private final int lineNumber;
+  private final boolean appFrame;
+  private final boolean nativeFrame;
+  private final Collection<VariableID> frameVariables;
 
-        this.className = className;
-        this.fileName = fileName;
-        this.methodName = methodName;
-        this.lineNumber = lineNumber;
-        this.appFrame = appFrame;
-        this.nativeFrame = nativeFrame;
-        this.frameVariables = frameVariables;
-    }
+  public StackFrame(final String fileName, final int lineNumber, final String className,
+      final String methodName, final boolean appFrame, final boolean nativeFrame,
+      final Collection<VariableID> frameVariables) {
 
-    public String getClassName()
-    {
-        return className;
-    }
+    this.className = className;
+    this.fileName = fileName;
+    this.methodName = methodName;
+    this.lineNumber = lineNumber;
+    this.appFrame = appFrame;
+    this.nativeFrame = nativeFrame;
+    this.frameVariables = frameVariables;
+  }
 
-    public String getFileName()
-    {
-        return fileName;
-    }
+  public String getClassName() {
+    return className;
+  }
 
-    public String getMethodName()
-    {
-        return methodName;
-    }
+  public String getFileName() {
+    return fileName;
+  }
 
-    public int getLineNumber()
-    {
-        return lineNumber;
-    }
+  public String getMethodName() {
+    return methodName;
+  }
 
-    public boolean isAppFrame()
-    {
-        return appFrame;
-    }
+  public int getLineNumber() {
+    return lineNumber;
+  }
 
-    public boolean isNativeFrame()
-    {
-        return nativeFrame;
-    }
+  public boolean isAppFrame() {
+    return appFrame;
+  }
 
-    public Collection<VariableID> getFrameVariables()
-    {
-        return frameVariables;
-    }
+  public boolean isNativeFrame() {
+    return nativeFrame;
+  }
+
+  public Collection<VariableID> getFrameVariables() {
+    return frameVariables;
+  }
 }

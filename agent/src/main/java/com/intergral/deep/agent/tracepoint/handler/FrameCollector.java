@@ -27,7 +27,6 @@ import com.intergral.deep.agent.types.snapshot.StackFrame;
 import com.intergral.deep.agent.types.snapshot.Variable;
 import com.intergral.deep.agent.types.snapshot.VariableID;
 import com.intergral.deep.agent.types.snapshot.WatchResult;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,278 +37,241 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class FrameCollector extends VariableProcessor
-{
-    protected final Settings settings;
-    protected final IEvaluator evaluator;
-    protected final Map<String, Object> variables;
-    private final StackTraceElement[] stack;
+public class FrameCollector extends VariableProcessor {
 
-    private final Map<String, String> varCache = new HashMap<>();
+  protected final Settings settings;
+  protected final IEvaluator evaluator;
+  protected final Map<String, Object> variables;
+  private final StackTraceElement[] stack;
 
-    public FrameCollector( final Settings settings, final IEvaluator evaluator, final Map<String, Object> variables,
-                           final StackTraceElement[] stack )
-    {
-        this.settings = settings;
-        this.evaluator = evaluator;
-        this.variables = variables;
-        this.stack = stack;
+  private final Map<String, String> varCache = new HashMap<>();
+
+  public FrameCollector(final Settings settings, final IEvaluator evaluator,
+      final Map<String, Object> variables,
+      final StackTraceElement[] stack) {
+    this.settings = settings;
+    this.evaluator = evaluator;
+    this.variables = variables;
+    this.stack = stack;
+  }
+
+  protected IFrameResult processFrame() {
+    final ArrayList<StackFrame> frames = new ArrayList<>();
+
+    for (int i = 0; i < stack.length; i++) {
+      final StackTraceElement stackTraceElement = stack[i];
+      final StackFrame frame = this.processFrame(stackTraceElement,
+          this.frameConfig.shouldCollectVars(i), i);
+      frames.add(frame);
     }
 
-    protected IFrameResult processFrame()
-    {
-        final ArrayList<StackFrame> frames = new ArrayList<>();
+    final Map<String, Variable> closedLookup = closeLookup();
 
-        for( int i = 0; i < stack.length; i++ )
-        {
-            final StackTraceElement stackTraceElement = stack[i];
-            final StackFrame frame = this.processFrame( stackTraceElement, this.frameConfig.shouldCollectVars( i ), i );
-            frames.add( frame );
+    return new IFrameResult() {
+      @Override
+      public Collection<StackFrame> frames() {
+        return frames;
+      }
+
+      @Override
+      public Map<String, Variable> variables() {
+        if (closedLookup == null) {
+          return Collections.emptyMap();
         }
+        return closedLookup;
+      }
+    };
+  }
 
-        final Map<String, Variable> closedLookup = closeLookup();
+  private StackFrame processFrame(final StackTraceElement stackTraceElement,
+      final boolean collectVars,
+      final int frameIndex) {
+    final String className = stackTraceElement.getClassName();
+    final int lineNumber = stackTraceElement.getLineNumber();
+    final String fileName = getFileName(stackTraceElement);
+    final boolean nativeMethod = stackTraceElement.isNativeMethod();
+    final boolean appFrame = isAppFrame(stackTraceElement);
+    final String methodName = getMethodName(stackTraceElement, variables, frameIndex);
 
-        return new IFrameResult()
-        {
-            @Override
-            public Collection<StackFrame> frames()
-            {
-                return frames;
-            }
-
-            @Override
-            public Map<String, Variable> variables()
-            {
-                if( closedLookup == null )
-                {
-                    return Collections.emptyMap();
-                }
-                return closedLookup;
-            }
-        };
+    final Collection<VariableID> varIds;
+    if (collectVars) {
+      varIds = this.processVars(this.selectVariables(frameIndex));
+    } else {
+      varIds = Collections.emptyList();
     }
 
-    private StackFrame processFrame( final StackTraceElement stackTraceElement, final boolean collectVars,
-                                     final int frameIndex )
-    {
-        final String className = stackTraceElement.getClassName();
-        final int lineNumber = stackTraceElement.getLineNumber();
-        final String fileName = getFileName( stackTraceElement );
-        final boolean nativeMethod = stackTraceElement.isNativeMethod();
-        final boolean appFrame = isAppFrame( stackTraceElement );
-        final String methodName = getMethodName( stackTraceElement, variables, frameIndex );
+    return new StackFrame(fileName,
+        lineNumber,
+        className,
+        methodName,
+        appFrame,
+        nativeMethod,
+        varIds);
+  }
 
+  protected Map<String, Object> selectVariables(final int frameIndex) {
+    if (frameIndex == 0) {
+      return this.variables;
+    }
+    // todo can we use native to get variables up the stack
+    return Collections.emptyMap();
+  }
 
-        final Collection<VariableID> varIds;
-        if( collectVars )
-        {
-            varIds = this.processVars( this.selectVariables( frameIndex ) );
-        }
-        else
-        {
-            varIds = Collections.emptyList();
-        }
+  protected List<VariableID> processVars(final Map<String, Object> variables) {
+    final List<VariableID> frameVars = new ArrayList<>();
 
-        return new StackFrame( fileName,
-                lineNumber,
-                className,
-                methodName,
-                appFrame,
-                nativeMethod,
-                varIds );
+    final Node.IParent frameParent = frameVars::add;
+
+    final Set<Node> initialNodes = variables.entrySet()
+        .stream()
+        .map(stringObjectEntry -> new Node(new Node.NodeValue(stringObjectEntry.getKey(),
+            stringObjectEntry.getValue()), frameParent)).collect(Collectors.toSet());
+
+    Node.breadthFirstSearch(new Node(null, new HashSet<>(initialNodes), frameParent),
+        this::processNode);
+
+    return frameVars;
+  }
+
+  protected boolean processNode(final Node node) {
+    if (!this.checkVarCount()) {
+      // we have exceeded the var count, so do not continue
+      return false;
     }
 
-    protected Map<String, Object> selectVariables( final int frameIndex )
-    {
-        if( frameIndex == 0 )
-        {
-            return this.variables;
-        }
-        // todo can we use native to get variables up the stack
-        return Collections.emptyMap();
+    final Node.NodeValue value = node.getValue();
+    if (value == null) {
+      // this node has no value, continue with children
+      return true;
     }
 
-    protected List<VariableID> processVars( final Map<String, Object> variables )
-    {
-        final List<VariableID> frameVars = new ArrayList<>();
+    // process this node variable
+    final VariableResponse processResult = super.processVariable(value);
+    final VariableID variableId = processResult.getVariableId();
 
-        final Node.IParent frameParent = frameVars::add;
+    // add the result to the parent - this maintains the hierarchy in the var look up
+    node.getParent().addChild(variableId);
 
-        final Set<Node> initialNodes = variables.entrySet()
-                .stream()
-                .map( stringObjectEntry -> new Node( new Node.NodeValue( stringObjectEntry.getKey(),
-                        stringObjectEntry.getValue() ), frameParent ) ).collect( Collectors.toSet() );
-
-        Node.breadthFirstSearch( new Node( null, new HashSet<>( initialNodes ), frameParent ), this::processNode );
-
-        return frameVars;
+    if (value.getValue() != null && processResult.processChildren()) {
+      final Set<Node> childNodes = super.processChildNodes(variableId, value.getValue(),
+          node.depth());
+      node.addChildren(childNodes);
     }
+    return true;
+  }
 
-    protected boolean processNode( final Node node )
-    {
-        if( !this.checkVarCount() )
-        {
-            // we have exceeded the var count, so do not continue
-            return false;
-        }
+  private boolean checkVarCount() {
+    return varCache.size() <= this.frameConfig.maxVariables();
+  }
 
-        final Node.NodeValue value = node.getValue();
-        if( value == null )
-        {
-            // this node has no value, continue with children
-            return true;
-        }
+  @Override
+  protected String checkId(final String identity) {
+    return this.varCache.get(identity);
+  }
 
-        // process this node variable
-        final VariableResponse processResult = super.processVariable( value );
-        final VariableID variableId = processResult.getVariableId();
+  @Override
+  protected String newVarId(final String identity) {
+    final int size = this.varCache.size();
+    final String newId = String.valueOf(size + 1);
+    this.varCache.put(identity, newId);
+    return newId;
+  }
 
-        // add the result to the parent - this maintains the hierarchy in the var look up
-        node.getParent().addChild( variableId );
+  protected boolean isAppFrame(final StackTraceElement stackTraceElement) {
+    final List<String> inAppInclude = settings.getAsList("in.app.include");
+    final List<String> inAppExclude = settings.getAsList("in.app.exclude");
 
-        if( value.getValue() != null && processResult.processChildren() )
-        {
-            final Set<Node> childNodes = super.processChildNodes( variableId, value.getValue(), node.depth() );
-            node.addChildren( childNodes );
-        }
-        return true;
-    }
+    final String className = stackTraceElement.getClassName();
 
-    private boolean checkVarCount()
-    {
-        return varCache.size() <= this.frameConfig.maxVariables();
-    }
-
-    @Override
-    protected String checkId( final String identity )
-    {
-        return this.varCache.get( identity );
-    }
-
-    @Override
-    protected String newVarId( final String identity )
-    {
-        final int size = this.varCache.size();
-        final String newId = String.valueOf( size + 1 );
-        this.varCache.put( identity, newId );
-        return newId;
-    }
-
-    protected boolean isAppFrame( final StackTraceElement stackTraceElement )
-    {
-        final List<String> inAppInclude = settings.getAsList( "in.app.include" );
-        final List<String> inAppExclude = settings.getAsList( "in.app.exclude" );
-
-        final String className = stackTraceElement.getClassName();
-
-        for( String exclude : inAppExclude )
-        {
-            if( className.equals( exclude ) )
-            {
-                return false;
-            }
-        }
-
-        for( String include : inAppInclude )
-        {
-            if( className.equals( include ) )
-            {
-                return true;
-            }
-        }
+    for (String exclude : inAppExclude) {
+      if (className.equals(exclude)) {
         return false;
+      }
     }
 
-    private String getFileName( final StackTraceElement stackTraceElement )
-    {
-        if( stackTraceElement.getFileName() == null )
-        {
-            return InstUtils.shortClassName( stackTraceElement.getClassName() );
-        }
-        return stackTraceElement.getFileName();
+    for (String include : inAppInclude) {
+      if (className.equals(include)) {
+        return true;
+      }
     }
+    return false;
+  }
 
-    protected String getMethodName( final StackTraceElement stackTraceElement,
-                                    final Map<String, Object> variables,
-                                    final int frameIndex )
-    {
-        return stackTraceElement.getMethodName();
+  private String getFileName(final StackTraceElement stackTraceElement) {
+    if (stackTraceElement.getFileName() == null) {
+      return InstUtils.shortClassName(stackTraceElement.getClassName());
     }
+    return stackTraceElement.getFileName();
+  }
 
-    protected IExpressionResult evaluateWatchExpression( final String watch )
-    {
-        try
-        {
-            final Object result = this.evaluator.evaluateExpression( watch, this.variables );
-            final List<VariableID> variableIDS = processVars( Collections.singletonMap( watch, result ) );
-            final Map<String, Variable> watchLookup = closeLookup();
-            return new IExpressionResult()
-            {
-                @Override
-                public WatchResult result()
-                {
-                    return new WatchResult( watch, variableIDS.get( 0 ) );
-                }
+  protected String getMethodName(final StackTraceElement stackTraceElement,
+      final Map<String, Object> variables,
+      final int frameIndex) {
+    return stackTraceElement.getMethodName();
+  }
 
-                @Override
-                public Map<String, Variable> variables()
-                {
-                    return watchLookup;
-                }
-            };
-        }
-        catch( Throwable t )
-        {
-            return new IExpressionResult()
-            {
-                @Override
-                public WatchResult result()
-                {
-                    return new WatchResult( watch, String.format( "%s: %s", t.getClass().getName(), t.getMessage() ) );
-                }
-
-                @Override
-                public Map<String, Variable> variables()
-                {
-                    return Collections.emptyMap();
-                }
-            };
-        }
-    }
-
-    protected Resource processAttributes( final TracePointConfig tracepoint )
-    {
-        final HashMap<String, Object> attributes = new HashMap<>();
-        attributes.put( "tracepoint", tracepoint.getId() );
-        attributes.put( "path", tracepoint.getPath() );
-        attributes.put( "line", tracepoint.getLineNo() );
-        attributes.put( "stack", tracepoint.getStackType() );
-        attributes.put( "frame", tracepoint.getFrameType() );
-
-        if( !tracepoint.getWatches().isEmpty() )
-        {
-            attributes.put( "has_watches", true );
+  protected IExpressionResult evaluateWatchExpression(final String watch) {
+    try {
+      final Object result = this.evaluator.evaluateExpression(watch, this.variables);
+      final List<VariableID> variableIds = processVars(Collections.singletonMap(watch, result));
+      final Map<String, Variable> watchLookup = closeLookup();
+      return new IExpressionResult() {
+        @Override
+        public WatchResult result() {
+          return new WatchResult(watch, variableIds.get(0));
         }
 
-        if( tracepoint.getCondition() != null && !tracepoint.getCondition().trim().isEmpty() )
-        {
-            attributes.put( "has_condition", true );
+        @Override
+        public Map<String, Variable> variables() {
+          return watchLookup;
+        }
+      };
+    } catch (Throwable t) {
+      return new IExpressionResult() {
+        @Override
+        public WatchResult result() {
+          return new WatchResult(watch,
+              String.format("%s: %s", t.getClass().getName(), t.getMessage()));
         }
 
-        return Resource.create( attributes );
+        @Override
+        public Map<String, Variable> variables() {
+          return Collections.emptyMap();
+        }
+      };
+    }
+  }
+
+  protected Resource processAttributes(final TracePointConfig tracepoint) {
+    final HashMap<String, Object> attributes = new HashMap<>();
+    attributes.put("tracepoint", tracepoint.getId());
+    attributes.put("path", tracepoint.getPath());
+    attributes.put("line", tracepoint.getLineNo());
+    attributes.put("stack", tracepoint.getStackType());
+    attributes.put("frame", tracepoint.getFrameType());
+
+    if (!tracepoint.getWatches().isEmpty()) {
+      attributes.put("has_watches", true);
     }
 
-    protected interface IFrameResult
-    {
-        Collection<StackFrame> frames();
-
-        Map<String, Variable> variables();
+    if (tracepoint.getCondition() != null && !tracepoint.getCondition().trim().isEmpty()) {
+      attributes.put("has_condition", true);
     }
 
-    protected interface IExpressionResult
-    {
-        WatchResult result();
+    return Resource.create(attributes);
+  }
 
-        Map<String, Variable> variables();
-    }
+  protected interface IFrameResult {
+
+    Collection<StackFrame> frames();
+
+    Map<String, Variable> variables();
+  }
+
+  protected interface IExpressionResult {
+
+    WatchResult result();
+
+    Map<String, Variable> variables();
+  }
 }

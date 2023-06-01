@@ -19,27 +19,24 @@ package com.intergral.deep.agent.api.utils;
 
 import java.util.Iterator;
 
-public class ArrayIterator<T> implements Iterator<T>
-{
-    private final T[] value;
-    private int index = 0;
+public class ArrayIterator<T> implements Iterator<T> {
 
-    public ArrayIterator( final T[] value )
-    {
-        this.value = value;
-    }
+  private final T[] value;
+  private int index = 0;
 
-    @Override
-    public boolean hasNext()
-    {
-        return index < value.length;
-    }
+  public ArrayIterator(final T[] value) {
+    this.value = value;
+  }
 
-    @Override
-    public T next()
-    {
-        final T o = value[index];
-        index++;
-        return o;
-    }
+  @Override
+  public boolean hasNext() {
+    return index < value.length;
+  }
+
+  @Override
+  public T next() {
+    final T o = value[index];
+    index++;
+    return o;
+  }
 }

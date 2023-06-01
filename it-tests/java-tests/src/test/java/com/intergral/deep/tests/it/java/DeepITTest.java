@@ -17,67 +17,61 @@
 
 package com.intergral.deep.tests.it.java;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.intergral.deep.proto.poll.v1.PollResponse;
 import com.intergral.deep.proto.poll.v1.ResponseType;
 import com.intergral.deep.proto.tracepoint.v1.Snapshot;
 import com.intergral.deep.proto.tracepoint.v1.TracePointConfig;
 import com.intergral.deep.proto.tracepoint.v1.Variable;
 import com.intergral.deep.proto.tracepoint.v1.WatchResult;
-import org.junit.jupiter.api.Test;
-
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+public class DeepITTest extends ANVITTest {
 
-public class DeepITTest extends ANVITTest
-{
-    @Test
-    void checkBPFires() throws Exception
-    {
-        final PollResponse build = PollResponse.newBuilder()
-                .setCurrentHash( "" )
-                .setResponseType( ResponseType.UPDATE )
-                .addResponse( TracePointConfig.newBuilder()
-                        .setPath( "BPTestTarget.java" )
-                        .setLineNumber( 33 )
-                        .addWatches( "this" )
-                        .build() )
-                .build();
-        onNext( build );
+  @Test
+  void checkBPFires() throws Exception {
+    final PollResponse build = PollResponse.newBuilder()
+        .setCurrentHash("")
+        .setResponseType(ResponseType.UPDATE)
+        .addResponse(TracePointConfig.newBuilder()
+            .setPath("BPTestTarget.java")
+            .setLineNumber(33)
+            .addWatches("this")
+            .build())
+        .build();
+    onNext(build);
 
-        grpcConnectLatch.await( 1, TimeUnit.MINUTES );
-        final AtomicBoolean hasTriggered = new AtomicBoolean( false );
+    grpcConnectLatch.await(1, TimeUnit.MINUTES);
+    final AtomicBoolean hasTriggered = new AtomicBoolean(false);
 
-        new Thread( () -> {
-            while( !hasTriggered.get() )
-            {
-                // if this line changes then the test will need changed below
-                final BPTestTarget checkBPFires = new BPTestTarget( "checkBPFires" );
-                System.out.println( checkBPFires.getName() );
-                try
-                {
-                    //noinspection BusyWait
-                    Thread.sleep( 1000 );
-                }
-                catch( InterruptedException e )
-                {
-                    e.printStackTrace();
-                }
-            }
-        } ).start();
+    new Thread(() -> {
+      while (!hasTriggered.get()) {
+        // if this line changes then the test will need changed below
+        final BPTestTarget checkBPFires = new BPTestTarget("checkBPFires");
+        System.out.println(checkBPFires.getName());
+        try {
+          //noinspection BusyWait
+          Thread.sleep(1000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+    }).start();
 
-        snapshotlatch.await( 5, TimeUnit.MINUTES );
+    snapshotlatch.await(5, TimeUnit.MINUTES);
 
-        final Snapshot snapshot = snapshotAtomicReference.get();
-        assertEquals( snapshot.getVarLookupMap().get( "1" ).getChildren( 0 ).getName(), "name" );
-        assertEquals( snapshot.getVarLookupMap().get( "2" ).getValue(), "checkBPFires" );
+    final Snapshot snapshot = snapshotAtomicReference.get();
+    assertEquals(snapshot.getVarLookupMap().get("1").getChildren(0).getName(), "name");
+    assertEquals(snapshot.getVarLookupMap().get("2").getValue(), "checkBPFires");
 
-        final WatchResult watches = snapshot.getWatches( 0 );
-        assertEquals( "this", watches.getExpression() );
-        assertEquals( "this", watches.getGoodResult().getName() );
+    final WatchResult watches = snapshot.getWatches(0);
+    assertEquals("this", watches.getExpression());
+    assertEquals("this", watches.getGoodResult().getName());
 
-        final Variable varLookupOrThrow = snapshot.getVarLookupOrThrow( watches.getGoodResult().getID() );
-        assertEquals( "com.intergral.deep.tests.it.java.BPTestTarget", varLookupOrThrow.getType() );
-    }
+    final Variable varLookupOrThrow = snapshot.getVarLookupOrThrow(watches.getGoodResult().getID());
+    assertEquals("com.intergral.deep.tests.it.java.BPTestTarget", varLookupOrThrow.getType());
+  }
 }

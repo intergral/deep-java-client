@@ -17,43 +17,37 @@
 
 package com.intergral.deep.agent.types.snapshot;
 
-public class WatchResult
-{
-    private final String error;
-    private final VariableID result;
-    private final String expression;
+public class WatchResult {
 
-    public WatchResult( final String expression, final String error )
-    {
-        this.expression = expression;
-        this.error = error;
-        this.result = null;
-    }
+  private final String error;
+  private final VariableID result;
+  private final String expression;
 
-    public WatchResult( final String expression, final VariableID result )
-    {
-        this.expression = expression;
-        this.error = null;
-        this.result = result;
-    }
+  public WatchResult(final String expression, final String error) {
+    this.expression = expression;
+    this.error = error;
+    this.result = null;
+  }
 
-    public boolean isError()
-    {
-        return this.error != null;
-    }
+  public WatchResult(final String expression, final VariableID result) {
+    this.expression = expression;
+    this.error = null;
+    this.result = result;
+  }
 
-    public String error()
-    {
-        return this.error;
-    }
+  public boolean isError() {
+    return this.error != null;
+  }
 
-    public VariableID goodResult()
-    {
-        return result;
-    }
+  public String error() {
+    return this.error;
+  }
 
-    public String expression()
-    {
-        return this.expression;
-    }
+  public VariableID goodResult() {
+    return result;
+  }
+
+  public String expression() {
+    return this.expression;
+  }
 }

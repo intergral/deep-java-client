@@ -17,24 +17,24 @@
 
 package com.intergral.deep.agent.poll;
 
-public interface ITimerTask
-{
-    /**
-     * This method is called by the {@link DriftAwareThread} at the end of each interval
-     *
-     * @param now the current time
-     * @throws Exception if the task fails
-     */
-    void run( final long now ) throws Exception;
+public interface ITimerTask {
+
+  /**
+   * This method is called by the {@link DriftAwareThread} at the end of each interval
+   *
+   * @param now the current time
+   * @throws Exception if the task fails
+   */
+  void run(final long now) throws Exception;
 
 
-    /**
-     * This method is called after the {@link #run(long)} method to allow performance tracking.
-     *
-     * @param duration          the duration of the last execution
-     * @param nextExecutionTime the next calculated execution time
-     * @return the modified execution next time
-     * @throws Exception if the callback fails
-     */
-    long callback( final long duration, final long nextExecutionTime ) throws Exception;
+  /**
+   * This method is called after the {@link #run(long)} method to allow performance tracking.
+   *
+   * @param duration          the duration of the last execution
+   * @param nextExecutionTime the next calculated execution time
+   * @return the modified execution next time
+   * @throws Exception if the callback fails
+   */
+  long callback(final long duration, final long nextExecutionTime) throws Exception;
 }

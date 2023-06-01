@@ -21,110 +21,94 @@ import com.intergral.deep.agent.IDUtils;
 import com.intergral.deep.agent.Utils;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.types.TracePointConfig;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EventSnapshot
-{
-    private final String id;
-    private final TracePointConfig tracepoint;
-    private final Map<String, Variable> varLookup;
-    private final long nanoTs;
-    private final Collection<StackFrame> frames;
-    private final ArrayList<WatchResult> watches;
-    private long durationNanos;
-    private final Resource resource;
-    private Resource attributes;
-    private boolean open;
+public class EventSnapshot {
 
-    public EventSnapshot( final TracePointConfig tracepoint,
-                          final long nanoTs,
-                          final Resource resource,
-                          final Collection<StackFrame> frames,
-                          final Map<String, Variable> variables )
-    {
-        this.id = IDUtils.randomId();
-        this.tracepoint = tracepoint;
-        this.varLookup = new HashMap<>( variables );
-        this.nanoTs = nanoTs;
-        this.frames = frames;
-        this.watches = new ArrayList<>();
-        this.attributes = Resource.create( Collections.emptyMap() );
-        this.durationNanos = 0;
-        this.resource = Resource.create( resource.getAttributes(), resource.getSchemaUrl() );
-        this.open = true;
-    }
+  private final String id;
+  private final TracePointConfig tracepoint;
+  private final Map<String, Variable> varLookup;
+  private final long nanoTs;
+  private final Collection<StackFrame> frames;
+  private final ArrayList<WatchResult> watches;
+  private long durationNanos;
+  private final Resource resource;
+  private Resource attributes;
+  private boolean open;
 
-    public void addWatchResult( final WatchResult result, final Map<String, Variable> variables )
-    {
-        if( this.open )
-        {
-            this.watches.add( result );
-            this.varLookup.putAll( variables );
-        }
-    }
+  public EventSnapshot(final TracePointConfig tracepoint,
+      final long nanoTs,
+      final Resource resource,
+      final Collection<StackFrame> frames,
+      final Map<String, Variable> variables) {
+    this.id = IDUtils.randomId();
+    this.tracepoint = tracepoint;
+    this.varLookup = new HashMap<>(variables);
+    this.nanoTs = nanoTs;
+    this.frames = frames;
+    this.watches = new ArrayList<>();
+    this.attributes = Resource.create(Collections.emptyMap());
+    this.durationNanos = 0;
+    this.resource = Resource.create(resource.getAttributes(), resource.getSchemaUrl());
+    this.open = true;
+  }
 
-    public void mergeAttributes( final Resource attributes )
-    {
-        if( this.open )
-        {
-            this.attributes = this.attributes.merge( attributes );
-        }
+  public void addWatchResult(final WatchResult result, final Map<String, Variable> variables) {
+    if (this.open) {
+      this.watches.add(result);
+      this.varLookup.putAll(variables);
     }
+  }
 
-    public String getID()
-    {
-        return id;
+  public void mergeAttributes(final Resource attributes) {
+    if (this.open) {
+      this.attributes = this.attributes.merge(attributes);
     }
+  }
 
-    public TracePointConfig getTracepoint()
-    {
-        return tracepoint;
-    }
+  public String getID() {
+    return id;
+  }
 
-    public Map<String, Variable> getVarLookup()
-    {
-        return varLookup;
-    }
+  public TracePointConfig getTracepoint() {
+    return tracepoint;
+  }
 
-    public long getNanoTs()
-    {
-        return nanoTs;
-    }
+  public Map<String, Variable> getVarLookup() {
+    return varLookup;
+  }
 
-    public Collection<StackFrame> getFrames()
-    {
-        return frames;
-    }
+  public long getNanoTs() {
+    return nanoTs;
+  }
 
-    public ArrayList<WatchResult> getWatches()
-    {
-        return watches;
-    }
+  public Collection<StackFrame> getFrames() {
+    return frames;
+  }
 
-    public long getDurationNanos()
-    {
-        return durationNanos;
-    }
+  public ArrayList<WatchResult> getWatches() {
+    return watches;
+  }
 
-    public Resource getResource()
-    {
-        return resource;
-    }
+  public long getDurationNanos() {
+    return durationNanos;
+  }
 
-    public Resource getAttributes()
-    {
-        return attributes;
-    }
+  public Resource getResource() {
+    return resource;
+  }
 
-    public void close()
-    {
-        this.open = false;
-        final long currentTimeNano = Utils.currentTimeNanos()[1];
-        this.durationNanos = currentTimeNano - this.nanoTs;
-    }
+  public Resource getAttributes() {
+    return attributes;
+  }
+
+  public void close() {
+    this.open = false;
+    final long currentTimeNano = Utils.currentTimeNanos()[1];
+    this.durationNanos = currentTimeNano - this.nanoTs;
+  }
 }

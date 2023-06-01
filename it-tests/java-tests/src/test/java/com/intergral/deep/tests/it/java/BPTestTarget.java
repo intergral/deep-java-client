@@ -17,25 +17,22 @@
 
 package com.intergral.deep.tests.it.java;
 
-public class BPTestTarget
-{
-    private String name;
+public class BPTestTarget {
+
+  private String name;
 
 
-    public BPTestTarget( final String name )
-    {
-        this.name = name;
-    }
+  public BPTestTarget(final String name) {
+    this.name = name;
+  }
 
 
-    public String getName()
-    {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
 
-    public void setName( final String name )
-    {
-        this.name = name;
-    }
+  public void setName(final String name) {
+    this.name = name;
+  }
 }

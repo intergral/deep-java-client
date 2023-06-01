@@ -24,48 +24,40 @@ import com.intergral.deep.agent.api.reflection.IReflection;
 import com.intergral.deep.agent.logging.Logger;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.tracepoint.inst.TracepointInstrumentationService;
-
 import java.lang.instrument.Instrumentation;
 import java.util.Map;
 
-public class AgentImpl
-{
+public class AgentImpl {
 
-    public static void startup( final Instrumentation inst, final Map<String, String> args )
-    {
-        final Settings settings = Settings.build( args );
-        final org.slf4j.Logger logger = Logger.configureLogging( settings );
-        final TracepointInstrumentationService tracepointInstrumentationService = TracepointInstrumentationService.init(
-                inst,
-                settings );
-        final DeepAgent deepAgent = new DeepAgent( settings, tracepointInstrumentationService );
+  public static void startup(final Instrumentation inst, final Map<String, String> args) {
+    final Settings settings = Settings.build(args);
+    final org.slf4j.Logger logger = Logger.configureLogging(settings);
 
-        deepAgent.start();
-    }
+    final TracepointInstrumentationService tracepointInstrumentationService =
+        TracepointInstrumentationService.init(inst, settings);
 
-    public static Object loadDeepAPI()
-    {
-        return new IDeepHook()
-        {
+    final DeepAgent deepAgent = new DeepAgent(settings, tracepointInstrumentationService);
 
-            @Override
-            public IDeep deepService()
-            {
-                return new IDeep()
-                {
-                    @Override
-                    public String getVersion()
-                    {
-                        return DeepVersion.VERSION;
-                    }
-                };
-            }
+    deepAgent.start();
+  }
 
-            @Override
-            public IReflection reflectionService()
-            {
-                return ReflectionUtils.getReflection();
-            }
+  public static Object loadDeepAPI() {
+    return new IDeepHook() {
+
+      @Override
+      public IDeep deepService() {
+        return new IDeep() {
+          @Override
+          public String getVersion() {
+            return DeepVersion.VERSION;
+          }
         };
-    }
+      }
+
+      @Override
+      public IReflection reflectionService() {
+        return ReflectionUtils.getReflection();
+      }
+    };
+  }
 }

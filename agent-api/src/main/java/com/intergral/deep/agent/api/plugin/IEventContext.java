@@ -17,7 +17,7 @@
 
 package com.intergral.deep.agent.api.plugin;
 
-public interface IEventContext
-{
-    String evaluateExpression( String expression ) throws Throwable;
+public interface IEventContext {
+
+  String evaluateExpression(String expression) throws Throwable;
 }

@@ -26,68 +26,55 @@ import com.intergral.deep.agent.types.snapshot.EventSnapshot;
 import com.intergral.deep.proto.tracepoint.v1.Snapshot;
 import com.intergral.deep.proto.tracepoint.v1.SnapshotResponse;
 import io.grpc.stub.StreamObserver;
+import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
+public class PushService {
 
-public class PushService
-{
-    private static final Logger LOGGER = LoggerFactory.getLogger( PushService.class );
-    private final Settings settings;
-    private final GrpcService grpcService;
+  private static final Logger LOGGER = LoggerFactory.getLogger(PushService.class);
+  private final Settings settings;
+  private final GrpcService grpcService;
 
 
-    public PushService( final Settings settings, final GrpcService grpcService )
-    {
-        this.settings = settings;
-        this.grpcService = grpcService;
-    }
+  public PushService(final Settings settings, final GrpcService grpcService) {
+    this.settings = settings;
+    this.grpcService = grpcService;
+  }
 
-    public void pushSnapshot( final EventSnapshot snapshot, final IEventContext context )
-    {
-        decorate( snapshot, context );
-        final Snapshot grpcSnapshot = PushUtils.convertToGrpc( snapshot );
-        this.grpcService.snapshotService().send( grpcSnapshot, new StreamObserver<SnapshotResponse>()
-        {
-            @Override
-            public void onNext( final SnapshotResponse value )
-            {
-                LOGGER.debug( "Sent snapshot: {}", snapshot.getID() );
-            }
+  public void pushSnapshot(final EventSnapshot snapshot, final IEventContext context) {
+    decorate(snapshot, context);
+    final Snapshot grpcSnapshot = PushUtils.convertToGrpc(snapshot);
+    this.grpcService.snapshotService().send(grpcSnapshot, new StreamObserver<SnapshotResponse>() {
+      @Override
+      public void onNext(final SnapshotResponse value) {
+        LOGGER.debug("Sent snapshot: {}", snapshot.getID());
+      }
 
-            @Override
-            public void onError( final Throwable t )
-            {
-                LOGGER.error( "Error sending snapshot: {}", snapshot.getID(), t );
-            }
+      @Override
+      public void onError(final Throwable t) {
+        LOGGER.error("Error sending snapshot: {}", snapshot.getID(), t);
+      }
 
-            @Override
-            public void onCompleted()
-            {
+      @Override
+      public void onCompleted() {
 
-            }
-        } );
-    }
+      }
+    });
+  }
 
-    private void decorate( final EventSnapshot snapshot, final IEventContext context )
-    {
-        final Collection<IPlugin> plugins = this.settings.getPlugins();
-        for( IPlugin plugin : plugins )
-        {
-            try
-            {
-                final Resource decorate = plugin.decorate( this.settings, context );
-                if( decorate != null )
-                {
-                    snapshot.mergeAttributes( decorate );
-                }
-            }
-            catch( Exception e )
-            {
-                LOGGER.error( "Error processing plugin {}", plugin.getClass().getName() );
-            }
+  private void decorate(final EventSnapshot snapshot, final IEventContext context) {
+    final Collection<IPlugin> plugins = this.settings.getPlugins();
+    for (IPlugin plugin : plugins) {
+      try {
+        final Resource decorate = plugin.decorate(this.settings, context);
+        if (decorate != null) {
+          snapshot.mergeAttributes(decorate);
         }
-        snapshot.close();
+      } catch (Exception e) {
+        LOGGER.error("Error processing plugin {}", plugin.getClass().getName());
+      }
     }
+    snapshot.close();
+  }
 }

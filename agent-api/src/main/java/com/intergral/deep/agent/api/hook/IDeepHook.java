@@ -20,10 +20,9 @@ package com.intergral.deep.agent.api.hook;
 import com.intergral.deep.agent.api.IDeep;
 import com.intergral.deep.agent.api.reflection.IReflection;
 
-public interface IDeepHook
-{
+public interface IDeepHook {
 
-    IDeep deepService();
+  IDeep deepService();
 
-    IReflection reflectionService();
+  IReflection reflectionService();
 }

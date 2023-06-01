@@ -28,38 +28,37 @@ import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.tracepoint.TracepointConfigService;
 import com.intergral.deep.agent.tracepoint.handler.Callback;
 import com.intergral.deep.agent.tracepoint.inst.TracepointInstrumentationService;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+public class DeepAgent {
 
-public class DeepAgent
-{
-    private final static Logger LOGGER = LoggerFactory.getLogger( DeepAgent.class );
-    private final Settings settings;
-    private final GrpcService grpcService;
-    private final LongPollService pollService;
-    private final TracepointConfigService tracepointConfig;
-    private final PushService pushService;
+  private static final Logger LOGGER = LoggerFactory.getLogger(DeepAgent.class);
+  private final Settings settings;
+  private final GrpcService grpcService;
+  private final LongPollService pollService;
+  private final TracepointConfigService tracepointConfig;
+  private final PushService pushService;
 
-    public DeepAgent( final Settings settings, TracepointInstrumentationService tracepointInstrumentationService )
-    {
-        this.settings = settings;
-        this.grpcService = new GrpcService( settings );
-        this.pollService = new LongPollService( settings, this.grpcService );
-        this.tracepointConfig = new TracepointConfigService( tracepointInstrumentationService );
-        this.pushService = new PushService( settings, grpcService );
+  public DeepAgent(final Settings settings,
+      TracepointInstrumentationService tracepointInstrumentationService) {
+    this.settings = settings;
+    this.grpcService = new GrpcService(settings);
+    this.pollService = new LongPollService(settings, this.grpcService);
+    this.tracepointConfig = new TracepointConfigService(tracepointInstrumentationService);
+    this.pushService = new PushService(settings, grpcService);
 
-        Callback.init( settings, tracepointConfig, pushService );
-    }
+    Callback.init(settings, tracepointConfig, pushService);
+  }
 
-    public void start()
-    {
-        final Resource resource = ResourceDetector.configureResource( settings, DeepAgent.class.getClassLoader() );
-        final List<IPlugin> iLoadedPlugins = PluginLoader.loadPlugins( settings );
-        this.settings.setPlugins( iLoadedPlugins );
-        this.settings.setResource( Resource.DEFAULT.merge( resource ) );
-        this.grpcService.start();
-        this.pollService.start( tracepointConfig );
-    }
+  public void start() {
+    final Resource resource = ResourceDetector.configureResource(settings,
+        DeepAgent.class.getClassLoader());
+    final List<IPlugin> iLoadedPlugins = PluginLoader.loadPlugins(settings);
+    this.settings.setPlugins(iLoadedPlugins);
+    this.settings.setResource(Resource.DEFAULT.merge(resource));
+    this.grpcService.start();
+    this.pollService.start(tracepointConfig);
+  }
 }
