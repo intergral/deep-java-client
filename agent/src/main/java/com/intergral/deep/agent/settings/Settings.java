@@ -177,7 +177,20 @@ public class Settings implements ISettings {
   public <T> T getSettingAs(String key, Class<T> clazz) {
     final String property = this.properties.getProperty(key);
 
-    return coerc(property, clazz);
+    if (property != null) {
+      return coerc(property, clazz);
+    }
+
+    final String envProp = readEnvProperty(key);
+    if (envProp != null) {
+      return coerc(envProp, clazz);
+    }
+
+    final String systemProperty = readSystemProperty(key);
+    if (systemProperty == null) {
+      return null;
+    }
+    return coerc(systemProperty, clazz);
   }
 
   @Override
