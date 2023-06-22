@@ -19,21 +19,37 @@ package com.intergral.deep.agent.logging;
 
 import com.intergral.deep.agent.AgentImpl;
 import com.intergral.deep.agent.settings.Settings;
+import java.io.IOException;
 import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
 import java.util.logging.Level;
+import java.util.logging.SimpleFormatter;
 import org.slf4j.LoggerFactory;
 
 public class Logger {
 
-  public static org.slf4j.Logger configureLogging(final Settings settings) {
+  public static void configureLogging(final Settings settings) {
     final java.util.logging.Logger logger = java.util.logging.Logger.getLogger("com.intergral");
     logger.setUseParentHandlers(false);
     final ConsoleHandler handler = new ConsoleHandler();
     logger.addHandler(handler);
 
-    final Level settingAs = settings.getSettingAs("logging.level", Level.class);
-    handler.setLevel(settingAs);
-    logger.setLevel(settingAs);
-    return LoggerFactory.getLogger(AgentImpl.class);
+    final Level loggingLevel = settings.getSettingAs("logging.level", Level.class);
+    final String loggingPath = settings.getSettingAs("logging.path", String.class);
+
+    if (loggingPath != null && !loggingPath.isEmpty()) {
+      try {
+        final FileHandler fileHandler = new FileHandler(loggingPath);
+        fileHandler.setFormatter(new SimpleFormatter());
+        logger.addHandler(fileHandler);
+      } catch (IOException e) {
+        System.out.println("Cannot initialize file handler for logger.");
+        System.err.println("Cannot initialize file handler for logger.");
+      }
+    }
+
+    handler.setLevel(loggingLevel);
+    logger.setLevel(loggingLevel);
+    LoggerFactory.getLogger(AgentImpl.class);
   }
 }
