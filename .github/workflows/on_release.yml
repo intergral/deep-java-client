@@ -31,4 +31,4 @@ jobs:
       - name: Update java version
         run: mvn versions:set -DnewVersion=${VERSION} -B -U
       - name: Build and Release
-        run: mvn -s .ci-settings.xml clean deploy -P release-ossrh -B -U -pl agent --also-make
+        run: mvn -s .ci-settings.xml clean deploy -DskipTests -P release-ossrh -B -U -pl agent,deep --also-make
