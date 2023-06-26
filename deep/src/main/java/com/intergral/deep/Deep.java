@@ -34,7 +34,7 @@ import java.lang.reflect.Method;
  * <p>
  * To use a deep API use
  * <code>
- * Deep.getInstance().<IDeep>api()
+ * Deep.getInstance().&lt;IDeep&gt;api()
  * </code>
  */
 public class Deep {
