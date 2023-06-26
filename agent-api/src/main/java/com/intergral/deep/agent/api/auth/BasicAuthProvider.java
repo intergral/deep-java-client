@@ -39,6 +39,6 @@ public class BasicAuthProvider implements IAuthProvider {
     }
     final String encodedString = Base64.getEncoder()
         .encodeToString(String.format("%s:%s", userName, password).getBytes());
-    return Collections.singletonMap("authorization", encodedString);
+    return Collections.singletonMap("authorization", "basic%20" + encodedString);
   }
 }

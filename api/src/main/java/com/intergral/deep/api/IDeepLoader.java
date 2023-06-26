@@ -25,9 +25,10 @@ public interface IDeepLoader {
   /**
    * Load the Deep agent into the provided process id.
    *
-   * @param pid    the current process id
-   * @param config the config to use
+   * @param pid     the current process id
+   * @param config  the config to use
+   * @param jarPath the full path to the jar to load (or {@code null} to auto discover the jar)
    * @throws Throwable if loader fails
    */
-  void load(final String pid, final String config) throws Throwable;
+  void load(final String pid, final String config, final String jarPath) throws Throwable;
 }
