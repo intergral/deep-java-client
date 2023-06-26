@@ -23,16 +23,82 @@ import java.util.Map;
 public class DeepConfigBuilder {
 
   private final Map<String, Object> config = new HashMap<>();
+  private String jarPath;
 
+  /**
+   * Start Deep using this config
+   */
   public void start() {
-    Deep.getInstance().startWithConfig(this.build());
+    Deep.getInstance().startWithConfig(this.build(), this.jarPath);
   }
 
-  public DeepConfigBuilder setValue(final String key, final Object value) {
+  /**
+   * This allows for overriding the path to the deep agent jar. This is useful when embedding deep into complex applications such as OSGI.
+   *
+   * @param path the full path to the agent jar file
+   * @return {this}
+   */
+  public DeepConfigBuilder setJarPath(final String path) {
+    this.jarPath = path;
+    return this;
+  }
+
+
+  /**
+   * Set a config value for deep. For the possible keys see the docs on config.
+   *
+   * @param key the key for the config value
+   * @param value the value as a string object
+   * @return {this{}}
+   */
+  public DeepConfigBuilder setValue(final String key, final String value) {
     this.config.put(key, value);
     return this;
   }
 
+
+  /**
+   * Set a config value for deep. For the possible keys see the docs on config.
+   *
+   * @param key the key for the config value
+   * @param value the value as a boolean
+   * @return {this{}}
+   */
+  public DeepConfigBuilder setValue(final String key, final boolean value) {
+    this.config.put(key, value);
+    return this;
+  }
+
+
+  /**
+   * Set a config value for deep. For the possible keys see the docs on config.
+   *
+   * @param key the key for the config value
+   * @param value the value as an int
+   * @return {this{}}
+   */
+  public DeepConfigBuilder setValue(final String key, final int value) {
+    this.config.put(key, value);
+    return this;
+  }
+
+
+  /**
+   * Set a config value for deep. For the possible keys see the docs on config.
+   *
+   * @param key the key for the config value
+   * @param value the value as a double
+   * @return {this{}}
+   */
+  public DeepConfigBuilder setValue(final String key, final double value) {
+    this.config.put(key, value);
+    return this;
+  }
+
+  /**
+   * Converts this object into a string that can be used by the attachment process
+   * @return a string for this config
+   */
   private String build() {
     return this.configAsArgs(this.config);
   }

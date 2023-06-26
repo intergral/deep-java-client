@@ -24,6 +24,19 @@ import java.lang.management.ManagementFactory;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
+/**
+ * This is the main entry point to deep when using the API. All calls to deep should precede with a call to this class.
+ * <p>
+ * To start deep first configure the instance.
+ * <code>
+ * Deep.config().start();
+ * </code>
+ * <p>
+ * To use a deep API use
+ * <code>
+ * Deep.getInstance().<IDeep>api()
+ * </code>
+ */
 public class Deep {
 
   private static Deep DEEP_INSTANCE = null;
@@ -31,10 +44,18 @@ public class Deep {
   private Object reflection = null;
 
 
+  /**
+   * This is a shortcut for {@code Deep.config().start()}
+   */
   public static void start() {
     Deep.config().start();
   }
 
+  /**
+   * This will create an instance of DEEP allowing access to the APIs from inside deep agent.
+   *
+   * @return {@link Deep}
+   */
   public static Deep getInstance() {
     if (DEEP_INSTANCE != null) {
       return DEEP_INSTANCE;
@@ -44,17 +65,37 @@ public class Deep {
     return DEEP_INSTANCE;
   }
 
+  /**
+   * This is the main point to start with deep. Call this to create a config builder and to customise the config of deep before starting
+   * it.
+   *
+   * @return {@link DeepConfigBuilder}
+   */
   public static DeepConfigBuilder config() {
     return new DeepConfigBuilder();
   }
 
-  public void startWithConfig(final String config) {
-    getInstance().startDeep(config);
+  /**
+   * This allows deep to be started with the parsed config
+   *
+   * @param config as a string
+   */
+  void startWithConfig(final String config, final String jarPath) {
+    getInstance().startDeep(config, jarPath);
   }
 
-  private void startDeep(final String config) {
+  /**
+   * This allows deep to be started with the parsed config builder
+   *
+   * @param builder the config to use
+   */
+  public void start(final DeepConfigBuilder builder) {
+    builder.start();
+  }
+
+  private void startDeep(final String config, final String jarPath) {
     try {
-      loadAgent(config);
+      loadAgent(config, jarPath);
 
       loadAPI();
     } catch (Throwable t) {
@@ -62,11 +103,11 @@ public class Deep {
     }
   }
 
-  private void loadAgent(final String config) throws Throwable {
+  private void loadAgent(final String config, final String jarPath) throws Throwable {
     final IDeepLoader loader = getLoader();
     final String pid = getPid();
 
-    loader.load(pid, config);
+    loader.load(pid, config, jarPath);
   }
 
 
@@ -123,6 +164,8 @@ public class Deep {
 
   /**
    * Get an instance of the API to allow calling NerdVision directly
+   * <p>
+   * This uses T as the type {@link IDeep} is not loaded so this class cannot use it.
    *
    * @param <T> this should be {@link IDeep}
    * @return the new instance or {@link IDeep}
@@ -138,12 +181,14 @@ public class Deep {
   }
 
 
-  private void setProxyService(Object service) {
-    final IDeepHook hook = (IDeepHook) service;
-    this.deepService = hook.deepService();
-    this.reflection = hook.reflectionService();
-  }
-
+  /**
+   * Get an instance of the Reflection api used in deep.
+   * <p>
+   * This uses T as the type {@link com.intergral.deep.agent.api.reflection.IReflection} is not loaded so this class cannot use it.
+   *
+   * @return the {@link com.intergral.deep.agent.api.reflection.IReflection} service
+   * @param <T> this should be {@link com.intergral.deep.agent.api.reflection.IReflection}
+   */
   public <T> T reflection() {
     loadAPI();
     if (this.reflection == null) {
@@ -151,5 +196,11 @@ public class Deep {
     }
     //noinspection unchecked
     return (T) reflection;
+  }
+
+  private void setProxyService(Object service) {
+    final IDeepHook hook = (IDeepHook) service;
+    this.deepService = hook.deepService();
+    this.reflection = hook.reflectionService();
   }
 }

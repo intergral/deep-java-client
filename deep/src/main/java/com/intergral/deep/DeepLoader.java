@@ -29,8 +29,8 @@ import net.bytebuddy.agent.ByteBuddyAgent;
 public class DeepLoader implements IDeepLoader {
 
   @Override
-  public void load(final String pid, final String config) {
-    final File agentJar = getAgentJar();
+  public void load(final String pid, final String config, final String jarPath) {
+    final File agentJar = getAgentJar(jarPath);
     final File tools = getToolsJar();
     if (agentJar == null) {
       throw new RuntimeException("Cannot find jar.");
@@ -60,8 +60,8 @@ public class DeepLoader implements IDeepLoader {
    *
    * @return the {@link File} object for the agent
    */
-  private File getAgentJar() {
-    final InputStream resourceAsStream = getAgentJarStream();
+  private File getAgentJar(final String jarPath) {
+    final InputStream resourceAsStream = getAgentJarStream(jarPath);
     final String pathname = extractLibrary(resourceAsStream);
     if (pathname != null) {
       return new File(pathname);
@@ -75,9 +75,9 @@ public class DeepLoader implements IDeepLoader {
    *
    * @return the stream to use, or {@code null}
    */
-  private InputStream getAgentJarStream() {
+  private InputStream getAgentJarStream(final String jarPath) {
     // this is pretty much just for testing, see Example
-    final String property = System.getProperty("deep.jar.path");
+    final String property = System.getProperty("deep.jar.path", jarPath);
     if (property != null) {
       try {
         return new FileInputStream(property);
