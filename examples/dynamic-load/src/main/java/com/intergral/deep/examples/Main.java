@@ -18,12 +18,24 @@
 package com.intergral.deep.examples;
 
 
+import com.intergral.deep.DEEPAPI;
 import com.intergral.deep.Deep;
 import com.intergral.deep.agent.api.IDeep;
 import com.intergral.deep.agent.api.reflection.IReflection;
+import com.intergral.deep.agent.api.resource.Resource;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 
+/**
+ * This example expects the deep agent to be loaded via the javaagent vm option.
+ * <p>
+ * See RunConfigurations for IDEA:
+ * <ul>
+ *   <li>Dynamic Load without JavaAgent</li>
+ *   <li>Dynamic Load with JavaAgent</li>
+ * </ul>
+ */
 public class Main {
 
   public static void main(String[] args) throws Throwable {
@@ -35,16 +47,33 @@ public class Main {
         .getParent()
         .getParent()
         .resolve("agent/target/deep-1.0-SNAPSHOT.jar");
-    System.setProperty("deep.jar.path", jarPath.toString());
 
+    // Dynamically configure and attach the deep agent
     Deep.config()
+        .setJarPath(jarPath.toAbsolutePath().toString())
         .setValue("service.url", "localhost:43315")
         .setValue("service.secure", false)
         .start();
 
+    // different ways to get the API instance
     final Deep instance = Deep.getInstance();
     System.out.println(instance.<IDeep>api().getVersion());
     System.out.println(instance.<IReflection>reflection());
+
+    System.out.println(DEEPAPI.api().getVersion());
+    System.out.println(DEEPAPI.reflection());
+
+    // Use the API to register a plugin
+    // This plugin will attach the attribute 'example' to the created snapshot
+    // you should also see the log line 'custom plugin' when you run this example
+    DEEPAPI.api().registerPlugin((settings, snapshot) -> {
+      System.out.println("custom plugin");
+      return Resource.create(Collections.singletonMap("example", "dynamic_load"));
+    });
+
+    // USe the API to create a tracepoint that will fire forever
+    DEEPAPI.api()
+        .registerTracepoint("com/intergral/deep/examples/SimpleTest", 46, Collections.singletonMap("fire_count", "-1"), Collections.emptyList());
 
     final SimpleTest ts = new SimpleTest("This is a test", 2);
     for (; ; ) {

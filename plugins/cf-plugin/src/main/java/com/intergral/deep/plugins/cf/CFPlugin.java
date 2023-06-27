@@ -17,7 +17,7 @@
 
 package com.intergral.deep.plugins.cf;
 
-import com.intergral.deep.agent.api.plugin.IEventContext;
+import com.intergral.deep.agent.api.plugin.ISnapshotContext;
 import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
@@ -26,7 +26,7 @@ import java.util.HashMap;
 public class CFPlugin implements IPlugin {
 
   @Override
-  public Resource decorate(final ISettings settings, final IEventContext context) {
+  public Resource decorate(final ISettings settings, final ISnapshotContext context) {
     String appName = null;
     try {
       appName = context.evaluateExpression("APPLICATION.applicationname");

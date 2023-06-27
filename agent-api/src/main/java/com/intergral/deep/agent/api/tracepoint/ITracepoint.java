@@ -15,29 +15,33 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.plugin;
+package com.intergral.deep.agent.api.tracepoint;
 
-import com.intergral.deep.agent.api.plugin.ISnapshotContext;
-import com.intergral.deep.agent.api.plugin.IPlugin;
-import com.intergral.deep.agent.api.resource.Resource;
-import com.intergral.deep.agent.api.settings.ISettings;
-import java.util.HashMap;
+import com.intergral.deep.agent.api.IRegistration;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 
-public class JavaPlugin implements IPlugin {
+public interface ITracepoint {
 
-  private final Map<String, String> basic = new HashMap<>();
+  String path();
 
-  public JavaPlugin() {
-    this.basic.put("java_version", System.getProperty("java.version"));
+  int line();
+
+  default Map<String, String> args() {
+    return Collections.emptyMap();
   }
 
-  @Override
-  public Resource decorate(final ISettings settings, final ISnapshotContext snapshot) {
-    final Map<String, Object> javaMap = new HashMap<>(this.basic);
-    final Thread thread = Thread.currentThread();
+  default Collection<String> watches() {
+    return Collections.emptyList();
+  }
 
-    javaMap.put("thread_name", thread.getName());
-    return Resource.create(javaMap);
+  default String id() {
+    return UUID.randomUUID().toString();
+  }
+
+  interface ITracepointRegistration extends IRegistration {
+
   }
 }

@@ -26,12 +26,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -41,6 +43,7 @@ public class Settings implements ISettings {
   private final Properties properties;
   private Resource resource;
   private Collection<IPlugin> plugins;
+  private final Collection<IPlugin> customPlugins = new ArrayList<>();
 
   private Settings(Properties properties) {
     this.properties = properties;
@@ -250,11 +253,25 @@ public class Settings implements ISettings {
   }
 
   public Collection<IPlugin> getPlugins() {
-    return this.plugins;
+    final ArrayList<IPlugin> actualPlugins = new ArrayList<>(this.plugins);
+    actualPlugins.addAll(this.customPlugins);
+    return actualPlugins;
   }
 
   public void setPlugins(Collection<IPlugin> plugins) {
     this.plugins = plugins;
+  }
+
+  public void addPlugin(final IPlugin plugin) {
+    final Optional<IPlugin> first = this.customPlugins.stream().filter(iPlugin -> iPlugin.name().equals(plugin.name())).findFirst();
+    if (first.isPresent()) {
+      throw new IllegalStateException(String.format("Cannot add duplicate named (%s) plugin", plugin.name()));
+    }
+    this.customPlugins.add(plugin);
+  }
+
+  public void removePlugin(final IPlugin plugin) {
+    this.plugins.removeIf(iPlugin -> iPlugin.name().equals(plugin.name()));
   }
 
   public static class InvalidConfigException extends RuntimeException {

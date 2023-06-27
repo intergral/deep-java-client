@@ -17,7 +17,6 @@
 
 package com.intergral.deep.agent;
 
-import com.intergral.deep.agent.api.DeepVersion;
 import com.intergral.deep.agent.api.IDeep;
 import com.intergral.deep.agent.api.hook.IDeepHook;
 import com.intergral.deep.agent.api.reflection.IReflection;
@@ -26,8 +25,12 @@ import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.tracepoint.inst.TracepointInstrumentationService;
 import java.lang.instrument.Instrumentation;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 public class AgentImpl {
+
+  private static final CountDownLatch LATCH = new CountDownLatch(1);
+  private static DeepAgent deepAgent;
 
   public static void startup(final Instrumentation inst, final Map<String, String> args) {
     final Settings settings = Settings.build(args);
@@ -36,22 +39,28 @@ public class AgentImpl {
     final TracepointInstrumentationService tracepointInstrumentationService =
         TracepointInstrumentationService.init(inst, settings);
 
-    final DeepAgent deepAgent = new DeepAgent(settings, tracepointInstrumentationService);
+    final DeepAgent deep = new DeepAgent(settings, tracepointInstrumentationService);
 
-    deepAgent.start();
+    deep.start();
+
+    deepAgent = deep;
+    LATCH.countDown();
+  }
+
+  public static Object awaitLoadAPI() throws InterruptedException {
+    LATCH.await();
+    return loadDeepAPI();
   }
 
   public static Object loadDeepAPI() {
+    if (deepAgent == null) {
+      throw new IllegalStateException("Must start DEEP first");
+    }
     return new IDeepHook() {
 
       @Override
       public IDeep deepService() {
-        return new IDeep() {
-          @Override
-          public String getVersion() {
-            return DeepVersion.VERSION;
-          }
-        };
+        return deepAgent;
       }
 
       @Override

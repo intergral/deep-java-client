@@ -97,7 +97,7 @@ public class Deep {
     try {
       loadAgent(config, jarPath);
 
-      loadAPI();
+      awaitAPI();
     } catch (Throwable t) {
       t.printStackTrace();
     }
@@ -144,6 +144,36 @@ public class Deep {
     return (IDeepLoader) newInstance;
   }
 
+  /**
+   * When we start Deep via the config, (ie not as a javaagent) we need to await the start. This should not take very long.
+   * <p>
+   * Essentially when we tell Bytebuddy to load the agent, this is sometimes done as an async external process. Which we cannot await. We
+   * need to, however, get an instance of the deep api hooked back after deep has connected. So we just keep trying.
+   * <p>
+   * This should not ever fail, as the agent will either load, or we will get an exception from the load. Once it is loaded however it can
+   * take some time to initialise depending on the size of the environment.
+   */
+  private void awaitAPI() {
+    if (this.deepService != null) {
+      // api already loaded
+      return;
+    }
+    while (this.deepService == null) {
+      try {
+        // this will throw a Deep not started error, if deep has not started.
+        loadAPI();
+      } catch (Exception ignored) {
+        try {
+          //noinspection BusyWait
+          Thread.sleep(100);
+        } catch (InterruptedException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    }
+  }
+
+
   private void loadAPI() {
     if (this.deepService != null) {
       // api already loaded
@@ -151,7 +181,9 @@ public class Deep {
     }
 
     try {
-      final Class<?> aClass = Class.forName("com.intergral.deep.agent.AgentImpl");
+      // we need to use the system class loader here, as when we run in OSGi or other complex environments. The class loader we have at
+      // this point might be isolated and wont be able to load the agent class.
+      final Class<?> aClass = ClassLoader.getSystemClassLoader().loadClass("com.intergral.deep.agent.AgentImpl");
       final Method registerBreakpointService = aClass.getDeclaredMethod("loadDeepAPI");
       final Object invoke = registerBreakpointService.invoke(null);
       if (invoke != null) {

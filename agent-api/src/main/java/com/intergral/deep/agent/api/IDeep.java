@@ -17,7 +17,52 @@
 
 package com.intergral.deep.agent.api;
 
+import com.intergral.deep.agent.api.plugin.IPlugin;
+import com.intergral.deep.agent.api.plugin.IPlugin.IPluginRegistration;
+import com.intergral.deep.agent.api.tracepoint.ITracepoint.ITracepointRegistration;
+import java.util.Collection;
+import java.util.Map;
+
+/**
+ * This type describes the main API for Deep.
+ * <p>
+ * This API can only be used after the agent has been loaded.
+ */
 public interface IDeep {
 
+  /**
+   * Get the version of deep being used.
+   *
+   * @return the sematic version of deep as a string e.g. 1.2.3
+   */
   String getVersion();
+
+  /**
+   * This allows the registration of custom plugins.
+   *
+   * @param plugin the plugin that can be used to decorate snapshots
+   * @return a {@link IPluginRegistration} that can be used to unregister the plugin
+   */
+  IPluginRegistration registerPlugin(final IPlugin plugin);
+
+  /**
+   * Create a tracepoint that will only exist on this instance.
+   *
+   * @param path the path to the file
+   * @param line the line number
+   * @return a {@link ITracepointRegistration} that can be used to remove the tracepoint
+   */
+  ITracepointRegistration registerTracepoint(final String path, final int line);
+
+  /**
+   * Create a tracepoint that will only exist on this instance.
+   *
+   * @param path the path to the file
+   * @param line the line number
+   * @param args the key value pairs that further define the tracepoint
+   * @param watches the list of watch expressions
+   * @return a {@link ITracepointRegistration} that can be used to remove the tracepoint
+   */
+  ITracepointRegistration registerTracepoint(final String path, final int line, final Map<String, String> args,
+      final Collection<String> watches);
 }
