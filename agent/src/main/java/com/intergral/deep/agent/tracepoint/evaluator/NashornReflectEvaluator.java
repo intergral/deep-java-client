@@ -17,6 +17,7 @@
 
 package com.intergral.deep.agent.tracepoint.evaluator;
 
+import com.intergral.deep.agent.api.plugin.AbstractEvaluator;
 import com.intergral.deep.agent.api.plugin.IEvaluator;
 import java.lang.reflect.Method;
 import java.util.HashMap;

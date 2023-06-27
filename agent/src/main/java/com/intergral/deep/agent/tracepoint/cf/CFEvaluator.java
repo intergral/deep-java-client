@@ -17,7 +17,7 @@
 
 package com.intergral.deep.agent.tracepoint.cf;
 
-import com.intergral.deep.agent.tracepoint.evaluator.AbstractEvaluator;
+import com.intergral.deep.agent.api.plugin.AbstractEvaluator;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
