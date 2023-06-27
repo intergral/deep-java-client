@@ -15,11 +15,13 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.agent.tracepoint.evaluator;
+package com.intergral.deep.agent.api.plugin;
 
-import com.intergral.deep.agent.api.plugin.IEvaluator;
 import java.util.Map;
 
+/**
+ * This allows for common handling for object to boolean expressions.
+ */
 public abstract class AbstractEvaluator implements IEvaluator {
 
   @Override
