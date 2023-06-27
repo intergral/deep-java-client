@@ -1,25 +1,58 @@
 /*
- *    Copyright 2023 Intergral GmbH
+ *     Copyright (C) 2023  Intergral GmbH
  *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.intergral.deep.examples;
 
 
+import com.intergral.deep.DEEPAPI;
+import com.intergral.deep.agent.api.resource.Resource;
+import java.util.Collections;
+
+/**
+ * This example expects the deep agent to be loaded via the javaagent vm option.
+ * <p>
+ * See RunConfigurations for IDEA:
+ * <ul>
+ *   <li>Agent Load without JavaAgent</li>
+ *   <li>Agent Load with JavaAgent</li>
+ * </ul>
+ */
 public class Main {
 
   public static void main(String[] args) throws Throwable {
+
+    // Use the API to show the version of deep that is running
+    // If the Deep agent is not loaded then you will get an exception on this line
+    // java.lang.IllegalStateException: Must start Deep first!
+    System.out.println(DEEPAPI.api().getVersion());
+
+    // Use the API to register a plugin
+    // This plugin will attach the attribute 'example' to the created snapshot
+    // you should also see the log line 'custom plugin' when you run this example
+    DEEPAPI.api().registerPlugin((settings, snapshot) -> {
+      System.out.println("custom plugin");
+      return Resource.create(Collections.singletonMap("example", "agent_load"));
+    });
+
+    // USe the API to create a tracepoint that will fire forever
+    DEEPAPI.api()
+        .registerTracepoint("com/intergral/deep/examples/SimpleTest", 46, Collections.singletonMap("fire_count", "-1"),
+            Collections.emptyList());
+
     final SimpleTest ts = new SimpleTest("This is a test", 2);
     for (; ; ) {
       try {

@@ -15,36 +15,32 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.examples;
+package com.intergral.deep;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.UUID;
+import com.intergral.deep.agent.api.IDeep;
+import com.intergral.deep.agent.api.reflection.IReflection;
 
-public class BaseTest {
+/**
+ * This type provides helper methods to get the api and other exposed APIs from deep. This type MUST not be used until after the agent is
+ * loaded or there will be Exceptions thrown.
+ */
+public class DEEPAPI {
 
-  protected final Properties systemProps = System.getProperties();
-
-
-  public String newId() {
-    return UUID.randomUUID().toString();
+  /**
+   * Get the reflection API
+   *
+   * @return a {@link IReflection} instance for the java version we are running
+   */
+  public static IReflection reflection() {
+    return Deep.getInstance().reflection();
   }
 
-
-  public Map<Character, Integer> makeCharCountMap(final String str) {
-    final HashMap<Character, Integer> res = new HashMap<Character, Integer>();
-
-    for (int i = 0; i < str.length(); i++) {
-      final char c = str.charAt(i);
-      final Integer cnt = res.get(c);
-      if (cnt == null) {
-        res.put(c, 0);
-      } else {
-        res.put(c, cnt + 1);
-      }
-    }
-
-    return res;
+  /**
+   * Get the Deep api
+   *
+   * @return a {@link IDeep} instance
+   */
+  public static IDeep api() {
+    return Deep.getInstance().api();
   }
 }

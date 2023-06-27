@@ -15,9 +15,15 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.agent.api.plugin;
+package com.intergral.deep.agent.api;
 
-public interface IEventContext {
+/**
+ * This is a generic interface from the result of a registration.
+ */
+public interface IRegistration {
 
-  String evaluateExpression(String expression) throws Throwable;
+  /**
+   * Unregister the item registered.
+   */
+  void unregister();
 }

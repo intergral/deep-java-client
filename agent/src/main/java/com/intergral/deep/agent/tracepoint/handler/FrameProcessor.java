@@ -18,8 +18,9 @@
 package com.intergral.deep.agent.tracepoint.handler;
 
 import com.intergral.deep.agent.Utils;
+import com.intergral.deep.agent.api.plugin.EvaluationException;
 import com.intergral.deep.agent.api.plugin.IEvaluator;
-import com.intergral.deep.agent.api.plugin.IEventContext;
+import com.intergral.deep.agent.api.plugin.ISnapshotContext;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.types.TracePointConfig;
@@ -29,7 +30,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class FrameProcessor extends FrameCollector implements IEventContext {
+public class FrameProcessor extends FrameCollector implements ISnapshotContext {
 
   private final Collection<TracePointConfig> tracePointConfigs;
   private final long[] lineStart;
@@ -115,9 +116,13 @@ public class FrameProcessor extends FrameCollector implements IEventContext {
   }
 
   @Override
-  public String evaluateExpression(final String expression) throws Throwable {
-    final Object o = this.evaluator.evaluateExpression(expression, this.variables);
-    return Utils.valueOf(o);
+  public String evaluateExpression(final String expression) throws EvaluationException {
+    try {
+      final Object o = this.evaluator.evaluateExpression(expression, this.variables);
+      return Utils.valueOf(o);
+    } catch (Throwable t) {
+      throw new EvaluationException(expression, t);
+    }
   }
 
   public interface IFactory {

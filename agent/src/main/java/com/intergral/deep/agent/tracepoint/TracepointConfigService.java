@@ -19,8 +19,13 @@ package com.intergral.deep.agent.tracepoint;
 
 import com.intergral.deep.agent.tracepoint.inst.TracepointInstrumentationService;
 import com.intergral.deep.agent.types.TracePointConfig;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +34,8 @@ public class TracepointConfigService implements ITracepointConfig {
   private static final Logger LOGGER = LoggerFactory.getLogger(TracepointConfigService.class);
   private final TracepointInstrumentationService tracepointInstrumentationService;
   private String currentHash = null;
-  private Collection<TracePointConfig> installedTracepoints;
+  private final Collection<TracePointConfig> customTracepoints = new ArrayList<>();
+  private Collection<TracePointConfig> installedTracepoints = new ArrayList<>();
   @SuppressWarnings("unused")
   private long lastUpdate;
 
@@ -49,7 +55,13 @@ public class TracepointConfigService implements ITracepointConfig {
     this.currentHash = hash;
     this.installedTracepoints = tracepoints;
     this.lastUpdate = tsNano;
-    this.tracepointInstrumentationService.processBreakpoints(tracepoints);
+    processChange();
+  }
+
+  private void processChange() {
+    final List<TracePointConfig> allTracepoints = Stream.concat(this.installedTracepoints.stream(), this.customTracepoints.stream())
+        .collect(Collectors.toList());
+    this.tracepointInstrumentationService.processBreakpoints(allTracepoints);
   }
 
   @Override
@@ -59,8 +71,20 @@ public class TracepointConfigService implements ITracepointConfig {
 
   @Override
   public Collection<TracePointConfig> loadTracepointConfigs(final Collection<String> tracepointId) {
-    return installedTracepoints.stream()
+    return Stream.concat(installedTracepoints.stream(), customTracepoints.stream())
         .filter(tracePointConfig -> tracepointId.contains(tracePointConfig.getId()))
         .collect(Collectors.toList());
+  }
+
+  public TracePointConfig addCustom(final String path, final int line, final Map<String, String> args,
+      final Collection<String> watches) {
+    final TracePointConfig tracePointConfig = new TracePointConfig(UUID.randomUUID().toString(), path, line, args, watches);
+    this.customTracepoints.add(tracePointConfig);
+    this.processChange();
+    return tracePointConfig;
+  }
+
+  public void removeCustom(final TracePointConfig tracePointConfig) {
+    this.customTracepoints.removeIf(current -> current.getId().equals(tracePointConfig.getId()));
   }
 }

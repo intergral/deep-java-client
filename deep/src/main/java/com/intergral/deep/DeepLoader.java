@@ -19,8 +19,6 @@ package com.intergral.deep;
 
 import com.intergral.deep.api.IDeepLoader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,7 +59,11 @@ public class DeepLoader implements IDeepLoader {
    * @return the {@link File} object for the agent
    */
   private File getAgentJar(final String jarPath) {
-    final InputStream resourceAsStream = getAgentJarStream(jarPath);
+    final File file = new File(jarPath);
+    if (file.exists()) {
+      return file;
+    }
+    final InputStream resourceAsStream = getAgentJarStream();
     final String pathname = extractLibrary(resourceAsStream);
     if (pathname != null) {
       return new File(pathname);
@@ -75,18 +77,7 @@ public class DeepLoader implements IDeepLoader {
    *
    * @return the stream to use, or {@code null}
    */
-  private InputStream getAgentJarStream(final String jarPath) {
-    // this is pretty much just for testing, see Example
-    final String property = System.getProperty("deep.jar.path", jarPath);
-    if (property != null) {
-      try {
-        return new FileInputStream(property);
-      } catch (FileNotFoundException e) {
-        System.err.println("Unable to load Deep jar from path: " + property);
-        e.printStackTrace(System.err);
-        return null;
-      }
-    }
+  private InputStream getAgentJarStream() {
     return Deep.class.getResourceAsStream("/deep-agent.jar");
   }
 

@@ -15,36 +15,19 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.examples;
+package com.intergral.deep.agent.api.plugin;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.UUID;
+/**
+ * This is the context passed to plugins. This allows for the data of a context to be exposed to the plugin in a controlled manor.
+ */
+public interface ISnapshotContext {
 
-public class BaseTest {
-
-  protected final Properties systemProps = System.getProperties();
-
-
-  public String newId() {
-    return UUID.randomUUID().toString();
-  }
-
-
-  public Map<Character, Integer> makeCharCountMap(final String str) {
-    final HashMap<Character, Integer> res = new HashMap<Character, Integer>();
-
-    for (int i = 0; i < str.length(); i++) {
-      final char c = str.charAt(i);
-      final Integer cnt = res.get(c);
-      if (cnt == null) {
-        res.put(c, 0);
-      } else {
-        res.put(c, cnt + 1);
-      }
-    }
-
-    return res;
-  }
+  /**
+   * Evaluate an expression in the frame of the tracepoint that triggered this snapshot
+   *
+   * @param expression the express to evaluate
+   * @return the result of the expression as a string
+   * @throws EvaluationException if there were any issues evaluating the expression
+   */
+  String evaluateExpression(String expression) throws EvaluationException;
 }

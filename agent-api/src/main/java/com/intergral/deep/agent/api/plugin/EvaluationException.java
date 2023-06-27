@@ -15,36 +15,35 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.examples;
+package com.intergral.deep.agent.api.plugin;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.UUID;
+/**
+ * This exception is thrown when a plugin tried to evaluate an expression that fails.
+ */
+public class EvaluationException extends Exception {
 
-public class BaseTest {
+  /**
+   * The expression that was evaluated.
+   */
+  private final String expression;
 
-  protected final Properties systemProps = System.getProperties();
-
-
-  public String newId() {
-    return UUID.randomUUID().toString();
+  /**
+   * Create a new exception
+   *
+   * @param expression the expression that failed
+   * @param cause      the failure
+   */
+  public EvaluationException(final String expression, final Throwable cause) {
+    super("Could not evaluate expression: " + expression, cause);
+    this.expression = expression;
   }
 
-
-  public Map<Character, Integer> makeCharCountMap(final String str) {
-    final HashMap<Character, Integer> res = new HashMap<Character, Integer>();
-
-    for (int i = 0; i < str.length(); i++) {
-      final char c = str.charAt(i);
-      final Integer cnt = res.get(c);
-      if (cnt == null) {
-        res.put(c, 0);
-      } else {
-        res.put(c, cnt + 1);
-      }
-    }
-
-    return res;
+  /**
+   * Get the expression
+   *
+   * @return {@link #expression}
+   */
+  public String getExpression() {
+    return expression;
   }
 }

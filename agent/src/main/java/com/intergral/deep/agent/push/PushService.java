@@ -17,7 +17,7 @@
 
 package com.intergral.deep.agent.push;
 
-import com.intergral.deep.agent.api.plugin.IEventContext;
+import com.intergral.deep.agent.api.plugin.ISnapshotContext;
 import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.grpc.GrpcService;
@@ -42,7 +42,7 @@ public class PushService {
     this.grpcService = grpcService;
   }
 
-  public void pushSnapshot(final EventSnapshot snapshot, final IEventContext context) {
+  public void pushSnapshot(final EventSnapshot snapshot, final ISnapshotContext context) {
     decorate(snapshot, context);
     final Snapshot grpcSnapshot = PushUtils.convertToGrpc(snapshot);
     this.grpcService.snapshotService().send(grpcSnapshot, new StreamObserver<SnapshotResponse>() {
@@ -63,7 +63,7 @@ public class PushService {
     });
   }
 
-  private void decorate(final EventSnapshot snapshot, final IEventContext context) {
+  private void decorate(final EventSnapshot snapshot, final ISnapshotContext context) {
     final Collection<IPlugin> plugins = this.settings.getPlugins();
     for (IPlugin plugin : plugins) {
       try {
@@ -71,7 +71,7 @@ public class PushService {
         if (decorate != null) {
           snapshot.mergeAttributes(decorate);
         }
-      } catch (Exception e) {
+      } catch (Throwable t) {
         LOGGER.error("Error processing plugin {}", plugin.getClass().getName());
       }
     }

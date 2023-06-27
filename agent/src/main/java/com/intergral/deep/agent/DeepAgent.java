@@ -17,8 +17,12 @@
 
 package com.intergral.deep.agent;
 
+import com.intergral.deep.agent.api.DeepVersion;
+import com.intergral.deep.agent.api.IDeep;
 import com.intergral.deep.agent.api.plugin.IPlugin;
+import com.intergral.deep.agent.api.plugin.IPlugin.IPluginRegistration;
 import com.intergral.deep.agent.api.resource.Resource;
+import com.intergral.deep.agent.api.tracepoint.ITracepoint.ITracepointRegistration;
 import com.intergral.deep.agent.grpc.GrpcService;
 import com.intergral.deep.agent.plugins.PluginLoader;
 import com.intergral.deep.agent.poll.LongPollService;
@@ -28,9 +32,13 @@ import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.tracepoint.TracepointConfigService;
 import com.intergral.deep.agent.tracepoint.handler.Callback;
 import com.intergral.deep.agent.tracepoint.inst.TracepointInstrumentationService;
+import com.intergral.deep.agent.types.TracePointConfig;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
-public class DeepAgent {
+public class DeepAgent implements IDeep {
 
   private final Settings settings;
   private final GrpcService grpcService;
@@ -57,5 +65,27 @@ public class DeepAgent {
     this.settings.setResource(Resource.DEFAULT.merge(resource));
     this.grpcService.start();
     this.pollService.start(tracepointConfig);
+  }
+
+  @Override
+  public String getVersion() {
+    return DeepVersion.VERSION;
+  }
+
+  public IPluginRegistration registerPlugin(final IPlugin plugin) {
+    this.settings.addPlugin(plugin);
+    return () -> this.settings.removePlugin(plugin);
+  }
+
+  @Override
+  public ITracepointRegistration registerTracepoint(final String path, final int line) {
+    return registerTracepoint(path, line, Collections.emptyMap(), Collections.emptyList());
+  }
+
+  @Override
+  public ITracepointRegistration registerTracepoint(final String path, final int line, final Map<String, String> args,
+      final Collection<String> watches) {
+    final TracePointConfig tracePointConfig = this.tracepointConfig.addCustom(path, line, args, watches);
+    return () -> this.tracepointConfig.removeCustom(tracePointConfig);
   }
 }

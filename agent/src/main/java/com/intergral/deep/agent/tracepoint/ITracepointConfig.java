@@ -24,8 +24,7 @@ public interface ITracepointConfig {
 
   void noChange(final long tsNano);
 
-  void configUpdate(final long tsNano, final String hash,
-      final Collection<TracePointConfig> tracepoints);
+  void configUpdate(final long tsNano, final String hash, final Collection<TracePointConfig> tracepoints);
 
   String currentHash();
 
