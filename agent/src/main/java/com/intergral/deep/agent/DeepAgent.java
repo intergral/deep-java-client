@@ -74,7 +74,7 @@ public class DeepAgent implements IDeep {
 
   public IPluginRegistration registerPlugin(final IPlugin plugin) {
     this.settings.addPlugin(plugin);
-    return () -> DeepAgent.this.settings.removePlugin(plugin);
+    return () -> this.settings.removePlugin(plugin);
   }
 
   @Override
@@ -86,6 +86,6 @@ public class DeepAgent implements IDeep {
   public ITracepointRegistration registerTracepoint(final String path, final int line, final Map<String, String> args,
       final Collection<String> watches) {
     final TracePointConfig tracePointConfig = this.tracepointConfig.addCustom(path, line, args, watches);
-    return () -> DeepAgent.this.tracepointConfig.removeCustom(tracePointConfig);
+    return () -> this.tracepointConfig.removeCustom(tracePointConfig);
   }
 }
