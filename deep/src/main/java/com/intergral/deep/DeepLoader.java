@@ -59,9 +59,11 @@ public class DeepLoader implements IDeepLoader {
    * @return the {@link File} object for the agent
    */
   private File getAgentJar(final String jarPath) {
-    final File file = new File(jarPath);
-    if (file.exists()) {
-      return file;
+    if (jarPath != null) {
+      final File file = new File(jarPath);
+      if (file.exists()) {
+        return file;
+      }
     }
     final InputStream resourceAsStream = getAgentJarStream();
     final String pathname = extractLibrary(resourceAsStream);
