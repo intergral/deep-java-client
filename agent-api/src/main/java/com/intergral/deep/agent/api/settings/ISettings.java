@@ -17,14 +17,43 @@
 
 package com.intergral.deep.agent.api.settings;
 
+import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.resource.Resource;
 import java.util.Map;
 
 public interface ISettings {
 
+  /**
+   * This is the settings key for the configured auth provider
+   */
+  String KEY_AUTH_PROVIDER = "service.auth.provider";
+
+  /**
+   * This is the setting key for enabling or disabling deep.
+   */
+  String KEY_ENABLED = "enabled";
+
+  /**
+   * This is the setting key for the service url
+   */
+  String KEY_SERVICE_URL = "service.url";
+
   <T> T getSettingAs(String key, Class<T> clazz);
 
   Map<String, String> getMap(String attributeProperty);
 
+  /**
+   * Returns the resource that describes this client
+   *
+   * @return the {@link Resource}
+   */
   Resource getResource();
+
+  /**
+   * Look for a plugin with the given name or class name.
+   *
+   * @param name the plugin name or the plugin class name
+   * @return the {@link IPlugin} or {@code null}
+   */
+  IPlugin getPlugin(final String name);
 }

@@ -20,10 +20,17 @@ package com.intergral.deep.agent.api;
 /**
  * This is a generic interface from the result of a registration.
  */
-public interface IRegistration {
+public interface IRegistration<T> {
 
   /**
    * Unregister the item registered.
    */
   void unregister();
+
+  /**
+   * Get the registered item
+   *
+   * @return the item that this registration is for.
+   */
+  T get();
 }

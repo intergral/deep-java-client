@@ -56,6 +56,11 @@ public class LongPollService implements ITimerTask {
 
   @Override
   public void run(long now) {
+    if (!this.settings.isActive()) {
+      // we have been disabled so skip this poll
+      // we will pause like normal and try again later
+      return;
+    }
     final PollConfigGrpc.PollConfigBlockingStub blockingStub = this.grpcService.pollService();
 
     final PollRequest.Builder builder = PollRequest.newBuilder();
@@ -69,7 +74,10 @@ public class LongPollService implements ITimerTask {
         .build();
 
     final PollResponse response = blockingStub.poll(pollRequest);
-
+    // check we are still active
+    if (!this.settings.isActive()) {
+      return;
+    }
     if (response.getResponseType() == ResponseType.NO_CHANGE) {
       this.tracepointConfig.noChange(response.getTsNanos());
     } else {

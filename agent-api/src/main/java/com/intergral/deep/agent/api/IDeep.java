@@ -31,6 +31,25 @@ import java.util.Map;
 public interface IDeep {
 
   /**
+   * Get the current state of deep.
+   *
+   * @return {@code true} if deep is currently enabled and sending requests, else {@code false}
+   */
+  boolean isEnabled();
+
+
+  /**
+   * This method can be used to disabled or enable Deep.
+   * <p>
+   * Changing the state to {@code false} (ie disabled) will cause deep to uninstall all the tracepoints and clear the current config.
+   * Meaning that when deep is enabled again it will have to reinstall the configuration. It is therefore advised to not call this function
+   * too frequently.
+   *
+   * @param enabled the new state to become
+   */
+  void setEnabled(final boolean enabled);
+
+  /**
    * Get the version of deep being used.
    *
    * @return the sematic version of deep as a string e.g. 1.2.3

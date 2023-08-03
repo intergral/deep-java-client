@@ -23,6 +23,7 @@ import com.intergral.deep.Deep;
 import com.intergral.deep.agent.api.IDeep;
 import com.intergral.deep.agent.api.reflection.IReflection;
 import com.intergral.deep.agent.api.resource.Resource;
+import com.intergral.deep.agent.api.settings.ISettings;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -51,7 +52,7 @@ public class Main {
     // Dynamically configure and attach the deep agent
     Deep.config()
         .setJarPath(jarPath.toAbsolutePath().toString())
-        .setValue("service.url", "localhost:43315")
+        .setValue(ISettings.KEY_SERVICE_URL, "localhost:43315")
         .setValue("service.secure", false)
         .start();
 

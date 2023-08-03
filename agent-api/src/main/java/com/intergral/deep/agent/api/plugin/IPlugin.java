@@ -70,7 +70,14 @@ public interface IPlugin {
   /**
    * This type describes a registered plugin.
    */
-  interface IPluginRegistration extends IRegistration {
+  interface IPluginRegistration extends IRegistration<IPlugin> {
 
+    /**
+     * Indicates if this plugin is currently set to be the auth provider
+     *
+     * @return {@code true} if the registered plugin is an {@link com.intergral.deep.agent.api.auth.IAuthProvider} and deep is configured to
+     * use this provider, else {@link false}
+     */
+    boolean isAuthProvider();
   }
 }

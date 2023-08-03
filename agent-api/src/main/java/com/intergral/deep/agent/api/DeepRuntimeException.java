@@ -15,33 +15,15 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.agent.api.tracepoint;
+package com.intergral.deep.agent.api;
 
-import com.intergral.deep.agent.api.IRegistration;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.UUID;
+public class DeepRuntimeException extends RuntimeException {
 
-public interface ITracepoint {
-
-  String path();
-
-  int line();
-
-  default Map<String, String> args() {
-    return Collections.emptyMap();
+  public DeepRuntimeException(final String message) {
+    super(message);
   }
 
-  default Collection<String> watches() {
-    return Collections.emptyList();
-  }
-
-  default String id() {
-    return UUID.randomUUID().toString();
-  }
-
-  interface ITracepointRegistration extends IRegistration<ITracepoint> {
-
+  public DeepRuntimeException(final String message, final Throwable cause) {
+    super(message, cause);
   }
 }
