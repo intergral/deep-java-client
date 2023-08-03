@@ -76,7 +76,7 @@ public interface IPlugin {
      * Indicates if this plugin is currently set to be the auth provider
      *
      * @return {@code true} if the registered plugin is an {@link com.intergral.deep.agent.api.auth.IAuthProvider} and deep is configured to
-     * use this provider, else {@link false}
+     * use this provider, else {@code false}
      */
     boolean isAuthProvider();
   }
