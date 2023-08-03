@@ -17,6 +17,8 @@
 
 package com.intergral.deep.agent.api.auth;
 
+import com.intergral.deep.agent.api.DeepRuntimeException;
+import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.settings.ISettings;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -32,6 +34,18 @@ public class AuthProvider {
     if (serviceAuthProvider == null || serviceAuthProvider.trim().isEmpty()) {
       return NOOP_PROVIDER;
     }
+
+    // check if we have a plugin of this name that we can use
+    final IPlugin plugin = settings.getPlugin(serviceAuthProvider);
+    if (plugin != null) {
+      if (plugin instanceof IAuthProvider) {
+        return (IAuthProvider) plugin;
+      } else {
+        throw new DeepRuntimeException(
+            String.format("Cannot use plugin %s as auth provider, must implement IAuthProvider interface.", plugin.name()));
+      }
+    }
+
     try {
       final Class<?> aClass = Class.forName(serviceAuthProvider);
       final Constructor<?> constructor = aClass.getConstructor(ISettings.class);
@@ -42,7 +56,7 @@ public class AuthProvider {
              | InvocationTargetException
              | InstantiationException
              | IllegalAccessException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException(String.format("Cannot load auth provider %s", serviceAuthProvider), e);
     }
   }
 

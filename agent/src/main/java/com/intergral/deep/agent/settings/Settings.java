@@ -35,11 +35,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 public class Settings implements ISettings {
 
+  private static final AtomicBoolean IS_ACTIVE = new AtomicBoolean(true);
   private final Properties properties;
   private Resource resource;
   private Collection<IPlugin> plugins;
@@ -60,6 +62,12 @@ public class Settings implements ISettings {
       }
     } else {
       propertiesStream = Settings.class.getResourceAsStream("/deep_settings.properties");
+    }
+
+    // we have special handling for is active as it is the only value that we allow to change during run time.
+    final String isActive = readProperty(ISettings.KEY_ENABLED, agentArgs);
+    if (isActive != null && !Boolean.parseBoolean(isActive)) {
+      IS_ACTIVE.set(false);
     }
 
     return build(agentArgs, propertiesStream);
@@ -178,6 +186,10 @@ public class Settings implements ISettings {
   }
 
   public <T> T getSettingAs(String key, Class<T> clazz) {
+    // special handling for enabled key
+    if(key.equals(ISettings.KEY_ENABLED)){
+      return coerc(String.valueOf(isActive()), clazz);
+    }
     final String property = this.properties.getProperty(key);
 
     if (property != null) {
@@ -206,33 +218,33 @@ public class Settings implements ISettings {
   }
 
   public String getServiceHost() {
-    final String serviceUrl = getSettingAs("service.url", String.class);
+    final String serviceUrl = getSettingAs(ISettings.KEY_SERVICE_URL, String.class);
     if (serviceUrl.contains("://")) {
       try {
         return new URL(serviceUrl).getHost();
       } catch (MalformedURLException e) {
-        throw new InvalidConfigException("service.url", serviceUrl, e);
+        throw new InvalidConfigException(ISettings.KEY_SERVICE_URL, serviceUrl, e);
       }
     } else if (serviceUrl.contains(":")) {
       return serviceUrl.split(":")[0];
     }
 
-    throw new InvalidConfigException("service.url", serviceUrl);
+    throw new InvalidConfigException(ISettings.KEY_SERVICE_URL, serviceUrl);
   }
 
   public int getServicePort() {
-    final String serviceUrl = getSettingAs("service.url", String.class);
+    final String serviceUrl = getSettingAs(ISettings.KEY_SERVICE_URL, String.class);
     if (serviceUrl.contains("://")) {
       try {
         return new URL(serviceUrl).getPort();
       } catch (MalformedURLException e) {
-        throw new InvalidConfigException("service.url", serviceUrl, e);
+        throw new InvalidConfigException(ISettings.KEY_SERVICE_URL, serviceUrl, e);
       }
     } else if (serviceUrl.contains(":")) {
       return Integer.parseInt(serviceUrl.split(":")[1]);
     }
 
-    throw new InvalidConfigException("service.url", serviceUrl);
+    throw new InvalidConfigException(ISettings.KEY_SERVICE_URL, serviceUrl);
   }
 
   @Override
@@ -272,6 +284,25 @@ public class Settings implements ISettings {
 
   public void removePlugin(final IPlugin plugin) {
     this.plugins.removeIf(iPlugin -> iPlugin.name().equals(plugin.name()));
+  }
+
+  @Override
+  public IPlugin getPlugin(final String name) {
+    final Collection<IPlugin> allPlugins = this.getPlugins();
+    for (IPlugin plugin : allPlugins) {
+      if (plugin.name().equals(name) || plugin.getClass().getName().equals(name)) {
+        return plugin;
+      }
+    }
+    return null;
+  }
+
+  public boolean isActive() {
+    return IS_ACTIVE.get();
+  }
+
+  public void setActive(boolean state) {
+    IS_ACTIVE.set(state);
   }
 
   public static class InvalidConfigException extends RuntimeException {

@@ -19,9 +19,12 @@ package com.intergral.deep.agent;
 
 import com.intergral.deep.agent.api.DeepVersion;
 import com.intergral.deep.agent.api.IDeep;
+import com.intergral.deep.agent.api.auth.IAuthProvider;
 import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.plugin.IPlugin.IPluginRegistration;
 import com.intergral.deep.agent.api.resource.Resource;
+import com.intergral.deep.agent.api.settings.ISettings;
+import com.intergral.deep.agent.api.tracepoint.ITracepoint;
 import com.intergral.deep.agent.api.tracepoint.ITracepoint.ITracepointRegistration;
 import com.intergral.deep.agent.grpc.GrpcService;
 import com.intergral.deep.agent.plugins.PluginLoader;
@@ -74,7 +77,29 @@ public class DeepAgent implements IDeep {
 
   public IPluginRegistration registerPlugin(final IPlugin plugin) {
     this.settings.addPlugin(plugin);
-    return () -> this.settings.removePlugin(plugin);
+    final boolean isAuthProvider;
+    if (plugin instanceof IAuthProvider) {
+      final String settingAs = this.settings.getSettingAs(ISettings.KEY_AUTH_PROVIDER, String.class);
+      isAuthProvider = settingAs != null && settingAs.equals(plugin.getClass().getName());
+    } else {
+      isAuthProvider = false;
+    }
+    return new IPluginRegistration() {
+      @Override
+      public boolean isAuthProvider() {
+        return isAuthProvider;
+      }
+
+      @Override
+      public void unregister() {
+        settings.removePlugin(plugin);
+      }
+
+      @Override
+      public IPlugin get() {
+        return plugin;
+      }
+    };
   }
 
   @Override
@@ -86,6 +111,62 @@ public class DeepAgent implements IDeep {
   public ITracepointRegistration registerTracepoint(final String path, final int line, final Map<String, String> args,
       final Collection<String> watches) {
     final TracePointConfig tracePointConfig = this.tracepointConfig.addCustom(path, line, args, watches);
-    return () -> this.tracepointConfig.removeCustom(tracePointConfig);
+    return new ITracepointRegistration() {
+      @Override
+      public void unregister() {
+        tracepointConfig.removeCustom(tracePointConfig);
+      }
+
+      @Override
+      public ITracepoint get() {
+        return new ITracepoint() {
+          @Override
+          public String path() {
+            return path;
+          }
+
+          @Override
+          public int line() {
+            return line;
+          }
+
+          @Override
+          public Map<String, String> args() {
+            return args;
+          }
+
+          @Override
+          public Collection<String> watches() {
+            return watches;
+          }
+
+          @Override
+          public String id() {
+            return tracePointConfig.getId();
+          }
+        };
+      }
+    };
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return this.settings.getSettingAs(ISettings.KEY_ENABLED, Boolean.class);
+  }
+
+  @Override
+  public synchronized void setEnabled(final boolean enabled) {
+    // we are already the desired state - so do nothing
+    if (isEnabled() == enabled) {
+      return;
+    }
+
+    // update config to new state
+    this.settings.setActive(enabled);
+
+    // if we are disabling then we need to clear configs
+    if (!enabled) {
+      this.tracepointConfig.configUpdate(0, null, Collections.emptyList());
+    }
   }
 }

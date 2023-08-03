@@ -16,6 +16,8 @@ public interface Ordered {
    * Returns the order of applying the SPI implementing this interface. Higher values are applied
    * later, for example: an SPI with order=1 will run after an SPI with order=0. SPI implementations
    * with equal values will be run in a non-deterministic order.
+   *
+   * @return the order value
    */
   default int order() {
     return 0;
