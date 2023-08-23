@@ -38,6 +38,16 @@ public interface ISettings {
    */
   String KEY_SERVICE_URL = "service.url";
 
+  /**
+   * This is the setting key for the service secure setting
+   */
+  String KEY_SERVICE_SECURE = "service.secure";
+
+  /**
+   * This is the setting key for the plugin list
+   */
+  String PLUGINS = "plugins";
+
   <T> T getSettingAs(String key, Class<T> clazz);
 
   Map<String, String> getMap(String attributeProperty);

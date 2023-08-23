@@ -53,7 +53,7 @@ public class Main {
     Deep.config()
         .setJarPath(jarPath.toAbsolutePath().toString())
         .setValue(ISettings.KEY_SERVICE_URL, "localhost:43315")
-        .setValue("service.secure", false)
+        .setValue(ISettings.KEY_SERVICE_SECURE, false)
         .start();
 
     // different ways to get the API instance

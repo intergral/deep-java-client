@@ -27,11 +27,13 @@ import java.lang.instrument.Instrumentation;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
+@SuppressWarnings("unused")
 public class AgentImpl {
 
   private static final CountDownLatch LATCH = new CountDownLatch(1);
   private static DeepAgent deepAgent;
 
+  // called via reflection
   public static void startup(final Instrumentation inst, final Map<String, String> args) {
     final Settings settings = Settings.build(args);
     Logger.configureLogging(settings);
@@ -47,6 +49,13 @@ public class AgentImpl {
     LATCH.countDown();
   }
 
+  /**
+   * await the load of the dep api
+   *
+   * @return the loaded api object
+   * @throws InterruptedException if interupted
+   */
+  // called via reflection
   public static Object awaitLoadAPI() throws InterruptedException {
     LATCH.await();
     return loadDeepAPI();

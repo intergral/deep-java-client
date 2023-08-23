@@ -17,8 +17,10 @@
 
 package com.intergral.deep.agent.grpc;
 
+import com.intergral.deep.agent.ReflectionUtils;
 import com.intergral.deep.agent.api.auth.AuthProvider;
 import com.intergral.deep.agent.api.auth.IAuthProvider;
+import com.intergral.deep.agent.api.settings.ISettings;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.proto.poll.v1.PollConfigGrpc;
 import com.intergral.deep.proto.tracepoint.v1.SnapshotServiceGrpc;
@@ -94,7 +96,7 @@ public class GrpcService {
     }
 
     // Select secure or not
-    if (this.settings.getSettingAs("service.secure", Boolean.class)) {
+    if (this.settings.getSettingAs(ISettings.KEY_SERVICE_SECURE, Boolean.class)) {
       ncBuilder.useTransportSecurity();
     } else {
       ncBuilder.usePlaintext();
@@ -134,7 +136,7 @@ public class GrpcService {
   }
 
   private Metadata buildMetaData() {
-    final IAuthProvider provider = AuthProvider.provider(this.settings);
+    final IAuthProvider provider = AuthProvider.provider(this.settings, ReflectionUtils.getReflection());
     final Map<String, String> headers = provider.provide();
 
     final Metadata metadata = new Metadata();

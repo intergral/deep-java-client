@@ -17,6 +17,8 @@
 
 package com.intergral.deep.agent.api.reflection;
 
+import com.intergral.deep.agent.api.DeepRuntimeException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Iterator;
@@ -31,6 +33,8 @@ public interface IReflection {
 
 
   boolean setAccessible(final Class<?> clazz, final Method method);
+
+  boolean setAccessible(final Class<?> clazz, final Constructor<?> constructor);
 
 
   <T> T callMethod(Object target, String methodName, Object... args);
@@ -57,4 +61,8 @@ public interface IReflection {
   <T> T callField(Object target, Field field);
 
   Set<String> getModifiers(Field field);
+
+  Constructor<?> findConstructor(final Class<?> clazz, final Class<?>... args);
+
+  <T> T callConstructor(final Constructor<?> constructor, final Object... args) throws DeepRuntimeException;
 }

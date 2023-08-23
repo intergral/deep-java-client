@@ -44,7 +44,7 @@ public class Settings implements ISettings {
   private static final AtomicBoolean IS_ACTIVE = new AtomicBoolean(true);
   private final Properties properties;
   private Resource resource;
-  private Collection<IPlugin> plugins;
+  private Collection<IPlugin> plugins = Collections.emptyList();
   private final Collection<IPlugin> customPlugins = new ArrayList<>();
 
   private Settings(Properties properties) {
@@ -128,9 +128,9 @@ public class Settings implements ISettings {
     if (type == Boolean.class || type == boolean.class) {
       return (T) Boolean.valueOf(str);
     } else if (type == Integer.class || type == int.class) {
-      return (T) Integer.valueOf(str);
+      return (T) Integer.valueOf(Double.valueOf(str).intValue());
     } else if (type == Long.class || type == long.class) {
-      return (T) Long.valueOf(str);
+      return (T) Long.valueOf(Double.valueOf(str).longValue());
     } else if (type == String.class) {
       return (T) str;
     } else if (type == Double.class || type == double.class) {

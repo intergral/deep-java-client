@@ -63,7 +63,7 @@ public class DeepAgent implements IDeep {
   public void start() {
     final Resource resource = ResourceDetector.configureResource(settings,
         DeepAgent.class.getClassLoader());
-    final List<IPlugin> iLoadedPlugins = PluginLoader.loadPlugins(settings);
+    final List<IPlugin> iLoadedPlugins = PluginLoader.loadPlugins(settings, ReflectionUtils.getReflection());
     this.settings.setPlugins(iLoadedPlugins);
     this.settings.setResource(Resource.DEFAULT.merge(resource));
     this.grpcService.start();

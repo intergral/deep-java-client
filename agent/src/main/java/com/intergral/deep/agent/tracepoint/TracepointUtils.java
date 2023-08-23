@@ -60,23 +60,23 @@ public class TracepointUtils {
     }
     if (srcRootArg != null) {
       if (relPath.startsWith(srcRootArg)) {
-        return Utils.trim(relPath.substring(srcRootArg.length()), "/");
+        return Utils.trimPrefix(relPath.substring(srcRootArg.length()), "/");
       }
     } else if (relPath.contains("/src/main/")) {
       final String mainDir = relPath.substring(relPath.indexOf("/src/main/") + 11);
       final int i = mainDir.indexOf('/');
-      return Utils.trim(mainDir.substring(i), "/");
+      return Utils.trimPrefix(mainDir.substring(i), "/");
     } else if (relPath.contains("/src/test/")) {
       final String mainDir = relPath.substring(relPath.indexOf("/src/test/") + 11);
       final int i = mainDir.indexOf('/');
-      return Utils.trim(mainDir.substring(i), "/");
+      return Utils.trimPrefix(mainDir.substring(i), "/");
     }
-    final String trim = Utils.trim(relPath, "/");
+    final String trim = Utils.trimPrefix(relPath, "/");
     // this is just to ensure the file name is never empty
     // this only happens on non class files such as '.gitignore'
     // rather then return empty name we return the raw path
     if (trim.isEmpty()) {
-      return Utils.trim(rawRelPath, "/");
+      return Utils.trimPrefix(rawRelPath, "/");
     }
     return trim;
   }

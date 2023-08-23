@@ -150,6 +150,12 @@
       <artifactId>asm-tree</artifactId>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>com.intergral.deep.tests</groupId>
+      <artifactId>test-utils</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

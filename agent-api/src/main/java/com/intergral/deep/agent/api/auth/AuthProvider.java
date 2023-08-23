@@ -19,9 +19,10 @@ package com.intergral.deep.agent.api.auth;
 
 import com.intergral.deep.agent.api.DeepRuntimeException;
 import com.intergral.deep.agent.api.plugin.IPlugin;
+import com.intergral.deep.agent.api.reflection.IReflection;
+import com.intergral.deep.agent.api.reflection.ReflectionUtils;
 import com.intergral.deep.agent.api.settings.ISettings;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.Map;
 
@@ -29,7 +30,7 @@ public class AuthProvider {
 
   private static final NoopProvider NOOP_PROVIDER = new NoopProvider();
 
-  public static IAuthProvider provider(final ISettings settings) {
+  public static IAuthProvider provider(final ISettings settings, final IReflection reflection) {
     final String serviceAuthProvider = settings.getSettingAs("service.auth.provider", String.class);
     if (serviceAuthProvider == null || serviceAuthProvider.trim().isEmpty()) {
       return NOOP_PROVIDER;
@@ -48,19 +49,14 @@ public class AuthProvider {
 
     try {
       final Class<?> aClass = Class.forName(serviceAuthProvider);
-      final Constructor<?> constructor = aClass.getConstructor(ISettings.class);
-      final Object newInstance = constructor.newInstance(settings);
-      return (IAuthProvider) newInstance;
-    } catch (ClassNotFoundException
-             | NoSuchMethodException
-             | InvocationTargetException
-             | InstantiationException
-             | IllegalAccessException e) {
+      final Constructor<?> constructor = ReflectionUtils.findConstructor(aClass, reflection);
+      return ReflectionUtils.callConstructor(constructor, settings, reflection);
+    } catch (ClassNotFoundException e) {
       throw new RuntimeException(String.format("Cannot load auth provider %s", serviceAuthProvider), e);
     }
   }
 
-  private static class NoopProvider implements IAuthProvider {
+  static class NoopProvider implements IAuthProvider {
 
     @Override
     public Map<String, String> provide() {

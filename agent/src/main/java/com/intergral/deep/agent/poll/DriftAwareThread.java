@@ -17,6 +17,7 @@
 
 package com.intergral.deep.agent.poll;
 
+import com.intergral.deep.agent.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +73,9 @@ public class DriftAwareThread extends Thread {
       try {
 
         // calculate if we woke up early
-        long now = System.currentTimeMillis();
+        long[] nowTuple = Utils.currentTimeNanos();
+        // the drift aware only calculates at ms accuracy - but we want to use ns for the time later
+        long now = nowTuple[0];
         long startDelay = checkForEarlyWake(now, this.nextExecutionTime);
 
         // if we woke early
@@ -96,7 +99,8 @@ public class DriftAwareThread extends Thread {
               samplerLock.wait(startDelay);
             }
           }
-          now = System.currentTimeMillis();
+          nowTuple = Utils.currentTimeNanos();
+          now = nowTuple[0];
           startDelay = checkForEarlyWake(now, this.nextExecutionTime);
 
           // quick exit if we have been stopped
@@ -109,7 +113,7 @@ public class DriftAwareThread extends Thread {
 
         try {
           debug("Running task.");
-          this.runnable.run(now);
+          this.runnable.run(nowTuple[1]);
         } catch (final Exception e) {
           error("Exception during task execution: " + e.getMessage(), e);
         }

@@ -114,14 +114,16 @@ public class PushUtils {
         .setMethodName(stackFrame.getMethodName())
         .setLineNumber(stackFrame.getLineNumber())
         .setClassName(stackFrame.getClassName())
-//                    .setIsAsync( false )
-//                    .setColumnNumber( 0 )
-        //todo update for JSP/CFM
+        // Java does not have async frames or column Numbers
+        //.setIsAsync( false )
+        //.setColumnNumber( 0 )
+        //todo update for JSP
 //                    .setTranspiledFileName( "" )
 //                    .setTranspiledLineNumber( 0 )
 //                    .setTranspiledColumnNumber( 0 )
         .addAllVariables(covertVariables(stackFrame.getFrameVariables()))
         .setAppFrame(stackFrame.isAppFrame())
+        .setNativeFrame(stackFrame.isNativeFrame())
         .build()).collect(Collectors.toList());
   }
 

@@ -172,7 +172,7 @@ public abstract class VariableProcessor {
       varType = objValue.getClass().getName();
     }
 
-    final Utils.ITrimResult iTrimResult = Utils.trim(this.valueToString(objValue),
+    final Utils.ITrimResult iTrimResult = Utils.truncate(this.valueToString(objValue),
         this.frameConfig.maxStringLength());
 
     final Variable variable = new Variable(varType, iTrimResult.value(), identityCode,
