@@ -62,7 +62,8 @@ public class Callback {
   private static PushService PUSH_SERVICE;
   private static int offset;
 
-  public static void init(final Settings settings,
+  public static void init(
+      final Settings settings,
       final TracepointConfigService breakpointService,
       final PushService pushService) {
     Callback.SETTINGS = settings;

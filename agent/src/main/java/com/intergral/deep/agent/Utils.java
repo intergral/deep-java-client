@@ -69,7 +69,7 @@ public class Utils {
    */
   public static <T> Map<String, T> newMap(final Map<String, T> map) {
     if (map == null) {
-      return Collections.emptyMap();
+      return new HashMap<>();
     }
     return new HashMap<>(map);
   }

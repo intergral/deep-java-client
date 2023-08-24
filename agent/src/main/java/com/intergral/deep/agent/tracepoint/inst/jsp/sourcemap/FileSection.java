@@ -15,26 +15,32 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.agent.tracepoint.inst.jsp;
+package com.intergral.deep.agent.tracepoint.inst.jsp.sourcemap;
 
-public class SourceMapLookup {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
-  private final String filename;
-  private final int lineNumber;
+public class FileSection {
+
+  private final HashMap<Integer, FileSectionEntry> entries = new HashMap<>();
 
 
-  public SourceMapLookup(final String filename, final int lineNumber) {
-    this.filename = filename;
-    this.lineNumber = lineNumber;
+  public void put(final int id, final FileSectionEntry entry) {
+    entries.put(id, entry);
   }
 
 
-  public String getFilename() {
-    return filename;
+  public FileSectionEntry get(final int id) {
+    return entries.get(id);
   }
 
 
-  public int getLineNumber() {
-    return lineNumber;
+  public List<String> getFilenames() {
+    final List<String> filenames = new ArrayList<>();
+    for (final FileSectionEntry entry : entries.values()) {
+      filenames.add(entry.getSourceName());
+    }
+    return filenames;
   }
 }

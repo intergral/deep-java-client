@@ -15,45 +15,31 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.agent.tracepoint.inst.jsp;
+package com.intergral.deep.agent.tracepoint.inst.jsp.sourcemap;
 
-public class FileSectionEntry {
+public class SourceMapLineStartEnd {
 
-  private final int id;
-  private final String sourceName;
-  private final String sourcePath;
+  private final int start;
+  private int end;
 
 
-  public FileSectionEntry(final int id, final String sourceName) {
-    this(id, sourceName, null);
+  public SourceMapLineStartEnd(final int start) {
+    this.start = start;
+    this.end = start;
   }
 
 
-  public FileSectionEntry(final int id, final String sourceName, String sourcePath) {
-    this.id = id;
-    this.sourceName = sourceName;
-    this.sourcePath = sourcePath;
+  public void setEnd(int end) {
+    this.end = end;
   }
 
 
-  public int getId() {
-    return id;
+  public int getStart() {
+    return start;
   }
 
 
-  public String getSourceName() {
-    return sourceName;
+  public int getEnd() {
+    return end;
   }
-
-
-  public String getSourcePath() {
-    return sourcePath;
-  }
-
-
-  @Override
-  public String toString() {
-    return "FileSectionEntry#" + id + ":" + sourceName + ":" + sourcePath;
-  }
-
 }

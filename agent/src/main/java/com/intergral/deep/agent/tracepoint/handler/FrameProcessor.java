@@ -53,7 +53,7 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
             && this.conditionPasses(tracePointConfig))
         .collect(Collectors.toList());
 
-    return this.filteredTracepoints.size() != 0;
+    return !this.filteredTracepoints.isEmpty();
   }
 
   private boolean conditionPasses(final TracePointConfig tracePointConfig) {

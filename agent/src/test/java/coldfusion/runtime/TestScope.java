@@ -15,41 +15,11 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.agent.tracepoint.inst.jsp;
+package coldfusion.runtime;
 
-public class StratumSection {
+import java.util.HashMap;
 
-  private final String name;
-  private FileSection fileSection;
-  private LineSection lineSection;
-
-
-  public StratumSection(final String name) {
-    this.name = name;
-  }
-
-
-  public String getName() {
-    return name;
-  }
-
-
-  public void setFileSection(final FileSection fileSection) {
-    this.fileSection = fileSection;
-  }
-
-
-  public FileSection getFileSection() {
-    return fileSection;
-  }
-
-
-  public void setLineSection(final LineSection lineSection) {
-    this.lineSection = lineSection;
-  }
-
-
-  public LineSection getLineSection() {
-    return lineSection;
-  }
+@SuppressWarnings("ALL")
+public class TestScope extends HashMap
+{
 }

@@ -369,6 +369,12 @@
                                     <goal>report</goal>
                                     <goal>report-aggregate</goal>
                                 </goals>
+                                <configuration>
+                                    <excludes>
+                                        <!-- We cannot test this as maven doesn't like it, it also has nothing in it-->
+                                        <exclude>**/java/com/intergral/deep/**</exclude>
+                                    </excludes>
+                                </configuration>
                             </execution>
                             <execution>
                                 <id>default-check</id>
@@ -403,6 +409,10 @@
                                             </limits>
                                         </rule>
                                     </rules>
+                                    <excludes>
+                                        <!-- We cannot test this as maven doesn't like it, it also has nothing in it-->
+                                        <exclude>**/java/com/intergral/deep/**</exclude>
+                                    </excludes>
                                 </configuration>
                             </execution>
                         </executions>

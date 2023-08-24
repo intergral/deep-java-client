@@ -15,31 +15,26 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.agent.tracepoint.inst;
+package com.intergral.deep.agent.tracepoint.inst.jsp.sourcemap;
+
+public class SourceMapLookup {
+
+  private final String filename;
+  private final int lineNumber;
 
 
-import java.util.Set;
-
-public class SetClassScanner implements IClassScanner {
-
-  private final Set<String> classNames;
-
-
-  public SetClassScanner(final Set<String> classNames) {
-    this.classNames = classNames;
+  public SourceMapLookup(final String filename, final int lineNumber) {
+    this.filename = filename;
+    this.lineNumber = lineNumber;
   }
 
 
-  @Override
-  public boolean scanClass(final Class<?> allLoadedClass) {
-    return this.classNames.contains(InstUtils.internalClass(allLoadedClass))
-        || this.classNames.contains(allLoadedClass.getSimpleName())
-        || allLoadedClass.getName().contains("$")
-        && this.classNames.contains(InstUtils.internalClassStripInner(allLoadedClass));
+  public String getFilename() {
+    return filename;
   }
 
-  @Override
-  public boolean isComplete() {
-    return classNames.isEmpty();
+
+  public int getLineNumber() {
+    return lineNumber;
   }
 }

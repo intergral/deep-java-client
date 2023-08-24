@@ -17,6 +17,7 @@
 
 package com.intergral.deep.tests.snapshot;
 
+import com.intergral.deep.proto.tracepoint.v1.Snapshot;
 import com.intergral.deep.proto.tracepoint.v1.Variable;
 import com.intergral.deep.proto.tracepoint.v1.VariableID;
 import java.util.List;
@@ -26,6 +27,16 @@ import java.util.Optional;
 
 public class SnapshotUtils {
 
+  /**
+   * Scan a snapshot for a variable with the given name
+   *
+   * @param name     the variable name
+   * @param snapshot the snapshot
+   * @return a {@link IVariableScan}
+   */
+  public static IVariableScan findVarByName(final String name, final Snapshot snapshot) {
+    return findVarByName(name, snapshot.getFrames(0).getVariablesList(), snapshot.getVarLookupMap());
+  }
   /**
    * Scan a snapshot for a variable with a given name.
    *

@@ -22,6 +22,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * This type is here to allow us to access it from anywhere (once it is loaded into the boot class path).
+ * <p>
+ * This will simply act as a proxy to the {@link Callback} which is where we do the real work.
+ * <p>
+ * This split is to allow us to support Lucee and other OSGi style environments that use isolated class loaders.
+ */
+@SuppressWarnings("unused")
 public class ProxyCallback {
 
   /**

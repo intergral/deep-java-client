@@ -15,31 +15,9 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.agent.tracepoint.inst;
+package coldfusion.runtime;
 
-
-import java.util.Set;
-
-public class SetClassScanner implements IClassScanner {
-
-  private final Set<String> classNames;
-
-
-  public SetClassScanner(final Set<String> classNames) {
-    this.classNames = classNames;
-  }
-
-
-  @Override
-  public boolean scanClass(final Class<?> allLoadedClass) {
-    return this.classNames.contains(InstUtils.internalClass(allLoadedClass))
-        || this.classNames.contains(allLoadedClass.getSimpleName())
-        || allLoadedClass.getName().contains("$")
-        && this.classNames.contains(InstUtils.internalClassStripInner(allLoadedClass));
-  }
-
-  @Override
-  public boolean isComplete() {
-    return classNames.isEmpty();
-  }
+@SuppressWarnings("ALL")
+public class CFPage
+{
 }

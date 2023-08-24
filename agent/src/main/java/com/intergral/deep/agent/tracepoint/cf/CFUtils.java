@@ -18,9 +18,16 @@
 package com.intergral.deep.agent.tracepoint.cf;
 
 import com.intergral.deep.agent.ReflectionUtils;
+import com.intergral.deep.agent.Utils;
 import com.intergral.deep.agent.api.plugin.IEvaluator;
+import com.intergral.deep.agent.types.TracePointConfig;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class CFUtils {
 
@@ -146,7 +153,14 @@ public class CFUtils {
   }
 
 
+  /**
+   * When running on Lucee servers we can guess the source from the class name
+   *
+   * @param classname the class we are processing
+   * @return the source file name, or {@code null}
+   */
   public static String guessSource(final String classname) {
+    // if the classname isn't a lucee class then skip it
     if (!classname.endsWith("$cf")) {
       return null;
     }
@@ -154,5 +168,42 @@ public class CFUtils {
         .replaceAll("\\.", "/")
         .substring(0, classname.length() - 3)
         .replace("_", ".");
+  }
+
+
+  public static Set<TracePointConfig> loadCfBreakpoints(final URL location,
+      final Map<String, TracePointConfig> values) {
+    final Set<TracePointConfig> iBreakpoints = new HashSet<>();
+    final Collection<TracePointConfig> breakpoints = values.values();
+    for (TracePointConfig breakpoint : breakpoints) {
+      final String srcRoot = breakpoint.getArgs().get("src_root");
+      final String relPathFromNv = breakpoint.getPath();
+      final String locationString = location.toString();
+      if (srcRoot != null && locationString.endsWith(relPathFromNv.substring(srcRoot.length()))
+          || locationString.endsWith(relPathFromNv)
+          || relPathFromNv.startsWith("/src/main/cfml")
+          && locationString.endsWith(relPathFromNv.substring("/src/main/cfml".length()))
+      ) {
+        iBreakpoints.add(breakpoint);
+      }
+    }
+    return iBreakpoints;
+  }
+
+  public static Set<TracePointConfig> loadCfBreakpoints(final String location,
+      final Map<String, TracePointConfig> values) {
+    if (location == null) {
+      return Collections.emptySet();
+    }
+    final Set<TracePointConfig> iBreakpoints = new HashSet<>();
+    final Collection<TracePointConfig> breakpoints = values.values();
+    for (TracePointConfig breakpoint : breakpoints) {
+      final String relPathFromNv = breakpoint.getPath();
+      // some versions of lucee use lowercase file names
+      if (Utils.endsWithIgnoreCase(relPathFromNv, location)) {
+        iBreakpoints.add(breakpoint);
+      }
+    }
+    return iBreakpoints;
   }
 }

@@ -15,31 +15,41 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.agent.tracepoint.inst;
+package com.intergral.deep.agent.tracepoint.inst.jsp.sourcemap;
+
+public class StratumSection {
+
+  private final String name;
+  private FileSection fileSection;
+  private LineSection lineSection;
 
 
-import java.util.Set;
-
-public class SetClassScanner implements IClassScanner {
-
-  private final Set<String> classNames;
-
-
-  public SetClassScanner(final Set<String> classNames) {
-    this.classNames = classNames;
+  public StratumSection(final String name) {
+    this.name = name;
   }
 
 
-  @Override
-  public boolean scanClass(final Class<?> allLoadedClass) {
-    return this.classNames.contains(InstUtils.internalClass(allLoadedClass))
-        || this.classNames.contains(allLoadedClass.getSimpleName())
-        || allLoadedClass.getName().contains("$")
-        && this.classNames.contains(InstUtils.internalClassStripInner(allLoadedClass));
+  public String getName() {
+    return name;
   }
 
-  @Override
-  public boolean isComplete() {
-    return classNames.isEmpty();
+
+  public void setFileSection(final FileSection fileSection) {
+    this.fileSection = fileSection;
+  }
+
+
+  public FileSection getFileSection() {
+    return fileSection;
+  }
+
+
+  public void setLineSection(final LineSection lineSection) {
+    this.lineSection = lineSection;
+  }
+
+
+  public LineSection getLineSection() {
+    return lineSection;
   }
 }

@@ -320,6 +320,7 @@ public abstract class VariableProcessor {
   private static class NamesFieldIterator extends NamedIterable<Field> {
 
     private final Object target;
+    private final HashSet<String> seenNames = new HashSet<>();
 
     public NamesFieldIterator(final Object target, final Iterator<Field> iterator) {
       super(iterator);
@@ -329,10 +330,12 @@ public abstract class VariableProcessor {
     @Override
     public INamedItem next() {
       final Field next = this.iterator.next();
+      final String name = getFieldName(next);
+      seenNames.add(next.getName());
       return new INamedItem() {
         @Override
         public String name() {
-          return next.getName();
+          return name;
         }
 
         @Override
@@ -350,6 +353,22 @@ public abstract class VariableProcessor {
           return ReflectionUtils.getModifiers(next);
         }
       };
+    }
+
+    private String getFieldName(final Field next) {
+      final String name;
+      // it is possible to have a field that is declared as a private value on a super type.
+      // here we will prefix the declaring class name of the field if we have already seen the simple name
+      if (seenNames.contains(next.getName())) {
+        if (next.getDeclaringClass() == this.target.getClass()) {
+          name = next.getName();
+        } else {
+          name = String.format("%s.%s", next.getDeclaringClass().getSimpleName(), next.getName());
+        }
+      } else {
+        name = next.getName();
+      }
+      return name;
     }
   }
 

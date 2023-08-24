@@ -20,13 +20,41 @@ package com.intergral.deep.agent.tracepoint;
 import com.intergral.deep.agent.types.TracePointConfig;
 import java.util.Collection;
 
+/**
+ * This is the interface to the config services. The implementation of this service should act as the manager between incoming tracepoint
+ * configs and instrumentation. To help reduce the time spent in the instrumentor.
+ */
 public interface ITracepointConfig {
 
+  /**
+   * Called when there is no change to the config so just update last seen.
+   *
+   * @param tsNano the time of the config update
+   */
   void noChange(final long tsNano);
 
+  /**
+   * This indicates that the config from the servers has changed, and we should inform the instrumentation services.
+   *
+   * @param tsNano      the time of the update
+   * @param hash        the new config hash
+   * @param tracepoints the new config
+   */
   void configUpdate(final long tsNano, final String hash, final Collection<TracePointConfig> tracepoints);
 
+  /**
+   * Get the hash of the config last used to update the config. This hash should be sent with the calls for new configs, so the server knows
+   * what the clients config is and can detect changes.
+   *
+   * @return the current hash.
+   */
   String currentHash();
 
+  /**
+   * Load the full configs for the given tracepoints ids
+   *
+   * @param tracepointId the tracepoint ids
+   * @return a collection of all the matched tracepoints
+   */
   Collection<TracePointConfig> loadTracepointConfigs(final Collection<String> tracepointId);
 }

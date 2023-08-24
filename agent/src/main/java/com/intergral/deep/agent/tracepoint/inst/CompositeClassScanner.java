@@ -55,7 +55,21 @@ public class CompositeClassScanner implements IClassScanner {
           && scanClass(allLoadedClass)) {
         classes.add(allLoadedClass);
       }
+      // stop iteration as soon as scanners are complete
+      if (isComplete()) {
+        break;
+      }
     }
     return classes.toArray(new Class<?>[0]);
+  }
+
+  @Override
+  public boolean isComplete() {
+    for (IClassScanner iClassScanner : scanner) {
+      if (!iClassScanner.isComplete()) {
+        return false;
+      }
+    }
+    return true;
   }
 }

@@ -109,9 +109,9 @@ public class Visitor extends ClassVisitor {
   static {
     // this is here to make the tests easier.
     // we cannot use java. classes in the tests without screwing with the class loaders
-    // so in the tests we use the 'nv.callback.class' which is the CallBack.class
-    // at runtime we use the ProxyCallback.class so we can bypass the osgi classloading restrictions
-    final String property = System.getProperty("nv.callback.class");
+    // so in the tests we use the 'deep.callback.class' which is the CallBack.class
+    // at runtime we use the ProxyCallback.class, so we can bypass the osgi classloading restrictions
+    final String property = System.getProperty("deep.callback.class");
     if (property == null) {
       CALLBACK_CLASS = ProxyCallback.class;
     } else {

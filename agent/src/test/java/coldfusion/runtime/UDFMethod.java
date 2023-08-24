@@ -15,25 +15,16 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.agent.tracepoint.inst.jsp;
+package coldfusion.runtime;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-
-public class LineSection {
-
-  private final List<LineSectionEntry> entries = new ArrayList<>();
+@SuppressWarnings("ALL")
+public class UDFMethod
+{
+    private final String key;
 
 
-  public void add(final LineSectionEntry entry) {
-    entries.add(entry);
-  }
-
-
-  public Iterator<LineSectionEntry> iterator() {
-    return entries.iterator();
-  }
-
+    public UDFMethod( final String key )
+    {
+        this.key = key;
+    }
 }

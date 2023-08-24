@@ -15,31 +15,29 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.agent.tracepoint.inst;
+package com.intergral.deep.test;
 
+import com.intergral.deep.agent.types.TracePointConfig;
+import java.util.ArrayList;
+import java.util.HashMap;
 
-import java.util.Set;
+public class MockTracepointConfig extends TracePointConfig {
 
-public class SetClassScanner implements IClassScanner {
+  public MockTracepointConfig() {
+    super("tp-id", "path", 123, new HashMap<>(), new ArrayList<>());
+  }
 
-  private final Set<String> classNames;
-
-
-  public SetClassScanner(final Set<String> classNames) {
-    this.classNames = classNames;
+  public MockTracepointConfig(final String path) {
+    super("tp-id", path, 123, new HashMap<>(), new ArrayList<>());
   }
 
 
-  @Override
-  public boolean scanClass(final Class<?> allLoadedClass) {
-    return this.classNames.contains(InstUtils.internalClass(allLoadedClass))
-        || this.classNames.contains(allLoadedClass.getSimpleName())
-        || allLoadedClass.getName().contains("$")
-        && this.classNames.contains(InstUtils.internalClassStripInner(allLoadedClass));
+  public MockTracepointConfig(final String path, final int line) {
+    super("tp-id", path, line, new HashMap<>(), new ArrayList<>());
   }
 
-  @Override
-  public boolean isComplete() {
-    return classNames.isEmpty();
+  public MockTracepointConfig withArg(final String key, final String value) {
+    this.getArgs().put(key, value);
+    return this;
   }
 }

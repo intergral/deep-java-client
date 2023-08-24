@@ -23,8 +23,15 @@ import com.intergral.deep.agent.types.TracePointConfig;
 
 public class TracepointUtils {
 
+  /**
+   * We normally get set the source file name, we need to convert this to a Java class name.
+   *
+   * @param tp the tracepoint to process
+   * @return the internal class name to install the tracepoint in, or {@code cfm} or {@code jsp} if the computed class is a CFM or JSP
+   * class.
+   */
   public static String estimatedClassRoot(final TracePointConfig tp) {
-    // the arg class_name is sent from ATP as it has the full class name already
+    // we allow the class name to be sent for specific cases
     final String className = tp.getArg("class_name", String.class, null);
     if (className != null) {
       return InstUtils.internalClass(className);
@@ -39,11 +46,12 @@ public class TracepointUtils {
   }
 
 
-  static String parseFullClassName(final String rawRelPath, final String srcRootArg) {
+  private static String parseFullClassName(final String rawRelPath, final String srcRootArg) {
+    // cf classes are handled specially
     if (rawRelPath.endsWith(".cfm") || rawRelPath.endsWith(".cfc")) {
       return "cfm";
     }
-
+    // jsp classes are handled specially
     if (rawRelPath.endsWith(".jsp")) {
       return "jsp";
     }

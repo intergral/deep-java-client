@@ -17,8 +17,17 @@
 
 package com.intergral.deep.agent.tracepoint.inst.jsp;
 
+import com.intergral.deep.agent.tracepoint.inst.InstUtils;
+import com.intergral.deep.agent.tracepoint.inst.jsp.sourcemap.SmapUtils;
+import com.intergral.deep.agent.tracepoint.inst.jsp.sourcemap.SourceMap;
+import com.intergral.deep.agent.tracepoint.inst.jsp.sourcemap.SourceMapParser;
+import com.intergral.deep.agent.types.TracePointConfig;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class JSPUtils {
 
@@ -75,5 +84,28 @@ public class JSPUtils {
       ioe.printStackTrace();
       return null;
     }
+  }
+
+  public static Set<TracePointConfig> loadJSPTracepoints(final Class<?> loadedClass,
+      final Map<String, TracePointConfig> jsp) {
+    return loadJSPTracepoints(getSourceMap(loadedClass), jsp);
+  }
+
+  public static Set<TracePointConfig> loadJSPTracepoints(final SourceMap sourceMap,
+      final Map<String, TracePointConfig> jsp) {
+    if (sourceMap == null) {
+      return Collections.emptySet();
+    }
+
+    final Set<TracePointConfig> matchedJsp = new HashSet<>();
+    final List<String> filenames = sourceMap.getFilenames();
+    for (Map.Entry<String, TracePointConfig> entry : jsp.entrySet()) {
+      final TracePointConfig value = entry.getValue();
+      final String fileName = InstUtils.fileName(value.getPath());
+      if (filenames.contains(fileName)) {
+        matchedJsp.add(value);
+      }
+    }
+    return matchedJsp;
   }
 }

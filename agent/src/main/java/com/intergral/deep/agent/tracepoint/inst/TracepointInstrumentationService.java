@@ -27,8 +27,8 @@ import com.intergral.deep.agent.tracepoint.inst.asm.TransformerUtils;
 import com.intergral.deep.agent.tracepoint.inst.asm.Visitor;
 import com.intergral.deep.agent.tracepoint.inst.jsp.JSPMappedBreakpoint;
 import com.intergral.deep.agent.tracepoint.inst.jsp.JSPUtils;
-import com.intergral.deep.agent.tracepoint.inst.jsp.SourceMap;
-import com.intergral.deep.agent.tracepoint.inst.jsp.SourceMapLineStartEnd;
+import com.intergral.deep.agent.tracepoint.inst.jsp.sourcemap.SourceMap;
+import com.intergral.deep.agent.tracepoint.inst.jsp.sourcemap.SourceMapLineStartEnd;
 import com.intergral.deep.agent.types.TracePointConfig;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
@@ -59,7 +59,17 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
   private final String jspSuffix;
   private final List<String> jspPackages;
 
-  private Map<String, Map<String, TracePointConfig>> classPrefixBreakpoints = new ConcurrentHashMap<>();
+  /**
+   * We process JSP classes specially, so we collect them all under this class key
+   */
+  private final String JSP_CLASS_KEY = "jsp";
+
+  /**
+   * We process CFM classes specially, so we collect them all under this class key
+   */
+  private final String CFM_CLASS_KEY = "cfm";
+
+  private Map<String, Map<String, TracePointConfig>> classPrefixTracepoints = new ConcurrentHashMap<>();
 
 
   public TracepointInstrumentationService(final Instrumentation inst, final Settings settings) {
@@ -68,65 +78,6 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
     //noinspection unchecked
     this.jspPackages = settings.getSettingAs("jsp.packages", List.class);
     this.jspSuffix = settings.getSettingAs("jsp.suffix", String.class);
-  }
-
-  static Set<TracePointConfig> loadJspBreakpoints(final Class<?> loadedClass,
-      final Map<String, TracePointConfig> jsp) {
-    return loadJspBreakpoints(JSPUtils.getSourceMap(loadedClass), jsp);
-  }
-
-  static Set<TracePointConfig> loadJspBreakpoints(final SourceMap sourceMap,
-      final Map<String, TracePointConfig> jsp) {
-    if (sourceMap == null) {
-      return Collections.emptySet();
-    }
-
-    final Set<TracePointConfig> matchedJsp = new HashSet<>();
-    final List<String> filenames = sourceMap.getFilenames();
-    for (Map.Entry<String, TracePointConfig> entry : jsp.entrySet()) {
-      final TracePointConfig value = entry.getValue();
-      final String fileName = InstUtils.fileName(value.getPath());
-      if (filenames.contains(fileName)) {
-        matchedJsp.add(value);
-      }
-    }
-    return matchedJsp;
-  }
-
-  static Set<TracePointConfig> loadCfBreakpoints(final URL location,
-      final Map<String, TracePointConfig> values) {
-    final Set<TracePointConfig> iBreakpoints = new HashSet<>();
-    final Collection<TracePointConfig> breakpoints = values.values();
-    for (TracePointConfig breakpoint : breakpoints) {
-      final String srcRoot = breakpoint.getArgs().get("src_root");
-      final String relPathFromNv = breakpoint.getPath();
-      final String locationString = location.toString();
-      if (srcRoot != null && locationString.endsWith(relPathFromNv.substring(srcRoot.length()))
-          || locationString.endsWith(relPathFromNv)
-          || relPathFromNv.startsWith("/src/main/cfml")
-          && locationString.endsWith(relPathFromNv.substring("/src/main/cfml".length()))
-      ) {
-        iBreakpoints.add(breakpoint);
-      }
-    }
-    return iBreakpoints;
-  }
-
-  static Set<TracePointConfig> loadCfBreakpoints(final String location,
-      final Map<String, TracePointConfig> values) {
-    if (location == null) {
-      return Collections.emptySet();
-    }
-    final Set<TracePointConfig> iBreakpoints = new HashSet<>();
-    final Collection<TracePointConfig> breakpoints = values.values();
-    for (TracePointConfig breakpoint : breakpoints) {
-      final String relPathFromNv = breakpoint.getPath();
-      // some versions of lucee use lowercase file names
-      if (Utils.endsWithIgnoreCase(relPathFromNv, location)) {
-        iBreakpoints.add(breakpoint);
-      }
-    }
-    return iBreakpoints;
   }
 
   public static TracepointInstrumentationService init(final Instrumentation inst,
@@ -148,8 +99,9 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
    */
   public synchronized void processBreakpoints(
       final Collection<TracePointConfig> breakpointResponse) {
-    final Map<String, Map<String, TracePointConfig>> existingBreakpoints = this.classPrefixBreakpoints;
-    final Set<String> newBreakpointOnExistingClasses = new HashSet<>();
+    // keep record of existing tracepoints
+    final Map<String, Map<String, TracePointConfig>> existingTracepoints = this.classPrefixTracepoints;
+    final Set<String> newTracepointOnExistingClasses = new HashSet<>();
     final Map<String, Map<String, TracePointConfig>> newBreakpoints = new HashMap<>();
 
     // process new breakpoints mapping to new breakpoints map { className -> { breakpoint id -> breakpoint } }
@@ -163,49 +115,49 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
 
         newBreakpoints.put(fullClass, value);
       }
-      final Map<String, TracePointConfig> existingConfig = existingBreakpoints.get(fullClass);
+      // track new tracepoints added to class that already has tracepoints on it
+      final Map<String, TracePointConfig> existingConfig = existingTracepoints.get(fullClass);
       if (existingConfig != null && !existingConfig.containsKey(tracePointConfig.getId())) {
-        newBreakpointOnExistingClasses.add(fullClass);
+        newTracepointOnExistingClasses.add(fullClass);
       }
     }
-    this.classPrefixBreakpoints = new ConcurrentHashMap<>(newBreakpoints);
+    // set the new config of the tracepoints
+    this.classPrefixTracepoints = new ConcurrentHashMap<>(newBreakpoints);
 
     // build class scanners
     final CompositeClassScanner compositeClassScanner = new CompositeClassScanner();
 
     // scanner to handle classes that no longer have classes and need transformed
     final IClassScanner removedTracepoints = reTransformClassesThatNoLongerHaveTracePoints(
-        new HashSet<>(existingBreakpoints.keySet()), new HashSet<>(newBreakpoints.keySet()));
+        new HashSet<>(existingTracepoints.keySet()), new HashSet<>(newBreakpoints.keySet()));
     compositeClassScanner.addScanner(removedTracepoints);
 
     // scanner to handle classes that now have tracepoints and need transformed
     final IClassScanner newClasses = reTransformClassesThatAreNew(
-        new HashSet<>(existingBreakpoints.keySet()),
+        new HashSet<>(existingTracepoints.keySet()),
         new HashSet<>(newBreakpoints.keySet()));
     compositeClassScanner.addScanner(newClasses);
 
     // scanner to handle classes that have tracepoints already, but the configs have changed
-    final SetClassScanner modifiedClasses = new SetClassScanner(newBreakpointOnExistingClasses);
+    final SetClassScanner modifiedClasses = new SetClassScanner(newTracepointOnExistingClasses);
     compositeClassScanner.addScanner(modifiedClasses);
 
     // scanner to handle JSP classes
-    if (this.classPrefixBreakpoints.containsKey("jsp") || existingBreakpoints.containsKey("jsp")) {
-      final Map<String, TracePointConfig> jsp = this.classPrefixBreakpoints.get("jsp");
-      final IClassScanner jspScanner = reTransFormJSPClasses(new HashMap<>(
-              jsp == null ? Collections.emptyMap() : jsp),
-          Utils.newMap(existingBreakpoints.get("jsp")));
+    if (this.classPrefixTracepoints.containsKey(JSP_CLASS_KEY) || existingTracepoints.containsKey(JSP_CLASS_KEY)) {
+      final Map<String, TracePointConfig> jsp = this.classPrefixTracepoints.get(this.JSP_CLASS_KEY);
+      final IClassScanner jspScanner = reTransFormJSPClasses(Utils.newMap(jsp),
+          Utils.newMap(existingTracepoints.get(this.JSP_CLASS_KEY)));
       compositeClassScanner.addScanner(jspScanner);
     }
 
     // scanner to handle CFM classes
-    if (this.classPrefixBreakpoints.containsKey("cfm") || existingBreakpoints.containsKey("cfm")) {
-      final Map<String, TracePointConfig> cfm = this.classPrefixBreakpoints.get("cfm");
-      final IClassScanner cfmScanner = reTransFormCfClasses(new HashMap<>(
-              cfm == null ? Collections.emptyMap() : cfm),
-          Utils.newMap(existingBreakpoints.get("cfm")));
+    if (this.classPrefixTracepoints.containsKey(CFM_CLASS_KEY) || existingTracepoints.containsKey(CFM_CLASS_KEY)) {
+      final Map<String, TracePointConfig> cfm = this.classPrefixTracepoints.get(CFM_CLASS_KEY);
+      final IClassScanner cfmScanner = reTransFormCfClasses(Utils.newMap(cfm),
+          Utils.newMap(existingTracepoints.get(CFM_CLASS_KEY)));
       compositeClassScanner.addScanner(cfmScanner);
     }
-    LOGGER.debug("New breakpoint config {}", this.classPrefixBreakpoints);
+    LOGGER.debug("New breakpoint config {}", this.classPrefixTracepoints);
 
     try {
       // scan loaded classes and transform
@@ -219,48 +171,97 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
     }
   }
 
-  private IClassScanner reTransFormJSPClasses(final Map<String, TracePointConfig> jsp,
-      final Map<String, TracePointConfig> oldJsp) {
-    final Map<String, TracePointConfig> removedBreakpoints = withRemoved(jsp, oldJsp);
-    return new JSPClassScanner(removedBreakpoints, this.jspSuffix, this.jspPackages);
+  /**
+   * Calculate the classes to scan for JSP
+   *
+   * @param newJSPState      the new JSP state
+   * @param previousJSPState the previous JSP state
+   * @return the JSP class scanner
+   */
+  private IClassScanner reTransFormJSPClasses(
+      final Map<String, TracePointConfig> newJSPState,
+      final Map<String, TracePointConfig> previousJSPState) {
+    final Map<String, TracePointConfig> allTracepoints = withRemoved(newJSPState, previousJSPState);
+    return new JSPClassScanner(allTracepoints, this.jspSuffix, this.jspPackages);
   }
 
-  Map<String, TracePointConfig> withRemoved(final Map<String, TracePointConfig> jsp,
-      final Map<String, TracePointConfig> oldJsp) {
-    final Set<String> newIds = jsp.keySet();
-    final Set<String> oldIds = oldJsp.keySet();
+  /**
+   * Add the removed tracepoints info the new state.
+   *
+   * @param newState      the new state of tracepoints
+   * @param previousState the previous state of tracepoints
+   * @return the newState plus any previous that have been removed
+   */
+  private Map<String, TracePointConfig> withRemoved(
+      final Map<String, TracePointConfig> newState,
+      final Map<String, TracePointConfig> previousState) {
+    final Set<String> newIds = newState.keySet();
+    final Set<String> oldIds = previousState.keySet();
 
     oldIds.removeAll(newIds);
 
     for (String oldId : oldIds) {
-      jsp.put(oldId, oldJsp.get(oldId));
+      newState.put(oldId, previousState.get(oldId));
     }
 
-    return jsp;
+    return newState;
   }
 
-  IClassScanner reTransFormCfClasses(final Map<String, TracePointConfig> cfm,
-      final Map<String, TracePointConfig> oldCfm) {
-    final Map<String, TracePointConfig> removedBreakpoints = withRemoved(cfm, oldCfm);
+  /**
+   * Calculate the classes to scan for CFM
+   *
+   * @param newCFMState      the new CFM state
+   * @param previousCFMState the previous CFM state
+   * @return the CFM class scanner
+   */
+  //exposed for testing
+  protected CFClassScanner reTransFormCfClasses(
+      final Map<String, TracePointConfig> newCFMState,
+      final Map<String, TracePointConfig> previousCFMState) {
+    final Map<String, TracePointConfig> allTracepoints = withRemoved(newCFMState, previousCFMState);
 
-    return new CFClassScanner(removedBreakpoints);
+    return new CFClassScanner(allTracepoints);
   }
 
-  public URL getLocation(final ProtectionDomain protectionDomain) {
+  private URL getLocation(final ProtectionDomain protectionDomain) {
     return protectionDomain.getCodeSource().getLocation();
   }
 
-  private IClassScanner reTransformClassesThatAreNew(final Set<String> existingClasses,
-      final Set<String> newClasses) {
-    newClasses.removeAll(existingClasses);
-    return new SetClassScanner(newClasses);
+  /**
+   * Calculate the classes that now have tracepoints but did not before.
+   * <p>
+   * e.g. If the classes {a, b, c} are the previous set and {a, d, e} is the new set. The result would be a set of {d,e}.
+   *
+   * @param previousState the list of classes that had tracepoints on them
+   * @param newState      the list of classes that now have tracepoints on them
+   * @return the set difference between the new and new previous
+   */
+  private IClassScanner reTransformClassesThatAreNew(final Set<String> previousState,
+      final Set<String> newState) {
+    newState.removeAll(previousState);
+    // jsp and cfm are processed special so ignore them here
+    previousState.remove(JSP_CLASS_KEY);
+    previousState.remove(CFM_CLASS_KEY);
+    return new SetClassScanner(newState);
   }
 
+  /**
+   * Calculate the classes that did have tracepoints but no longer do.
+   * <p>
+   * e.g. If the classes {a, b, c} are the previous set and {a, d, e} is the new set. The result would be a set of {b,c}.
+   *
+   * @param previousState the list of classes that had tracepoints on them
+   * @param newState      the list of classes that now have tracepoints on them
+   * @return the set difference between the previous and new state
+   */
   private IClassScanner reTransformClassesThatNoLongerHaveTracePoints(
-      final Set<String> existingClasses,
-      final Set<String> newClasses) {
-    existingClasses.removeAll(newClasses);
-    return new SetClassScanner(existingClasses);
+      final Set<String> previousState,
+      final Set<String> newState) {
+    previousState.removeAll(newState);
+    // jsp and cfm are processed special so ignore them here
+    previousState.remove(JSP_CLASS_KEY);
+    previousState.remove(CFM_CLASS_KEY);
+    return new SetClassScanner(previousState);
   }
 
   @Override
@@ -279,15 +280,15 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
     final Collection<TracePointConfig> matchedTracepoints = matchTracepoints(className,
         shortClassName);
     // no breakpoints for this class or any CF classes
-    if (matchedTracepoints.isEmpty() && !this.classPrefixBreakpoints.containsKey("cfm")
-        && !this.classPrefixBreakpoints.containsKey("jsp")) {
+    if (matchedTracepoints.isEmpty() && !this.classPrefixTracepoints.containsKey(CFM_CLASS_KEY)
+        && !this.classPrefixTracepoints.containsKey(JSP_CLASS_KEY)) {
       return null;
     }
     // no breakpoints for this class, but we have a cfm breakpoints, and this is a cfm class
     else if (matchedTracepoints.isEmpty()
-        && this.classPrefixBreakpoints.containsKey("cfm")
+        && this.classPrefixTracepoints.containsKey(CFM_CLASS_KEY)
         && CFUtils.isCfClass(classNameP)) {
-      final Map<String, TracePointConfig> cfm = this.classPrefixBreakpoints.get("cfm");
+      final Map<String, TracePointConfig> cfm = this.classPrefixTracepoints.get(CFM_CLASS_KEY);
       final URL location = getLocation(protectionDomain);
       if (location == null) {
         reader = new ClassReader(classfileBuffer);
@@ -295,9 +296,9 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
         // no need to expand frames here as we only need the version and source file
         reader.accept(cn, ClassReader.SKIP_FRAMES | ClassReader.SKIP_CODE);
         final String sourceFile = cn.sourceFile;
-        iBreakpoints = loadCfBreakpoints(sourceFile, cfm);
+        iBreakpoints = CFUtils.loadCfBreakpoints(sourceFile, cfm);
       } else {
-        iBreakpoints = loadCfBreakpoints(location, cfm);
+        iBreakpoints = CFUtils.loadCfBreakpoints(location, cfm);
       }
       if (iBreakpoints.isEmpty()) {
         return null;
@@ -306,7 +307,7 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
     }
     // no breakpoints for this class, but we have a jsp breakpoints, and this is a jsp class
     else if (matchedTracepoints.isEmpty()
-        && this.classPrefixBreakpoints.containsKey("jsp")
+        && this.classPrefixTracepoints.containsKey(JSP_CLASS_KEY)
         && JSPUtils.isJspClass(this.jspSuffix, this.jspPackages,
         InstUtils.externalClassName(className))) {
       isCf = false;
@@ -316,8 +317,8 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
         return null;
       }
 
-      final Collection<TracePointConfig> rawBreakpoints = loadJspBreakpoints(sourceMap,
-          this.classPrefixBreakpoints.get("jsp"));
+      final Collection<TracePointConfig> rawBreakpoints = JSPUtils.loadJSPTracepoints(sourceMap,
+          this.classPrefixTracepoints.get(JSP_CLASS_KEY));
       if (rawBreakpoints.isEmpty()) {
         LOGGER.debug("Cannot load tracepoints for class: {}", className);
         return null;
@@ -382,12 +383,12 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
 
   private Collection<TracePointConfig> matchTracepoints(final String className,
       final String shortClassName) {
-    final Map<String, TracePointConfig> classMatches = this.classPrefixBreakpoints.get(className);
+    final Map<String, TracePointConfig> classMatches = this.classPrefixTracepoints.get(className);
     if (classMatches != null) {
       return classMatches.values();
     }
 
-    final Map<String, TracePointConfig> shortClassMatches = this.classPrefixBreakpoints.get(
+    final Map<String, TracePointConfig> shortClassMatches = this.classPrefixTracepoints.get(
         shortClassName);
     if (shortClassMatches != null) {
       return shortClassMatches.values();

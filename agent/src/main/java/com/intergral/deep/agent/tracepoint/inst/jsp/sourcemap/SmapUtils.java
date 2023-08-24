@@ -15,7 +15,7 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.agent.tracepoint.inst.jsp;
+package com.intergral.deep.agent.tracepoint.inst.jsp.sourcemap;
 
 import static org.objectweb.asm.Opcodes.ASM7;
 

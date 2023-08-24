@@ -85,6 +85,13 @@ public class TracepointConfigService implements ITracepointConfig {
   }
 
   public void removeCustom(final TracePointConfig tracePointConfig) {
-    this.customTracepoints.removeIf(current -> current.getId().equals(tracePointConfig.getId()));
+    final boolean removed = this.customTracepoints.removeIf(current -> current.getId().equals(tracePointConfig.getId()));
+    if (removed) {
+      this.processChange();
+    }
+  }
+
+  public long lastUpdate() {
+    return this.lastUpdate;
   }
 }
