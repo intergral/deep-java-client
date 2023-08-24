@@ -2,6 +2,18 @@
 
 Here we have a few hints on how to develop this module.
 
+## Environment
+
+### Java SDK
+
+To set up the java environment we recommend using [SDKMAN](https://sdkman.io/). Once sdkman is installed simply run `sdk env` in the project
+root to set the JDK.
+
+### Building
+
+To simplify the building the maven build is split into a few profiles to reduce the build time. There are a few commands in
+the [`Makefile`](./Makefile) that can help with the builds.
+
 ## CF Debugging
 
 To debug in CF I found the easiest way is to use the docker. We can do this with this command:

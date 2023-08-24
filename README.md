@@ -19,7 +19,9 @@ Deep.start()
 
 There are a couple of examples [available here](./examples/README.md).
 
+## Developing
 
+For help developing this see [DEVELOPMENT.md](./DEVELOPMENT.md)
 
 ## Licensing
 
