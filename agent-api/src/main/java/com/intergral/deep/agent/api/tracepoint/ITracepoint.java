@@ -19,9 +19,7 @@ package com.intergral.deep.agent.api.tracepoint;
 
 import com.intergral.deep.agent.api.IRegistration;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
-import java.util.UUID;
 
 public interface ITracepoint {
 
@@ -29,17 +27,11 @@ public interface ITracepoint {
 
   int line();
 
-  default Map<String, String> args() {
-    return Collections.emptyMap();
-  }
+  Map<String, String> args();
 
-  default Collection<String> watches() {
-    return Collections.emptyList();
-  }
+  Collection<String> watches();
 
-  default String id() {
-    return UUID.randomUUID().toString();
-  }
+  String id();
 
   interface ITracepointRegistration extends IRegistration<ITracepoint> {
 

@@ -15,9 +15,17 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.agent.api;
+package com.intergral.deep.agent.api.spi;
 
-public interface DeepVersion {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-  public static final String VERSION = "${project.version}";
+import org.junit.jupiter.api.Test;
+
+class OrderedTest {
+
+  @Test
+  void order() {
+    assertEquals(0, new Ordered() {
+    }.order());
+  }
 }

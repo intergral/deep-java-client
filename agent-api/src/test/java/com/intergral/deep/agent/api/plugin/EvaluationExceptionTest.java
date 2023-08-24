@@ -15,9 +15,16 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.agent.api;
+package com.intergral.deep.agent.api.plugin;
 
-public interface DeepVersion {
+import static org.junit.jupiter.api.Assertions.*;
 
-  public static final String VERSION = "${project.version}";
+import org.junit.jupiter.api.Test;
+
+class EvaluationExceptionTest {
+
+  @Test
+  void getExpression() {
+    assertEquals("some expression", new EvaluationException("some expression", new RuntimeException()).getExpression());
+  }
 }

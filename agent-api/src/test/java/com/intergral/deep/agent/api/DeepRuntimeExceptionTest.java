@@ -17,7 +17,15 @@
 
 package com.intergral.deep.agent.api;
 
-public interface DeepVersion {
+import static org.junit.jupiter.api.Assertions.*;
 
-  public static final String VERSION = "${project.version}";
+import org.junit.jupiter.api.Test;
+
+class DeepRuntimeExceptionTest {
+
+  @Test
+  void runtimeException() {
+    assertEquals("Some message", new DeepRuntimeException("Some message").getMessage());
+    assertEquals("Some message", new DeepRuntimeException("Some message", new RuntimeException()).getMessage());
+  }
 }

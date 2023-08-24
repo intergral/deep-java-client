@@ -19,8 +19,10 @@ package com.intergral.deep.agent.api.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.NoSuchElementException;
 import org.junit.jupiter.api.Test;
 
 class CompoundIteratorTest {
@@ -43,5 +45,7 @@ class CompoundIteratorTest {
     assertTrue(iterator.hasNext());
     assertEquals("three_3", iterator.next());
     assertFalse(iterator.hasNext());
+    final NoSuchElementException noSuchElementException = assertThrows(NoSuchElementException.class, iterator::next);
+    assertEquals("end of compound iterator", noSuchElementException.getMessage());
   }
 }

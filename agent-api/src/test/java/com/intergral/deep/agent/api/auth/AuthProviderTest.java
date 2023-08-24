@@ -18,6 +18,7 @@
 package com.intergral.deep.agent.api.auth;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.intergral.deep.agent.api.auth.AuthProvider.NoopProvider;
 import com.intergral.deep.agent.api.plugin.IPlugin;
@@ -31,6 +32,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 class AuthProviderTest {
+
+  @Test
+  void coverage() {
+    // for coverage
+    //noinspection ObviousNullCheck,InstantiationOfUtilityClass
+    assertNotNull(new AuthProvider());
+  }
 
   @Test
   void canProvide() {
@@ -52,6 +60,15 @@ class AuthProviderTest {
     final IAuthProvider provider = AuthProvider.provider(settings, reflection);
 
     assertEquals(MockAuthProviderPlugin.class, provider.getClass());
+  }
+
+  @Test
+  void willUseNoopProvider() {
+    final ISettings settings = Mockito.mock(ISettings.class);
+    final IReflection reflection = Mockito.mock(IReflection.class);
+    final IAuthProvider provider = AuthProvider.provider(settings, reflection);
+    assertEquals(NoopProvider.class, provider.getClass());
+    assertEquals(Collections.emptyMap(), provider.provide());
   }
 
   public static class MockAuthProviderPlugin implements IPlugin, IAuthProvider {

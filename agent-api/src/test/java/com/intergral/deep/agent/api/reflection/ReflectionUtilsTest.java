@@ -15,9 +15,18 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.agent.api;
+package com.intergral.deep.agent.api.reflection;
 
-public interface DeepVersion {
+import static org.junit.jupiter.api.Assertions.*;
 
-  public static final String VERSION = "${project.version}";
+import org.junit.jupiter.api.Test;
+
+class ReflectionUtilsTest {
+
+  @Test
+  void coverage() {
+    // for coverage
+    //noinspection ObviousNullCheck,InstantiationOfUtilityClass
+    assertNotNull(new ReflectionUtils());
+  }
 }

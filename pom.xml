@@ -161,6 +161,7 @@
                                     <goal>sign</goal>
                                 </goals>
                                 <configuration>
+                                    <!--suppress MavenModelInspection -->
                                     <passphrase>${env.GPG_PASSPHRASE}</passphrase>
                                     <gpgArguments>
                                         <!--https://stackoverflow.com/questions/28859942/how-do-i-get-the-maven-gpg-plugin-to-use-a-passphrase-from-environment-variable-->
@@ -337,6 +338,72 @@
                                 <goals>
                                     <goal>check</goal>
                                 </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>coverage</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>0.8.10</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <!-- attached to Maven test phase -->
+                            <execution>
+                                <id>report</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                    <goal>report-aggregate</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>default-check</id>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <rule implementation="org.jacoco.maven.RuleConfiguration">
+                                            <element>BUNDLE</element>
+                                            <limits>
+                                                <limit implementation="org.jacoco.report.check.Limit">
+                                                    <counter>INSTRUCTION</counter>
+                                                    <value>COVEREDRATIO</value>
+                                                    <minimum>0</minimum>
+                                                </limit>
+                                                <limit implementation="org.jacoco.report.check.Limit">
+                                                    <counter>BRANCH</counter>
+                                                    <value>COVEREDRATIO</value>
+                                                    <minimum>0</minimum>
+                                                </limit>
+                                                <limit implementation="org.jacoco.report.check.Limit">
+                                                    <counter>CLASS</counter>
+                                                    <value>MISSEDCOUNT</value>
+                                                    <maximum>0</maximum>
+                                                </limit>
+                                                <limit implementation="org.jacoco.report.check.Limit">
+                                                    <counter>METHOD</counter>
+                                                    <value>MISSEDCOUNT</value>
+                                                    <maximum>0</maximum>
+                                                </limit>
+                                            </limits>
+                                        </rule>
+                                    </rules>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

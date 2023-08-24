@@ -18,6 +18,7 @@
 package com.intergral.deep.agent.api.utils;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class CompoundIterator<T> implements Iterator<T> {
 
@@ -47,7 +48,7 @@ public class CompoundIterator<T> implements Iterator<T> {
 
       @Override
       public T next() {
-        return null;
+        throw new NoSuchElementException("end of compound iterator");
       }
     };
   }

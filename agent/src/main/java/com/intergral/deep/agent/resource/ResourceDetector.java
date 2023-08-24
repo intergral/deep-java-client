@@ -5,7 +5,7 @@
 
 package com.intergral.deep.agent.resource;
 
-import com.intergral.deep.agent.api.resource.ConfigurationException;
+import com.intergral.deep.agent.api.DeepRuntimeException;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.resource.ResourceAttributes;
 import com.intergral.deep.agent.api.spi.ConditionalResourceProvider;
@@ -79,7 +79,7 @@ public class ResourceDetector {
       }
     } catch (UnsupportedEncodingException e) {
       // Should not happen since always using standard charset
-      throw new ConfigurationException("Unable to decode resource attributes.", e);
+      throw new DeepRuntimeException("Unable to decode resource attributes.", e);
     }
     String serviceName = settings.getSettingAs(SERVICE_NAME_PROPERTY, String.class);
     if (serviceName != null) {

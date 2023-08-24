@@ -33,3 +33,7 @@ build:
 .PHONY: install
 install:
 	mvn clean install -U -B -pl agent,deep --also-make $(MVN_ARGS)
+
+.PHONY: coverage
+coverage:
+	mvn clean verify -U -B -P coverage -pl '!it-tests/java-tests,!it-tests'

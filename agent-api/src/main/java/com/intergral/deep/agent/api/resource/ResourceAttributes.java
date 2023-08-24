@@ -5,7 +5,7 @@
 
 package com.intergral.deep.agent.api.resource;
 
-public class ResourceAttributes {
+public interface ResourceAttributes {
 
   /**
    * Logical name of the service.
@@ -20,20 +20,20 @@ public class ResourceAttributes {
    *       MUST be set to {@code unknown_service}.
    * </ul>
    */
-  public static final String SERVICE_NAME = "service.name";
+  String SERVICE_NAME = "service.name";
 
   /**
    * The name of the telemetry SDK as defined above.
    */
-  public static final String TELEMETRY_SDK_NAME = "telemetry.sdk.name";
+  String TELEMETRY_SDK_NAME = "telemetry.sdk.name";
 
   /**
    * The language of the telemetry SDK.
    */
-  public static final String TELEMETRY_SDK_LANGUAGE = "telemetry.sdk.language";
+  String TELEMETRY_SDK_LANGUAGE = "telemetry.sdk.language";
 
   /**
    * The version string of the telemetry SDK.
    */
-  public static final String TELEMETRY_SDK_VERSION = "telemetry.sdk.version";
+  String TELEMETRY_SDK_VERSION = "telemetry.sdk.version";
 }
