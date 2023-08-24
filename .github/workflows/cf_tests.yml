@@ -15,6 +15,6 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - name: Build agent
-        run: mvn package -U -B -pl agent --also-make -DskipTests
+        run: make package
       - name: Run CF Tests
-        run: mvn verify -U -B -P cf-it-tests -pl it-tests/cf-tests --also-make
+        run: make cf-tests

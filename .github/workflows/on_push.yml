@@ -21,7 +21,7 @@ jobs:
           cache: 'maven'
 
       - name: Run tests
-        run: mvn -U -B clean verify
+        run: make test
 
       # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
       - name: Update dependency graph
@@ -39,7 +39,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - name: Check Formatting
-        run: mvn -U -B validate -Plint,examples,cf-it-tests
+        run: make check-formatting
 
   pmd:
     runs-on: ubuntu-latest
@@ -53,7 +53,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - name: Run PMD check
-        run: mvn -U -B verify -Ppmd
+        run: make pmd
 
 
   docs:
@@ -68,5 +68,5 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - name: Run docs check
-        run: mvn -s .ci-settings.xml clean package javadoc:jar -DskipTests -P release-ossrh -B -U -pl agent,deep --also-make
+        run: make docs
 
