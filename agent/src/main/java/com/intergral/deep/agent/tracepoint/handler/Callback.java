@@ -19,6 +19,7 @@ package com.intergral.deep.agent.tracepoint.handler;
 
 import com.intergral.deep.agent.Utils;
 import com.intergral.deep.agent.api.plugin.IEvaluator;
+import com.intergral.deep.agent.api.plugin.LazyEvaluator;
 import com.intergral.deep.agent.push.PushService;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.tracepoint.TracepointConfigService;
@@ -88,7 +89,7 @@ public class Callback {
       final int lineNo,
       final Map<String, Object> variables) {
     try {
-      final IEvaluator evaluator = CFUtils.findCfEval(variables);
+      final IEvaluator evaluator = new LazyEvaluator(() -> CFUtils.findCfEval(variables));
       commonCallback(bpIds, filename, lineNo, variables, evaluator, CFFrameProcessor::new);
     } catch (Throwable t) {
       LOGGER.debug("Unable to process tracepoint {}:{}", filename, lineNo, t);
@@ -109,7 +110,7 @@ public class Callback {
       final int lineNo,
       final Map<String, Object> variables) {
     try {
-      final IEvaluator evaluator = EvaluatorService.createEvaluator();
+      final IEvaluator evaluator = new LazyEvaluator(EvaluatorService::createEvaluator);
       commonCallback(bpIds, filename, lineNo, variables, evaluator, FrameProcessor::new);
     } catch (Throwable t) {
       LOGGER.debug("Unable to process tracepoint {}:{}", filename, lineNo, t);

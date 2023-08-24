@@ -41,3 +41,8 @@ build/
 dispath/*
 
 _site/
+
+agent.log
+pom.xml.versionsBackup
+**/pom.xml.versionsBackup
+site.tar.gz
