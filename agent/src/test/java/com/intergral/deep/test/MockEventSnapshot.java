@@ -36,9 +36,12 @@ public class MockEventSnapshot extends EventSnapshot {
   }
 
   public MockEventSnapshot withFrames() {
-    this.getFrames().add(new StackFrame("file_name_1", 4321, "class_name_1", "methodName_1", true, true, new ArrayList<>()));
-    this.getFrames().add(new StackFrame("file_name_2", 321, "class_name_2", "methodName_2", false, true, new ArrayList<>()));
-    this.getFrames().add(new StackFrame("file_name_3", 21, "class_name_3", "methodName_3", true, false, new ArrayList<>()));
+    this.getFrames().add(new StackFrame("file_name_1", 4321, "class_name_1", "methodName_1", true, true, new ArrayList<>(),
+        null, -1));
+    this.getFrames().add(new StackFrame("file_name_2", 321, "class_name_2", "methodName_2", false, true, new ArrayList<>(),
+        null, -1));
+    this.getFrames().add(new StackFrame("file_name_3", 21, "class_name_3", "methodName_3", true, false, new ArrayList<>(),
+        null, -1));
 
     final VariableID someLocalVar = new VariableID("var-id-1", "someLocalVar", new HashSet<>(), null);
     final HashSet<String> modifiers = new HashSet<>();
@@ -49,7 +52,8 @@ public class MockEventSnapshot extends EventSnapshot {
     frameVariables.add(someLocalVar);
     frameVariables.add(someLocalVar2);
     frameVariables.add(someLocalVar3);
-    this.getFrames().add(new StackFrame("file_name_4", 1, "class_name_4", "methodName_4", false, false, frameVariables));
+    this.getFrames().add(new StackFrame("file_name_4", 1, "class_name_4", "methodName_4", false, false, frameVariables,
+        null, -1));
     return this;
   }
 

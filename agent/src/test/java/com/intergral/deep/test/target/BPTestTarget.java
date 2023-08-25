@@ -10,7 +10,7 @@ import java.util.Random;
  * plugin to see the code.
  */
 // @formatter:off
-@SuppressWarnings({"unused", "ThrowFromFinallyBlock"}) public class BPTestTarget extends BPSuperClass
+@SuppressWarnings("ALL") public class BPTestTarget extends BPSuperClass
 {
     private String name;
 
@@ -156,7 +156,7 @@ import java.util.Random;
     }
 
 
-    public void checkEnd( final int val, final int max ) throws Exception
+    public void conditionalThrow( final int val, final int max ) throws Exception
     {
         if( val > max )
         {

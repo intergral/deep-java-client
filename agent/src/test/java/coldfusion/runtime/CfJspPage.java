@@ -17,10 +17,25 @@
 
 package coldfusion.runtime;
 
-@SuppressWarnings("ALL")
-public abstract class CFPage extends CfJspPage
-{
+import coldfusion.tagext.io.OutputTag;
+import java.io.IOException;
+import javax.servlet.jsp.tagext.Tag;
 
-  @Override
-  protected abstract Object runPage() ;
+public abstract class CfJspPage {
+  public Tag parent;
+  public NeoPageContext pageContext = new NeoPageContext();
+  protected void bindPageVariables(VariableScope varscope, LocalScope locscope) {
+
+  }
+
+  protected Variable bindPageVariable(String varName, VariableScope varScope, LocalScope locScope) {
+    return null;
+  }
+  protected abstract Object runPage();
+
+  public Tag _initTag(Class clazz, int slot, Tag parent) throws IOException {
+    return new OutputTag();
+  }
+
+  public void _setCurrentLineNo(int lineNo) {}
 }

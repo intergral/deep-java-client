@@ -17,10 +17,15 @@
 
 package coldfusion.runtime;
 
-@SuppressWarnings("ALL")
-public abstract class CFPage extends CfJspPage
-{
+import javax.servlet.jsp.JspWriter;
+import org.apache.jasper.runtime.JspWriterImpl;
+import org.mockito.Mockito;
 
-  @Override
-  protected abstract Object runPage() ;
+public class NeoPageContext {
+
+  JspWriter getOut() {
+    return new JspWriterImpl();
+  }
+
+  void setPageEncoding(String encoding){}
 }

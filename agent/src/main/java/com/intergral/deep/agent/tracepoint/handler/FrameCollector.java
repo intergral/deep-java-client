@@ -22,6 +22,9 @@ import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.tracepoint.handler.bfs.Node;
 import com.intergral.deep.agent.tracepoint.inst.InstUtils;
+import com.intergral.deep.agent.tracepoint.inst.jsp.JSPUtils;
+import com.intergral.deep.agent.tracepoint.inst.jsp.sourcemap.SourceMap;
+import com.intergral.deep.agent.tracepoint.inst.jsp.sourcemap.SourceMapLookup;
 import com.intergral.deep.agent.types.TracePointConfig;
 import com.intergral.deep.agent.types.snapshot.StackFrame;
 import com.intergral.deep.agent.types.snapshot.Variable;
@@ -45,6 +48,8 @@ public class FrameCollector extends VariableProcessor {
   private final StackTraceElement[] stack;
 
   private final Map<String, String> varCache = new HashMap<>();
+  private final String jspSuffix;
+  private final List<String> jspPackages;
 
   public FrameCollector(final Settings settings, final IEvaluator evaluator,
       final Map<String, Object> variables,
@@ -53,6 +58,8 @@ public class FrameCollector extends VariableProcessor {
     this.evaluator = evaluator;
     this.variables = variables;
     this.stack = stack;
+    this.jspSuffix = settings.getSettingAs("jsp.suffix", String.class);
+    this.jspPackages = settings.getAsList("jsp.packages");
   }
 
   protected IFrameResult processFrame() {
@@ -87,8 +94,7 @@ public class FrameCollector extends VariableProcessor {
       final boolean collectVars,
       final int frameIndex) {
     final String className = stackTraceElement.getClassName();
-    final int lineNumber = stackTraceElement.getLineNumber();
-    final String fileName = getFileName(stackTraceElement);
+
     final boolean nativeMethod = stackTraceElement.isNativeMethod();
     final boolean appFrame = isAppFrame(stackTraceElement);
     final String methodName = getMethodName(stackTraceElement, variables, frameIndex);
@@ -99,14 +105,62 @@ public class FrameCollector extends VariableProcessor {
     } else {
       varIds = Collections.emptyList();
     }
+    final FileNameMapping mapping = getFileNameMapping(stackTraceElement, className);
 
-    return new StackFrame(fileName,
-        lineNumber,
+    return new StackFrame(mapping.fileName,
+        mapping.lineNumber,
         className,
         methodName,
         appFrame,
         nativeMethod,
-        varIds);
+        varIds,
+        mapping.transpiledFile,
+        mapping.transpiledLine);
+  }
+
+  private FileNameMapping getFileNameMapping(final StackTraceElement stackTraceElement, final String className) {
+
+    if (!JSPUtils.isJspClass(jspSuffix, jspPackages, className)) {
+      return new FileNameMapping(getFileName(stackTraceElement), stackTraceElement.getLineNumber(), null, -1);
+    }
+
+    Class<?> forName = null;
+    try {
+      forName = Class.forName(className);
+    } catch (ClassNotFoundException ignored) {
+      // not possible
+    }
+
+    if (forName == null) {
+      return new FileNameMapping(getFileName(stackTraceElement), stackTraceElement.getLineNumber(), null, -1);
+    }
+
+    final SourceMap sourceMap = JSPUtils.getSourceMap(forName);
+    if (sourceMap == null) {
+      return new FileNameMapping(getFileName(stackTraceElement), stackTraceElement.getLineNumber(), null, -1);
+    }
+
+    final SourceMapLookup lookup = sourceMap.lookup(stackTraceElement.getLineNumber());
+    final String jspFilename = lookup.getFilename();
+    final int jspLine = lookup.getLineNumber();
+    final String transpiledFile = getFileName(stackTraceElement);
+    final int transpiledLine = stackTraceElement.getLineNumber();
+    return new FileNameMapping(jspFilename, jspLine, transpiledFile, transpiledLine);
+  }
+
+  private static class FileNameMapping {
+
+    public final String fileName;
+    public final int lineNumber;
+    private final String transpiledFile;
+    private final int transpiledLine;
+
+    public FileNameMapping(final String fileName, final int lineNumber, final String transpiledFile, final int transpiledLine) {
+      this.fileName = fileName;
+      this.lineNumber = lineNumber;
+      this.transpiledFile = transpiledFile;
+      this.transpiledLine = transpiledLine;
+    }
   }
 
   protected Map<String, Object> selectVariables(final int frameIndex) {

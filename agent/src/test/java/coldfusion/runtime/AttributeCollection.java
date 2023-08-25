@@ -17,10 +17,8 @@
 
 package coldfusion.runtime;
 
-@SuppressWarnings("ALL")
-public abstract class CFPage extends CfJspPage
-{
+public class AttributeCollection {
 
-  @Override
-  protected abstract Object runPage() ;
+  public AttributeCollection(Object[] objects) {
+  }
 }

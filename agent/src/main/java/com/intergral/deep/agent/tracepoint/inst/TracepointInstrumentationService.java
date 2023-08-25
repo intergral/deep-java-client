@@ -223,7 +223,8 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
     return new CFClassScanner(allTracepoints);
   }
 
-  private URL getLocation(final ProtectionDomain protectionDomain) {
+  //exposed for tests
+  protected URL getLocation(final ProtectionDomain protectionDomain) {
     return protectionDomain.getCodeSource().getLocation();
   }
 

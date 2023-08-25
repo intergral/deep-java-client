@@ -15,12 +15,8 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package coldfusion.runtime;
+package coldfusion.tagext.io;
 
-@SuppressWarnings("ALL")
-public abstract class CFPage extends CfJspPage
-{
+public class FileTag {
 
-  @Override
-  protected abstract Object runPage() ;
 }

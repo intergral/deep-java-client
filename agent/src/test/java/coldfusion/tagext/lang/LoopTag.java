@@ -15,12 +15,8 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package coldfusion.runtime;
+package coldfusion.tagext.lang;
 
-@SuppressWarnings("ALL")
-public abstract class CFPage extends CfJspPage
-{
+public class LoopTag {
 
-  @Override
-  protected abstract Object runPage() ;
 }

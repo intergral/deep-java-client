@@ -28,10 +28,12 @@ public class StackFrame {
   private final boolean appFrame;
   private final boolean nativeFrame;
   private final Collection<VariableID> frameVariables;
+  private final String transpiledFile;
+  private final int transpiledLine;
 
   public StackFrame(final String fileName, final int lineNumber, final String className,
       final String methodName, final boolean appFrame, final boolean nativeFrame,
-      final Collection<VariableID> frameVariables) {
+      final Collection<VariableID> frameVariables, final String transpiledFile, final int transpiledLine) {
 
     this.className = className;
     this.fileName = fileName;
@@ -40,6 +42,8 @@ public class StackFrame {
     this.appFrame = appFrame;
     this.nativeFrame = nativeFrame;
     this.frameVariables = frameVariables;
+    this.transpiledFile = transpiledFile;
+    this.transpiledLine = transpiledLine;
   }
 
   public String getClassName() {
@@ -68,5 +72,13 @@ public class StackFrame {
 
   public Collection<VariableID> getFrameVariables() {
     return frameVariables;
+  }
+
+  public String getTranspiledFile() {
+    return transpiledFile;
+  }
+
+  public int getTranspiledLine() {
+    return transpiledLine;
   }
 }

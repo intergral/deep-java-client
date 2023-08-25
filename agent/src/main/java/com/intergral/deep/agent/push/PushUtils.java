@@ -26,6 +26,7 @@ import com.intergral.deep.proto.common.v1.AnyValue;
 import com.intergral.deep.proto.common.v1.KeyValue;
 import com.intergral.deep.proto.tracepoint.v1.Snapshot;
 import com.intergral.deep.proto.tracepoint.v1.StackFrame;
+import com.intergral.deep.proto.tracepoint.v1.StackFrame.Builder;
 import com.intergral.deep.proto.tracepoint.v1.TracePointConfig;
 import com.intergral.deep.proto.tracepoint.v1.Variable;
 import com.intergral.deep.proto.tracepoint.v1.WatchResult;
@@ -109,22 +110,29 @@ public class PushUtils {
 
   private static Iterable<? extends StackFrame> convertFrames(
       final Collection<com.intergral.deep.agent.types.snapshot.StackFrame> frames) {
-    return frames.stream().map(stackFrame -> StackFrame.newBuilder()
-        .setFileName(stackFrame.getFileName())
-        .setMethodName(stackFrame.getMethodName())
-        .setLineNumber(stackFrame.getLineNumber())
-        .setClassName(stackFrame.getClassName())
-        // Java does not have async frames or column Numbers
-        //.setIsAsync( false )
-        //.setColumnNumber( 0 )
-        //todo update for JSP
-//                    .setTranspiledFileName( "" )
-//                    .setTranspiledLineNumber( 0 )
-//                    .setTranspiledColumnNumber( 0 )
-        .addAllVariables(covertVariables(stackFrame.getFrameVariables()))
-        .setAppFrame(stackFrame.isAppFrame())
-        .setNativeFrame(stackFrame.isNativeFrame())
-        .build()).collect(Collectors.toList());
+    return frames.stream().map(stackFrame -> {
+      final Builder builder = StackFrame.newBuilder()
+          .setFileName(stackFrame.getFileName())
+          .setMethodName(stackFrame.getMethodName())
+          .setLineNumber(stackFrame.getLineNumber())
+          .setClassName(stackFrame.getClassName())
+          // Java does not have async frames or column Numbers
+          //.setIsAsync( false )
+          //.setColumnNumber( 0 )
+          // .setTranspiledColumnNumber(0)
+          .addAllVariables(covertVariables(stackFrame.getFrameVariables()))
+          .setAppFrame(stackFrame.isAppFrame())
+          .setNativeFrame(stackFrame.isNativeFrame());
+
+      // only set transpiled if they are set
+      if (stackFrame.getTranspiledFile() != null) {
+        builder.setTranspiledFileName(stackFrame.getTranspiledFile());
+      }
+      if (stackFrame.getTranspiledLine() != -1) {
+        builder.setTranspiledLineNumber(stackFrame.getTranspiledLine());
+      }
+      return builder.build();
+    }).collect(Collectors.toList());
   }
 
   private static Iterable<? extends com.intergral.deep.proto.tracepoint.v1.VariableID> covertVariables(

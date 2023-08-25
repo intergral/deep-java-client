@@ -17,10 +17,6 @@
 
 package coldfusion.runtime;
 
-@SuppressWarnings("ALL")
-public abstract class CFPage extends CfJspPage
-{
+public class LocalScope {
 
-  @Override
-  protected abstract Object runPage() ;
 }
