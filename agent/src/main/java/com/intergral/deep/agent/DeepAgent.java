@@ -151,7 +151,7 @@ public class DeepAgent implements IDeep {
 
   @Override
   public boolean isEnabled() {
-    return this.settings.getSettingAs(ISettings.KEY_ENABLED, Boolean.class);
+    return this.settings.isActive();
   }
 
   @Override

@@ -17,6 +17,7 @@
 
 package coldfusion.tagext.lang;
 
+@SuppressWarnings("ALL")
 public class LoopTag {
 
 }

@@ -17,6 +17,7 @@
 
 package coldfusion.runtime;
 
+@SuppressWarnings("ALL")
 public class AttributeCollection {
 
   public AttributeCollection(Object[] objects) {

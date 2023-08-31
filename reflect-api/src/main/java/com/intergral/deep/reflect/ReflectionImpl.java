@@ -27,6 +27,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -78,6 +79,7 @@ public class ReflectionImpl implements IReflection {
     if (method != null) {
       try {
         setAccessible(target.getClass(), method);
+        //noinspection unchecked
         return (T) method.invoke(target, args);
       } catch (IllegalAccessException | InvocationTargetException e) {
         return null;
@@ -173,6 +175,9 @@ public class ReflectionImpl implements IReflection {
   @Override
   public Set<String> getModifiers(final Field field) {
     final int modifiers = field.getModifiers();
+    if (modifiers == 0) {
+      return Collections.emptySet();
+    }
     final String string = Modifier.toString(modifiers);
     return Arrays.stream(string.split(" ")).collect(Collectors.toSet());
   }

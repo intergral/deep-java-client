@@ -15,18 +15,14 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package coldfusion.runtime;
+package lucee.runtime.type.scope;
 
-import javax.servlet.jsp.JspWriter;
-import org.apache.jasper.runtime.JspWriterImpl;
+import lucee.runtime.type.Collection.Key;
 
 @SuppressWarnings("ALL")
-public class NeoPageContext {
+public interface Undefined {
 
-  public JspWriter getOut() {
-    return new JspWriterImpl();
-  }
+  Object get(Key k);
 
-  public void setPageEncoding(String encoding) {
-  }
+  Object set(Key ket, Object obj);
 }

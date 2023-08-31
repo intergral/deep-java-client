@@ -17,6 +17,10 @@
 
 package coldfusion.runtime;
 
+@SuppressWarnings("ALL")
 public class Variable {
 
+  public void set(int i) {
+
+  }
 }

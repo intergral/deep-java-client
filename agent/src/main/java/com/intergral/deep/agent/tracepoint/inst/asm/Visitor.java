@@ -388,7 +388,7 @@ public class Visitor extends ClassVisitor {
             hook.add(new InsnNode(ATHROW));
             // } (end catch)
             hook.add(new LabelNode(
-                startFinally)); // we start the finally before we end the catch for some reason
+                startFinally)); // we start the 'finally' before we end the catch for some reason
             // 'bad' finally {
             // store exception in next slot
             hook.add(new VarInsnNode(ASTORE, varOffset + 1));
@@ -408,7 +408,7 @@ public class Visitor extends ClassVisitor {
               hook.add(new LdcInsnNode(bp.getId())); // bp id
               hook.add(new MethodInsnNode(INVOKEVIRTUAL, Type.getInternalName(HashSet.class), "add",
                   "(Ljava/lang/Object;)Z"));
-              hook.add(new InsnNode(POP)); // dont care about return
+              hook.add(new InsnNode(POP)); // don't care about return
             }
             // if we are a next line then we need to remove the start line label from the seen labels so
             // the variable capture in the finally does not capture variables defined on the line we are wrapping
@@ -447,17 +447,17 @@ public class Visitor extends ClassVisitor {
               // we want to insert here - as the throw will be 'caught' by the catch/finally we are inserting
               instructions.insert(node, hook);
             } else {
-              // if we are a next line then we need to insert before the previous
-              // the previous on next lines will be the 'label' for the next line
+              // if we are a next line then we need to insert before the previous instruction
+              // the previous instruction on next lines will be the 'label' for the next line
 
               // methodVisitor.visitFieldInsn( PUTFIELD, "com/nerdvision/agent/BPTestTarget", "name", "Ljava/lang/String;" );  - this is the line we are wrapping
               // Label label1 = new Label();
               // methodVisitor.visitLabel( label1 ); <- insert before this one
-              // methodVisitor.visitLineNumber( 32, label1 ); <- this it the node we are on
+              // methodVisitor.visitLineNumber( 32, label1 ); <- this is the node we are on
               // methodVisitor.visitInsn( RETURN ); <- this is the next line
               instructions.insertBefore(previous, hook);
             }
-            // remove the start so we know this line is done.
+            // remove the start, so we know this line is done.
             start = null;
             iBreakpoints.clear();
           }
@@ -481,6 +481,8 @@ public class Visitor extends ClassVisitor {
             // first line will be hit as all subsequent will be disabled
             final List<TracePointConfig> thisLineBps = lineNos.remove((long) ln.line);
             if (thisLineBps != null) {
+              // we track the breakpoints separate from the lineNos as we need to detect here what tracepoints should be installed,
+              // but we might need to use them in forth coming instructions for line end etc
               iBreakpoints.clear();
               iBreakpoints.addAll(thisLineBps);
             }
@@ -499,10 +501,18 @@ public class Visitor extends ClassVisitor {
             if (!iBreakpoints.isEmpty()) {
               start = ln.start;
               LOGGER.trace("visitMethod {} {} line number {}", classname, name, ln.line);
+              // we insert the normal hook here, so we can capture the line data.
+              // the try/catch/finally that is added later can be attached regardless of when this hook is
+              // added as long as we have appropriate label instructions (which we add later)
               final InsnList hook = getAbstractInsnNodes(seenLabels, ln, iBreakpoints);
 
               changed = true;
               instructions.insert(ln, hook);
+              if (isCf) {
+                // if we are CF we do not support line capture, so we always clear the tracepoints
+                // for non-cf the tracepoints are cleared after the try/finally is added (on the next instruction)
+                iBreakpoints.clear();
+              }
 
               LOGGER.debug("visitMethod {} {} patched @ {} {}", classname, name, ln.line, bps);
             }
@@ -510,13 +520,13 @@ public class Visitor extends ClassVisitor {
         }
 
         //  Use this to debug the raw byte code instruction changes in the even the visitors fail
-        //  if(changed)
-        //  {
-        //      for( AbstractInsnNode instruction : instructions )
-        //      {
-        //          System.out.println(InsnPrinter.prettyPrint( instruction ));
-        //      }
-        //  }
+//          if(changed)
+//          {
+//              for( AbstractInsnNode instruction : instructions )
+//              {
+//                  System.out.println(InsnPrinter.prettyPrint( instruction ));
+//              }
+//          }
 
         this.accept(jsrInlinerAdapter);
 

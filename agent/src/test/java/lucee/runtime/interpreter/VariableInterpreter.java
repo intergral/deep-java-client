@@ -15,18 +15,14 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package coldfusion.runtime;
+package lucee.runtime.interpreter;
 
-import javax.servlet.jsp.JspWriter;
-import org.apache.jasper.runtime.JspWriterImpl;
+import lucee.runtime.type.ref.VariableReference;
 
 @SuppressWarnings("ALL")
-public class NeoPageContext {
+public class VariableInterpreter {
 
-  public JspWriter getOut() {
-    return new JspWriterImpl();
-  }
-
-  public void setPageEncoding(String encoding) {
+  public static VariableReference getVariableReference(lucee.runtime.PageContext ctx, String name){
+    return new VariableReference();
   }
 }

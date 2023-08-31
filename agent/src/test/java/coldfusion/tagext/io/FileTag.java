@@ -17,6 +17,7 @@
 
 package coldfusion.tagext.io;
 
+@SuppressWarnings("ALL")
 public class FileTag {
 
 }

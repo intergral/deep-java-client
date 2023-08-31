@@ -15,18 +15,9 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package coldfusion.runtime;
-
-import javax.servlet.jsp.JspWriter;
-import org.apache.jasper.runtime.JspWriterImpl;
+package lucee.commons.color;
 
 @SuppressWarnings("ALL")
-public class NeoPageContext {
-
-  public JspWriter getOut() {
-    return new JspWriterImpl();
-  }
-
-  public void setPageEncoding(String encoding) {
-  }
+public class ConstantsDouble {
+public static Double _100 = Double.valueOf(100.0d);
 }

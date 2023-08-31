@@ -17,8 +17,21 @@
 
 package coldfusion.tagext.io;
 
-import javax.servlet.jsp.tagext.TagSupport;
+import coldfusion.tagext.GenericTag;
 
-public class OutputTag extends TagSupport {
+@SuppressWarnings("ALL")
+public class OutputTag extends GenericTag {
 
+  public int doStartTag(){
+    return 1;
+  }
+  public int doAfterBody(){
+    return 0;
+  }
+  public int doEndTag(){
+    return 0;
+  }
+  public int doCatch(){
+    return 0;
+  }
 }

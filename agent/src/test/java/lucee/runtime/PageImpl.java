@@ -15,18 +15,18 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package coldfusion.runtime;
+package lucee.runtime;
 
-import javax.servlet.jsp.JspWriter;
-import org.apache.jasper.runtime.JspWriterImpl;
+import lucee.runtime.type.UDFProperties;
 
 @SuppressWarnings("ALL")
-public class NeoPageContext {
+public class PageImpl
+{
+    protected UDFProperties[] udfs;
 
-  public JspWriter getOut() {
-    return new JspWriterImpl();
-  }
+    protected void setPageSource(PageSource source){}
 
-  public void setPageEncoding(String encoding) {
-  }
+    public static class SomePageImpl extends PageImpl {
+
+    }
 }

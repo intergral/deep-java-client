@@ -135,12 +135,12 @@ public class PushUtils {
     }).collect(Collectors.toList());
   }
 
-  private static Iterable<? extends com.intergral.deep.proto.tracepoint.v1.VariableID> covertVariables(
+  public static Collection<com.intergral.deep.proto.tracepoint.v1.VariableID> covertVariables(
       final Collection<VariableID> frameVariables) {
     return frameVariables.stream().map(PushUtils::convertVariableID).collect(Collectors.toList());
   }
 
-  private static Map<String, Variable> convertVarLookup(
+  public static Map<String, Variable> convertVarLookup(
       final Map<String, com.intergral.deep.agent.types.snapshot.Variable> varLookup) {
     return varLookup.entrySet()
         .stream()

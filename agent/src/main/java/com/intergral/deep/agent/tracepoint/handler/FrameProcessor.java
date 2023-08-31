@@ -66,10 +66,7 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
   }
 
   public void configureSelf() {
-    for (TracePointConfig tracePointConfig : this.filteredTracepoints) {
-      this.frameConfig.process(tracePointConfig);
-    }
-    this.frameConfig.close();
+    configureSelf(this.filteredTracepoints);
   }
 
   public Collection<EventSnapshot> collect() {

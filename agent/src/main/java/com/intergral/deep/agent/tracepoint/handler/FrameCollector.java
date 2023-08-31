@@ -17,6 +17,7 @@
 
 package com.intergral.deep.agent.tracepoint.handler;
 
+import com.intergral.deep.agent.Utils;
 import com.intergral.deep.agent.api.plugin.IEvaluator;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.settings.Settings;
@@ -47,7 +48,6 @@ public class FrameCollector extends VariableProcessor {
   protected final Map<String, Object> variables;
   private final StackTraceElement[] stack;
 
-  private final Map<String, String> varCache = new HashMap<>();
   private final String jspSuffix;
   private final List<String> jspPackages;
 
@@ -214,23 +214,6 @@ public class FrameCollector extends VariableProcessor {
     return true;
   }
 
-  private boolean checkVarCount() {
-    return varCache.size() <= this.frameConfig.maxVariables();
-  }
-
-  @Override
-  protected String checkId(final String identity) {
-    return this.varCache.get(identity);
-  }
-
-  @Override
-  protected String newVarId(final String identity) {
-    final int size = this.varCache.size();
-    final String newId = String.valueOf(size + 1);
-    this.varCache.put(identity, newId);
-    return newId;
-  }
-
   protected boolean isAppFrame(final StackTraceElement stackTraceElement) {
     final List<String> inAppInclude = settings.getAsList("in.app.include");
     final List<String> inAppExclude = settings.getAsList("in.app.exclude");
@@ -255,7 +238,7 @@ public class FrameCollector extends VariableProcessor {
     if (stackTraceElement.getFileName() == null) {
       return InstUtils.shortClassName(stackTraceElement.getClassName());
     }
-    return stackTraceElement.getFileName();
+    return Utils.trimPrefix(stackTraceElement.getFileName(), "/");
   }
 
   protected String getMethodName(final StackTraceElement stackTraceElement,

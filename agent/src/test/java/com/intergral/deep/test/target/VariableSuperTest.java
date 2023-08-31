@@ -15,18 +15,13 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package coldfusion.runtime;
-
-import javax.servlet.jsp.JspWriter;
-import org.apache.jasper.runtime.JspWriterImpl;
+package com.intergral.deep.test.target;
 
 @SuppressWarnings("ALL")
-public class NeoPageContext {
+public class VariableSuperTest extends VariableSuperSuperTest {
 
-  public JspWriter getOut() {
-    return new JspWriterImpl();
-  }
-
-  public void setPageEncoding(String encoding) {
-  }
+  public static int i = 9;
+  protected static float f = 8.8f;
+  static long l = 8L;
+  private static double d = 9.8d;
 }

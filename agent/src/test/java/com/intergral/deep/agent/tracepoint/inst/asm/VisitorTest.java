@@ -36,6 +36,7 @@ import com.intergral.deep.agent.tracepoint.inst.InstUtils;
 import com.intergral.deep.agent.tracepoint.inst.TracepointInstrumentationService;
 import com.intergral.deep.agent.types.TracePointConfig;
 import com.intergral.deep.agent.types.snapshot.EventSnapshot;
+import com.intergral.deep.agent.types.snapshot.StackFrame;
 import com.intergral.deep.proto.tracepoint.v1.Snapshot;
 import com.intergral.deep.proto.tracepoint.v1.Variable;
 import com.intergral.deep.test.MockTracepointConfig;
@@ -43,6 +44,7 @@ import com.intergral.deep.test.target.BPTestTarget;
 import com.intergral.deep.tests.inst.ByteClassLoader;
 import com.intergral.deep.tests.snapshot.SnapshotUtils;
 import com.intergral.deep.tests.snapshot.SnapshotUtils.IVariableScan;
+import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -65,6 +67,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspFactory;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
+import lucee.runtime.PageSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -1271,37 +1274,48 @@ class VisitorTest {
     assertEquals("someFunctionWithABody", snapshot.getFrames(0).getMethodName());
   }
 
-  // cannot seem to load cf class files
-  // consistent issues with verifier
-//  @Test
-//  void cfVisitor() throws Exception {
-//    final MockTracepointConfig tracepointConfig = new MockTracepointConfig("/src/main/cfml/testFile.cfm", 3);
-//    tracepointRef.set(Collections.singletonList(tracepointConfig));
-//    // we need to process the cfm tracepoints
-//    instrumentationService.processBreakpoints(Collections.singletonList(tracepointConfig));
-//
-//    final String name = "cftestFile2ecfm137384933";
-//    final ByteClassLoader byteClassLoader = ByteClassLoader.forFile(name);
-//    final byte[] originalBytes = byteClassLoader.getBytes(name);
-//
-//    // for adobe cf we need a location url to be set
-//    cfUrl.set(new URL("file:///src/main/cfml/testFile.cfm"));
-//
-//    final byte[] transformed = instrumentationService.transform(null, name, null, null, originalBytes);
-//    // we do this here so each test can save the modified bytes, else as they all use the same target class they would stomp over each other
-//    TransformerUtils.storeUnsafe(disPath, originalBytes, transformed, name + Thread.currentThread().getStackTrace()[1].getMethodName());
-//
-//    assertNotNull(transformed, "Failed to transform the test class!");
-//    assertNotEquals(originalBytes.length, transformed.length);
-//
-//    byteClassLoader.setBytes("coldfusion.runtime.CfJspPage", ByteClassLoader.loadBytes("coldfusion/runtime/CfJspPage"));
-//    byteClassLoader.setBytes("coldfusion.runtime.CFPage", ByteClassLoader.loadBytes("coldfusion/runtime/CFPage"));
+
+  @Test
+  void cfVisitor() throws Exception {
+    final MockTracepointConfig tracepointConfig = new MockTracepointConfig("/src/main/cfml/testFile.cfm", 3);
+    tracepointRef.set(Collections.singletonList(tracepointConfig));
+    // we need to process the cfm tracepoints
+    instrumentationService.processBreakpoints(Collections.singletonList(tracepointConfig));
+
+    final String name = "cftestFile2ecfm137384933";
+    final ByteClassLoader byteClassLoader = ByteClassLoader.forFile(name);
+    final byte[] originalBytes = byteClassLoader.getBytes(name);
+
+    final JspFactory jspFactory = Mockito.mock(JspFactory.class);
+    final PageContext pageContext = Mockito.mock(PageContext.class);
+    final JspWriter jspWriter = Mockito.mock(JspWriter.class);
+    Mockito.when(pageContext.getOut()).thenReturn(jspWriter);
+
+    JspFactory.setDefaultFactory(jspFactory);
+    Mockito.when(jspFactory.getPageContext(Mockito.any(Servlet.class), Mockito.any(ServletRequest.class), Mockito.any(
+            ServletResponse.class), Mockito.eq(null), Mockito.anyBoolean(), Mockito.anyInt(), Mockito.anyBoolean()))
+        .thenReturn(pageContext);
+
+    // for adobe cf we need a location url to be set
+    cfUrl.set(new URL("file:///src/main/cfml/testFile.cfm"));
+
+    final byte[] transformed = instrumentationService.transform(null, name, null, null, originalBytes);
+    // we do this here so each test can save the modified bytes, else as they all use the same target class they would stomp over each other
+    TransformerUtils.storeUnsafe(disPath, originalBytes, transformed, name + Thread.currentThread().getStackTrace()[1].getMethodName());
+
+    assertNotNull(transformed, "Failed to transform the test class!");
+    assertNotEquals(originalBytes.length, transformed.length);
+
+    // we cannot load the cf class in test case for some reason
+    // consistent issues with verifier
 //    byteClassLoader.setBytes(name, transformed);
-//    byteClassLoader.loadClass("java.lang.Object");
-//    final Class<?> jspPageClass = byteClassLoader.loadClass("coldfusion.runtime.CfJspPage");
-//    assertNotNull(jspPageClass);
-//    final Class<?> pageClass = byteClassLoader.loadClass("coldfusion.runtime.CFPage");
-//    assertNotNull(pageClass);
+//    final List<String> classes = Arrays.asList("java.lang.Object", "coldfusion.tagext.io.OutputTag", "coldfusion.runtime.NeoPageContext",
+//        "coldfusion.runtime.CfJspPage", "coldfusion.runtime.CFPage");
+//    for (String s : classes) {
+//      final Class<?> aClass = byteClassLoader.loadClass(s);
+//      assertNotNull(aClass);
+//      assertEquals(aClass.getName(), s);
+//    }
 //    final Class<?> aClass = byteClassLoader.loadClass(name);
 //
 //    final Constructor<?> constructor = aClass.getConstructor();
@@ -1314,8 +1328,8 @@ class VisitorTest {
 //
 //    Mockito.verify(pushService, Mockito.times(1))
 //        .pushSnapshot(argumentCaptor.capture(), Mockito.any());
-//
-//  }
+
+  }
 
 
   @Test
@@ -1375,5 +1389,49 @@ class VisitorTest {
     assertEquals(9, snapshot.getFrames(0).getLineNumber());
     assertEquals("string_jsp.java", snapshot.getFrames(0).getTranspiledFileName());
     assertEquals(127, snapshot.getFrames(0).getTranspiledLineNumber());
+  }
+
+  @Test
+  void luceeVisitorTest()
+      throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    final MockTracepointConfig tracepointConfig = new MockTracepointConfig("/tests/testFile.cfm", 3);
+    tracepointRef.set(Collections.singletonList(tracepointConfig));
+    // we need to process the jsp tracepoints
+    instrumentationService.processBreakpoints(Collections.singletonList(tracepointConfig));
+
+    cfUrl.set(new URL("file:///tests/testFile.cfm"));
+    final String name = "testfile_cfm$cf";
+    final ByteClassLoader byteClassLoader = ByteClassLoader.forFile(name);
+    final byte[] originalBytes = byteClassLoader.getBytes(name);
+
+    final byte[] transformed = instrumentationService.transform(null, name, null, null, originalBytes);
+    // we do this here so each test can save the modified bytes, else as they all use the same target class they would stomp over each other
+    TransformerUtils.storeUnsafe(disPath, originalBytes, transformed, name + Thread.currentThread().getStackTrace()[1].getMethodName());
+
+    assertNotNull(transformed, "Failed to transform test class.");
+    assertNotEquals(originalBytes.length, transformed.length);
+
+    final String className = InstUtils.externalClassName(name);
+    byteClassLoader.setBytes(className, transformed);
+    final Class<?> aClass = byteClassLoader.loadClass(className);
+
+    final Constructor<?> constructor = aClass.getConstructor(PageSource.class);
+    final Object instance = constructor.newInstance(new PageSource());
+    final Method call = aClass.getMethod("call", lucee.runtime.PageContext.class);
+    call.invoke(instance, new lucee.runtime.PageContext());
+
+    final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
+
+    Mockito.verify(pushService, Mockito.times(1))
+        .pushSnapshot(argumentCaptor.capture(), Mockito.any());
+
+    final EventSnapshot value = argumentCaptor.getValue();
+    assertNotNull(value);
+    // Cannot really verify variables as we are using fake classes to run this test
+
+    final StackFrame stackFrame = value.getFrames().iterator().next();
+    assertEquals("testFile.cfm", stackFrame.getFileName());
+    assertEquals(3, stackFrame.getLineNumber());
+    assertEquals("testfile_cfm$cf", stackFrame.getClassName());
   }
 }

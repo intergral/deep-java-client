@@ -19,8 +19,10 @@ package coldfusion.runtime;
 
 import coldfusion.tagext.io.OutputTag;
 import java.io.IOException;
+import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.Tag;
 
+@SuppressWarnings("ALL")
 public abstract class CfJspPage {
   public Tag parent;
   public NeoPageContext pageContext = new NeoPageContext();
@@ -38,4 +40,8 @@ public abstract class CfJspPage {
   }
 
   public void _setCurrentLineNo(int lineNo) {}
+
+  public void _whitespace(JspWriter out, String msg){
+
+  }
 }

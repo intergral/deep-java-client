@@ -85,6 +85,10 @@ public class Node {
   public interface IParent {
 
     void addChild(final VariableID child);
+
+    default boolean isCollection(){
+      return false;
+    }
   }
 
 
@@ -94,6 +98,9 @@ public class Node {
   }
 
 
+  /**
+   * This type wraps an Object that we are to process. They simply acts as a reference to the read data during the Breadth First search.
+   */
   public static class NodeValue {
 
     private final String key;
