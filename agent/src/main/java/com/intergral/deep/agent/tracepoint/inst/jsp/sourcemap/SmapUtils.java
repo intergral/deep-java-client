@@ -24,16 +24,12 @@ import java.io.InputStream;
 import java.net.URL;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * Use getResource and getResourceAsStream from class loaders to get Debug Source of loaded
- * classes.
- *
- * @author nwightma
- * @since 1.0.2
- */
 public final class SmapUtils {
 
+  private final static Logger LOGGER = LoggerFactory.getLogger(SmapUtils.class);
   private SmapUtils() {
   }
 
@@ -49,7 +45,7 @@ public final class SmapUtils {
           final InputStream in = resource.openStream();
           return parseStream(in);
         } catch (Throwable t) {
-          t.printStackTrace();
+          LOGGER.error("Could not parse source map for class {}", c.getName(), t);
         }
       } else {
         try {
@@ -58,7 +54,7 @@ public final class SmapUtils {
             return parseStream(in);
           }
         } catch (Throwable t) {
-          t.printStackTrace();
+          LOGGER.error("Could not parse source map for class {}", c.getName(), t);
         }
       }
 
@@ -72,7 +68,7 @@ public final class SmapUtils {
         final InputStream in = resource.openStream();
         return parseStream(in);
       } catch (Throwable t) {
-        t.printStackTrace();
+        LOGGER.error("Could not parse source map for class {}", c.getName(), t);
       }
     }
 
