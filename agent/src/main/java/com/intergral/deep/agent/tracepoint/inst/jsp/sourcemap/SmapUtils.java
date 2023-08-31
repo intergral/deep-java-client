@@ -32,7 +32,7 @@ import org.objectweb.asm.ClassVisitor;
  * @author nwightma
  * @since 1.0.2
  */
-public class SmapUtils {
+public final class SmapUtils {
 
   private SmapUtils() {
   }
@@ -92,7 +92,7 @@ public class SmapUtils {
   }
 
 
-  protected static String scan(ClassReader reader) {
+  private static String scan(ClassReader reader) {
     final Visitor v = new Visitor();
     reader.accept(v, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES);
     return v.getDebug();

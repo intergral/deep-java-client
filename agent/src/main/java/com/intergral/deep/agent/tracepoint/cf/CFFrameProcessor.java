@@ -56,7 +56,7 @@ public class CFFrameProcessor extends FrameProcessor {
 
   @Override
   protected Map<String, Object> selectVariables(final int frameIndex) {
-    if (frameIndex != 0 || getTracepointConfig("cf.raw", Boolean.class, false)) {
+    if (frameIndex != 0 || frameConfig.isCfRaw()) {
       return super.selectVariables(frameIndex);
     }
 

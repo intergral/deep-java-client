@@ -21,7 +21,10 @@ import com.intergral.deep.agent.api.DeepRuntimeException;
 import com.intergral.deep.agent.api.settings.ISettings;
 import java.lang.reflect.Constructor;
 
-public class ReflectionUtils {
+public final class ReflectionUtils {
+
+  private ReflectionUtils() {
+  }
 
   public static <T> T callConstructor(final Constructor<?> constructor, final ISettings settings, final IReflection reflection) {
     if (constructor.getParameterTypes().length == 0) {

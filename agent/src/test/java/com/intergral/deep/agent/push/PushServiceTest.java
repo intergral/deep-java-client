@@ -17,6 +17,7 @@
 
 package com.intergral.deep.agent.push;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,6 +29,7 @@ import com.intergral.deep.agent.api.plugin.ISnapshotContext;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
 import com.intergral.deep.agent.grpc.GrpcService;
+import com.intergral.deep.agent.push.PushService.LoggingObserver;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.proto.common.v1.KeyValue;
 import com.intergral.deep.proto.tracepoint.v1.Snapshot;
@@ -55,6 +57,14 @@ class PushServiceTest {
 
     settings = Settings.build(map);
     pushService = new PushService(settings, grpcService);
+  }
+
+  @Test
+  void snapshotLogger() {
+    final LoggingObserver observer = new LoggingObserver("test id");
+    assertDoesNotThrow(() -> observer.onError(new RuntimeException("test exception")));
+    assertDoesNotThrow(() -> observer.onNext(null));
+    assertDoesNotThrow(observer::onCompleted);
   }
 
   @Test

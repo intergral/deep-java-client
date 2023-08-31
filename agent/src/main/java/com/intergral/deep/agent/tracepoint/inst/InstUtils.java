@@ -17,7 +17,10 @@
 
 package com.intergral.deep.agent.tracepoint.inst;
 
-public class InstUtils {
+public final class InstUtils {
+
+  private InstUtils() {
+  }
 
   public static String externalClassName(final String className) {
     return className.replaceAll("/", ".");

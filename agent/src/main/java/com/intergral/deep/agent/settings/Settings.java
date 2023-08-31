@@ -79,6 +79,7 @@ public class Settings implements ISettings {
       properties.load(resourceAsStream);
     } catch (IOException e) {
       // logging is not initialized until after the settings class
+      //noinspection CallToPrintStackTrace
       e.printStackTrace();
     }
 
@@ -219,13 +220,13 @@ public class Settings implements ISettings {
 
   public String getServiceHost() {
     final String serviceUrl = getSettingAs(ISettings.KEY_SERVICE_URL, String.class);
-    if (serviceUrl.contains("://")) {
+    if (serviceUrl != null && serviceUrl.contains("://")) {
       try {
         return new URL(serviceUrl).getHost();
       } catch (MalformedURLException e) {
         throw new InvalidConfigException(ISettings.KEY_SERVICE_URL, serviceUrl, e);
       }
-    } else if (serviceUrl.contains(":")) {
+    } else if (serviceUrl != null && serviceUrl.contains(":")) {
       return serviceUrl.split(":")[0];
     }
 
@@ -234,13 +235,13 @@ public class Settings implements ISettings {
 
   public int getServicePort() {
     final String serviceUrl = getSettingAs(ISettings.KEY_SERVICE_URL, String.class);
-    if (serviceUrl.contains("://")) {
+    if (serviceUrl != null && serviceUrl.contains("://")) {
       try {
         return new URL(serviceUrl).getPort();
       } catch (MalformedURLException e) {
         throw new InvalidConfigException(ISettings.KEY_SERVICE_URL, serviceUrl, e);
       }
-    } else if (serviceUrl.contains(":")) {
+    } else if (serviceUrl != null && serviceUrl.contains(":")) {
       return Integer.parseInt(serviceUrl.split(":")[1]);
     }
 
@@ -283,7 +284,7 @@ public class Settings implements ISettings {
   }
 
   public void removePlugin(final IPlugin plugin) {
-    this.plugins.removeIf(iPlugin -> iPlugin.name().equals(plugin.name()));
+    this.customPlugins.removeIf(iPlugin -> iPlugin.name().equals(plugin.name()));
   }
 
   @Override

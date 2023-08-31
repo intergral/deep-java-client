@@ -37,6 +37,8 @@ public class FrameConfig {
   private int maxWatchVars = -1;
   private int maxTpProcessTime = -1;
 
+  private boolean cfRaw = false;
+
   public void process(final TracePointConfig tracePointConfig) {
     maxVarDepth = Math.max(tracePointConfig.getArg("MAX_VAR_DEPTH", Integer.class, -1),
         maxVarDepth);
@@ -68,6 +70,11 @@ public class FrameConfig {
       } else if (stackType.equals(TracePointConfig.STACK)) {
         this.stackType = stackType;
       }
+    }
+
+    final Boolean cfRaw = tracePointConfig.getArg("cf.raw", Boolean.class, null);
+    if (cfRaw != null && cfRaw) {
+      this.cfRaw = true;
     }
   }
 
@@ -109,5 +116,9 @@ public class FrameConfig {
 
   public int maxCollectionSize() {
     return this.maxCollectionSize;
+  }
+
+  public boolean isCfRaw() {
+    return this.cfRaw;
   }
 }

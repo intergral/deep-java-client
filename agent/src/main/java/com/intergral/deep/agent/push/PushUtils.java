@@ -35,7 +35,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class PushUtils {
+public final class PushUtils {
+
+  private PushUtils() {
+  }
 
   public static Snapshot convertToGrpc(final EventSnapshot snapshot) {
     return Snapshot.newBuilder()

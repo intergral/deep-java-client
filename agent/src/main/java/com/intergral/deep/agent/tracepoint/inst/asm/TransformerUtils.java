@@ -17,8 +17,6 @@
 
 package com.intergral.deep.agent.tracepoint.inst.asm;
 
-import static org.objectweb.asm.Opcodes.ACC_ABSTRACT;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -26,7 +24,10 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-public class TransformerUtils {
+public final class TransformerUtils {
+
+  private TransformerUtils() {
+  }
 
   private static final List<String> EXCLUDE_PACKAGES = Collections.emptyList();
   private static final List<String> EXCLUDE_CONTAINS = Collections.emptyList();
@@ -109,10 +110,5 @@ public class TransformerUtils {
     }
 
     return false;
-  }
-
-
-  public static boolean isAbstract(final int access) {
-    return (access & ACC_ABSTRACT) == ACC_ABSTRACT;
   }
 }

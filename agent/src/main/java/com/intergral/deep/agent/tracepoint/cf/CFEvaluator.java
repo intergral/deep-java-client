@@ -18,7 +18,8 @@
 package com.intergral.deep.agent.tracepoint.cf;
 
 import com.intergral.deep.agent.api.plugin.AbstractEvaluator;
-import java.lang.reflect.InvocationTargetException;
+import com.intergral.deep.agent.api.plugin.IEvaluator;
+import com.intergral.deep.agent.api.plugin.LazyEvaluator.IEvaluatorLoader;
 import java.lang.reflect.Method;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -42,9 +43,24 @@ public class CFEvaluator extends AbstractEvaluator {
   public Object evaluateExpression(final String expression, final Map<String, Object> values) {
     try {
       return evaluate.invoke(page, expression);
-    } catch (IllegalAccessException | InvocationTargetException e) {
+    } catch (Throwable e) {
       LOGGER.debug("Unable to evaluate expression {}", expression);
     }
     return null;
+  }
+
+  public static class Loader implements IEvaluatorLoader {
+
+    private final Map<String, Object> variables;
+
+    public Loader(final Map<String, Object> variables) {
+
+      this.variables = variables;
+    }
+
+    @Override
+    public IEvaluator load() {
+      return CFUtils.findCfEval(variables);
+    }
   }
 }

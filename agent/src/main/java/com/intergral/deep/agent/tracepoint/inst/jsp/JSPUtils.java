@@ -28,9 +28,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JSPUtils {
 
+  private final static Logger LOGGER = LoggerFactory.getLogger(JSPUtils.class);
   private JSPUtils() {
   }
 
@@ -45,7 +48,7 @@ public class JSPUtils {
   private static String getJspClassname(final String jspSuffix,
       final List<String> jspPackages,
       final String className) {
-    if (jspSuffix.isEmpty() || className.endsWith(jspSuffix)) {
+    if (jspSuffix == null || jspSuffix.isEmpty() || className.endsWith(jspSuffix)) {
       for (final String jspPackage : jspPackages) {
         if (className.startsWith(jspPackage)) {
           return className.substring(jspPackage.length() + 1);
@@ -69,7 +72,7 @@ public class JSPUtils {
       }
       return null;
     } catch (IOException ioe) {
-      ioe.printStackTrace();
+      LOGGER.error("Failed to load source map", ioe);
       return null;
     }
   }
@@ -81,7 +84,7 @@ public class JSPUtils {
       final SourceMapParser parser = new SourceMapParser(rtn);
       return parser.parse();
     } catch (IOException ioe) {
-      ioe.printStackTrace();
+      LOGGER.error("Failed to load source map", ioe);
       return null;
     }
   }

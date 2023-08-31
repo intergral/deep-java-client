@@ -19,6 +19,7 @@ package com.intergral.deep.test;
 
 import com.intergral.deep.agent.types.TracePointConfig;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class MockTracepointConfig extends TracePointConfig {
@@ -38,6 +39,11 @@ public class MockTracepointConfig extends TracePointConfig {
 
   public MockTracepointConfig withArg(final String key, final String value) {
     this.getArgs().put(key, value);
+    return this;
+  }
+
+  public MockTracepointConfig withWatches(final String... watches) {
+    this.getWatches().addAll(Arrays.asList(watches));
     return this;
   }
 }

@@ -11,7 +11,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.ServiceLoader;
 
-public class SpiUtil {
+public final class SpiUtil {
+
+  private SpiUtil() {
+  }
 
   static <T extends Ordered> List<T> loadOrdered(Class<T> spiClass,
       ClassLoader serviceClassLoader) {

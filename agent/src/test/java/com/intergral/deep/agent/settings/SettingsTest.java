@@ -17,9 +17,19 @@
 
 package com.intergral.deep.agent.settings;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.intergral.deep.agent.api.plugin.IPlugin;
+import com.intergral.deep.agent.api.plugin.ISnapshotContext;
+import com.intergral.deep.agent.api.resource.Resource;
+import com.intergral.deep.agent.api.settings.ISettings;
+import com.intergral.deep.agent.settings.Settings.InvalidConfigException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,5 +71,78 @@ class SettingsTest {
     assertEquals(Level.FINEST, settings.getSettingAs("debug", Level.class));
     assertEquals(Level.FINEST, settings.getSettingAs("debug_2", Level.class));
     assertEquals(Level.FINE, settings.getSettingAs("level", Level.class));
+  }
+
+  @Test
+  void canHandleURLs() {
+    {
+      final Settings settings = Settings.build(Collections.singletonMap(Settings.KEY_SERVICE_URL, "://bad-url"));
+
+      final InvalidConfigException invalidConfigException = assertThrows(InvalidConfigException.class, settings::getServiceHost);
+      assertEquals(MalformedURLException.class, invalidConfigException.getCause().getClass());
+      assertThrows(InvalidConfigException.class, settings::getServicePort);
+    }
+    {
+      final Settings settings = Settings.build(Collections.singletonMap(Settings.KEY_SERVICE_URL, "https://google.com"));
+
+      assertEquals("google.com", settings.getServiceHost());
+      assertEquals(-1, settings.getServicePort());
+    }
+    {
+      final Settings settings = Settings.build(Collections.singletonMap(Settings.KEY_SERVICE_URL, "http://google.com:80"));
+
+      assertEquals("google.com", settings.getServiceHost());
+      assertEquals(80, settings.getServicePort());
+    }
+    {
+      final Settings settings = Settings.build(Collections.singletonMap(Settings.KEY_SERVICE_URL, "google.com:443"));
+
+      assertEquals("google.com", settings.getServiceHost());
+      assertEquals(443, settings.getServicePort());
+    }
+    {
+      final Settings settings = Settings.build(Collections.singletonMap(Settings.KEY_SERVICE_URL, "google.com:80"));
+
+      assertEquals("google.com", settings.getServiceHost());
+      assertEquals(80, settings.getServicePort());
+    }
+    {
+      final Settings settings = Settings.build(Collections.singletonMap(Settings.KEY_SERVICE_URL, "google.com"));
+
+      assertThrows(InvalidConfigException.class, settings::getServiceHost);
+      assertThrows(InvalidConfigException.class, settings::getServicePort);
+    }
+  }
+
+  @Test
+  void plugins() {
+
+    final Settings settings = Settings.build(new HashMap<>());
+
+    final IPlugin plugin = new IPlugin() {
+      @Override
+      public Resource decorate(final ISettings settings, final ISnapshotContext snapshot) {
+        return null;
+      }
+    };
+    settings.addPlugin(plugin);
+    final IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> settings.addPlugin(plugin));
+    assertEquals("Cannot add duplicate named (com.intergral.deep.agent.settings.SettingsTest$1) plugin",
+        illegalStateException.getMessage());
+
+    assertEquals(1, settings.getPlugins().size());
+    settings.removePlugin(plugin);
+
+    assertEquals(0, settings.getPlugins().size());
+  }
+
+  @Test
+  void setActive() {
+
+    final Settings settings = Settings.build(new HashMap<>());
+
+    assertTrue(settings.isActive());
+    settings.setActive(false);
+    assertFalse(settings.isActive());
   }
 }

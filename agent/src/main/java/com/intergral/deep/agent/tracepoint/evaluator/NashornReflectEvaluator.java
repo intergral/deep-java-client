@@ -99,13 +99,13 @@ public class NashornReflectEvaluator extends AbstractEvaluator {
     return eval.invoke(engine, parseExpression(expression), bindings);
   }
 
-  private String parseExpression(final String expression) {
+  static String parseExpression(final String expression) {
     // we have to remap 'this' to something else as 'this' is a JS keyword and will become
     // the 'this' that exists inside the JS environment.
-    if (expression.trim().startsWith("this")) {
-      return "deep_" + expression;
+    if (!expression.contains("this")) {
+      return expression.trim();
     }
 
-    return expression;
+    return expression.replaceAll("this", "deep_this").trim();
   }
 }

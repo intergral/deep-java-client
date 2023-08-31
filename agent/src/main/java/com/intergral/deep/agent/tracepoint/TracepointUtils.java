@@ -21,7 +21,10 @@ import com.intergral.deep.agent.Utils;
 import com.intergral.deep.agent.tracepoint.inst.InstUtils;
 import com.intergral.deep.agent.types.TracePointConfig;
 
-public class TracepointUtils {
+public final class TracepointUtils {
+
+  private TracepointUtils() {
+  }
 
   /**
    * We normally get set the source file name, we need to convert this to a Java class name.

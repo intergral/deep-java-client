@@ -51,11 +51,11 @@ import java.util.Set;
  * <p>
  * While processing a variable or frame, we will process using a Breadth first approach. These means given the tree:
  * <pre>
- *   1 -> 1.1
+ *   1 -&gt; 1.1
  *        1.2
- *        1.3 -> 1.3.1
- *   2 -> 2.1
- *   3 -> 3.1 -> 3.1.1
+ *        1.3 -&gt; 1.3.1
+ *   2 -&gt; 2.1
+ *   3 -&gt; 3.1 -&gt; 3.1.1
  * </pre>
  * We will attempt to gather the variables in the order:
  * <ul>
@@ -103,6 +103,10 @@ public abstract class VariableProcessor {
     NO_CHILDREN_TYPES.add(Iterator.class);
   }
 
+  /**
+   * Some config values from the triggered tracepoints affect all tracepoints at the point of collection. This {@link FrameConfig}
+   * calculates the most encompassing config for all triggered tracepoints.
+   */
   protected final FrameConfig frameConfig = new FrameConfig();
   /**
    * This is the cache we use while building this lookup, this cache essentially maps {@link System#identityHashCode(Object)} to an internal

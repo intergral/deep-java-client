@@ -131,15 +131,15 @@ public class ClassInfo {
     return null;
   }
 
-  private static boolean isRailoClassLoader(final ClassLoader loader) {
+  static boolean isRailoClassLoader(final ClassLoader loader) {
     return loader.getClass().getName().equals(RAILO_LOADER);
   }
 
-  private static boolean isLuceeClassLoader(final ClassLoader loader) {
+  static boolean isLuceeClassLoader(final ClassLoader loader) {
     return loader.getClass().getName().equals(LUCEE_LOADER);
   }
 
-  private static boolean isSafeLoader(final ClassLoader loader) {
+  static boolean isSafeLoader(final ClassLoader loader) {
     final String name = loader.getClass().getName();
     return SAFE_LOADERS.contains(name);
   }

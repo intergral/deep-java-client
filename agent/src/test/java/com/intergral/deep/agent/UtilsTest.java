@@ -74,11 +74,13 @@ class UtilsTest {
     assertNotNull(valueOf);
     assertTrue(valueOf.startsWith(badtostring.class.getName()));
     assertTrue(valueOf.endsWith("toString() failed"));
+
   }
 
   @Test
   void trim() {
     assertEquals("value", Utils.trimPrefix("//value", "/"));
+    assertEquals("test", Utils.trimPrefix(".....test", "."));
   }
 
   @Test
@@ -87,5 +89,18 @@ class UtilsTest {
     assertEquals("somelongst", Utils.truncate("somelongstring", 10).value());
     assertFalse(Utils.truncate("somelongstring", 20).truncated());
     assertEquals("somelongstring", Utils.truncate("somelongstring", 20).value());
+  }
+
+
+  @Test
+  void getVersion() {
+    assertEquals(7, Utils.extractVersion("1.7"));
+    assertEquals(8, Utils.extractVersion("1.8"));
+    assertEquals(9, Utils.extractVersion("1.9"));
+    assertEquals(10, Utils.extractVersion("10.1"));
+    assertEquals(11, Utils.extractVersion("11.2"));
+    assertEquals(12, Utils.extractVersion("12.4"));
+    assertEquals(13, Utils.extractVersion("13.5"));
+    assertEquals(14, Utils.extractVersion("14.5"));
   }
 }

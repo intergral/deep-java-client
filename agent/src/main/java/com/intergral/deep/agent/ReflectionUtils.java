@@ -24,7 +24,10 @@ import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.Set;
 
-public class ReflectionUtils {
+public final class ReflectionUtils {
+
+  private ReflectionUtils() {
+  }
 
   private static final IReflection reflection;
 

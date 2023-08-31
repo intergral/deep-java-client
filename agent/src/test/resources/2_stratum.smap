@@ -1,0 +1,20 @@
+SMAP
+Hi.java
+Java
+*S Foo
+*F
+1 Hi.foo
+2 Incl.foo
+*L
+1#1,1:1,1
+2#1,4:6,2
+1#2,2:2,2
+*S Bar
+*F
+1 Hi.bar
+2 Incl.bar
+*L
+1#1:1
+1#2,4:2
+3#1,8:6
+*E

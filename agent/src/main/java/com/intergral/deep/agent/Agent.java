@@ -27,7 +27,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.jar.JarFile;
 
-public class Agent {
+public final class Agent {
+
+  private Agent() {
+  }
 
   /**
    * This is called when the agent is dynamically attached to the VM
@@ -81,12 +84,13 @@ public class Agent {
       System.err.println(
           "ERROR: Failed to start deep agent: " + t.getClass().getName() + " " + t.getMessage());
       System.err.println("----------------------------------------------------------");
+      //noinspection CallToPrintStackTrace
       t.printStackTrace();
       System.err.println("----------------------------------------------------------");
     }
   }
 
-  protected static Map<String, String> parseArgs(final String args) {
+  static Map<String, String> parseArgs(final String args) {
     if (args == null) {
       return new HashMap<>();
     }
@@ -107,7 +111,7 @@ public class Agent {
     return arguments;
   }
 
-  protected static List<String> splitArgs(final String args) {
+  private static List<String> splitArgs(final String args) {
     final List<String> rtn = new ArrayList<>();
 
     boolean escaped = false;

@@ -22,7 +22,10 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EvaluatorService {
+public final class EvaluatorService {
+
+  private EvaluatorService() {
+  }
 
   private static final Logger LOGGER = LoggerFactory.getLogger(EvaluatorService.class);
   private static final Exception NO_EVALUATOR_EXCEPTION = new RuntimeException(

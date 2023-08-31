@@ -18,11 +18,13 @@
 package com.intergral.deep.agent;
 
 import java.time.Instant;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Utils {
+public final class Utils {
+
+  private Utils() {
+  }
 
   /**
    * Get the current version of Java running in this JVM

@@ -31,6 +31,8 @@ import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.CodeSource;
+import java.security.ProtectionDomain;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -169,5 +171,15 @@ class TracepointInstrumentationServiceTest {
     Mockito.verify(instrumentation, times(1)).retransformClasses(jspClass);
     tracepointInstrumentationService.processBreakpoints(Collections.emptyList());
     Mockito.verify(instrumentation, times(2)).retransformClasses(jspClass);
+  }
+
+  @Test
+  void getLocation() throws MalformedURLException {
+    final ProtectionDomain protectionDomain = Mockito.mock(ProtectionDomain.class);
+    final CodeSource codeSource = Mockito.mock(CodeSource.class);
+    Mockito.when(protectionDomain.getCodeSource()).thenReturn(codeSource);
+    Mockito.when(codeSource.getLocation()).thenReturn(new URL("http://google.com"));
+    final URL location = tracepointInstrumentationService.getLocation(protectionDomain);
+    assertEquals("http://google.com", location.toString());
   }
 }

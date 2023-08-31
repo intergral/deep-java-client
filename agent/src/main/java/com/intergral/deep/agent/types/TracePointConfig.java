@@ -58,7 +58,7 @@ public class TracePointConfig {
   /**
    * The condition that has to be 'truthy' for this tracepoint to fire
    */
-  private static final String CONDITION = "condition";
+  public static final String CONDITION = "condition";
   /**
    * This is the key to indicate the frame collection type
    */

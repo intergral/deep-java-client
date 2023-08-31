@@ -20,7 +20,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class ResourceDetector {
+public final class ResourceDetector {
+
+  private ResourceDetector() {
+  }
 
   // Visible for testing
   static final String ATTRIBUTE_PROPERTY = "deep.resource.attributes";

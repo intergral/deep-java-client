@@ -29,7 +29,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class CFUtils {
+public final class CFUtils {
 
   private CFUtils() {
   }
@@ -99,13 +99,6 @@ public class CFUtils {
         && (varScope.getClass().getName().startsWith("coldfusion")
         && varScope.getClass().getName().contains("Scope")
         || varScope.getClass().getName().equals("coldfusion.runtime.ArgumentCollection"));
-  }
-
-
-  static boolean isLuceeScope(final Object varScope) {
-    return varScope instanceof Map
-        && varScope.getClass().getName().startsWith("lucee")
-        && varScope.getClass().getName().contains("scope");
   }
 
 
@@ -190,7 +183,8 @@ public class CFUtils {
     return iBreakpoints;
   }
 
-  public static Set<TracePointConfig> loadCfBreakpoints(final String location,
+  public static Set<TracePointConfig> loadCfBreakpoints(
+      final String location,
       final Map<String, TracePointConfig> values) {
     if (location == null) {
       return Collections.emptySet();

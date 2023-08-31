@@ -26,7 +26,10 @@ import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
 import org.slf4j.LoggerFactory;
 
-public class Logger {
+public final class Logger {
+
+  private Logger() {
+  }
 
   public static void configureLogging(final Settings settings) {
     final java.util.logging.Logger logger = java.util.logging.Logger.getLogger("com.intergral");

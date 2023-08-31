@@ -30,6 +30,9 @@ import java.util.concurrent.CountDownLatch;
 @SuppressWarnings("unused")
 public class AgentImpl {
 
+  private AgentImpl() {
+  }
+
   private static final CountDownLatch LATCH = new CountDownLatch(1);
   private static DeepAgent deepAgent;
 

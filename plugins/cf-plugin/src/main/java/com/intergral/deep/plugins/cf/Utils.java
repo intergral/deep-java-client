@@ -17,7 +17,10 @@
 
 package com.intergral.deep.plugins.cf;
 
-public class Utils {
+public final class Utils {
+
+  private Utils() {
+  }
 
   public static boolean isCFServer() {
     return System.getProperty("sun.java.command").contains("coldfusion");

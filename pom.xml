@@ -374,6 +374,10 @@
                                     <excludes>
                                         <!-- We cannot test this as maven doesn't like it, it also has nothing in it-->
                                         <exclude>**/java/com/intergral/deep/**</exclude>
+                                        <!-- This type is used exclusively for debugging in development.-->
+                                        <exclude>**/*InsnPrinter.*</exclude>
+                                        <!--Testing the Agent is pretty pointless-->
+                                        <exclude>**/com/intergral/deep/agent/Agent.*</exclude>
                                     </excludes>
                                 </configuration>
                             </execution>
@@ -413,6 +417,10 @@
                                     <excludes>
                                         <!-- We cannot test this as maven doesn't like it, it also has nothing in it-->
                                         <exclude>**/java/com/intergral/deep/**</exclude>
+                                        <!-- This type is used exclusively for debugging in development.-->
+                                        <exclude>**/*InsnPrinter.*</exclude>
+                                        <!--Testing the Agent is pretty pointless-->
+                                        <exclude>**/com/intergral/deep/agent/Agent.*</exclude>
                                     </excludes>
                                 </configuration>
                             </execution>

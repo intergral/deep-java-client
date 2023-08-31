@@ -23,8 +23,8 @@ import com.intergral.deep.agent.api.plugin.LazyEvaluator;
 import com.intergral.deep.agent.push.PushService;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.tracepoint.TracepointConfigService;
+import com.intergral.deep.agent.tracepoint.cf.CFEvaluator;
 import com.intergral.deep.agent.tracepoint.cf.CFFrameProcessor;
-import com.intergral.deep.agent.tracepoint.cf.CFUtils;
 import com.intergral.deep.agent.tracepoint.evaluator.EvaluatorService;
 import com.intergral.deep.agent.tracepoint.inst.asm.Visitor;
 import com.intergral.deep.agent.types.TracePointConfig;
@@ -37,7 +37,10 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Callback {
+public final class Callback {
+
+  private Callback() {
+  }
 
   //    @SuppressWarnings("AnonymousHasLambdaAlternative")
 //    public static final ThreadLocal<Deque<CallbackHook>> CALLBACKS = new ThreadLocal<Deque<CallbackHook>>()
@@ -90,7 +93,7 @@ public class Callback {
       final int lineNo,
       final Map<String, Object> variables) {
     try {
-      final IEvaluator evaluator = new LazyEvaluator(() -> CFUtils.findCfEval(variables));
+      final IEvaluator evaluator = new LazyEvaluator(new CFEvaluator.Loader(variables));
       commonCallback(bpIds, filename, lineNo, variables, evaluator, CFFrameProcessor::new);
     } catch (Throwable t) {
       LOGGER.debug("Unable to process tracepoint {}:{}", filename, lineNo, t);

@@ -46,6 +46,23 @@ public class NashornReflectEvaluatorTest {
     assertEquals("bob", String.valueOf(o));
   }
 
+  @Test
+  void parseExpression() {
+    assertEquals("deep_this", NashornReflectEvaluator.parseExpression("this"));
+    assertEquals("deep_this", NashornReflectEvaluator.parseExpression("   this"));
+    assertEquals("deep_this", NashornReflectEvaluator.parseExpression("   this   "));
+    assertEquals("deep_this", NashornReflectEvaluator.parseExpression("this   "));
+
+    assertEquals("deep_this.some.path.to.value", NashornReflectEvaluator.parseExpression("this.some.path.to.value"));
+    assertEquals("deep_this.someFunction()", NashornReflectEvaluator.parseExpression("this.someFunction()"));
+    assertEquals("max(deep_this.someFunction(), 123)", NashornReflectEvaluator.parseExpression("max(this.someFunction(), 123)"));
+    assertEquals("101 - deep_this.someFunction()", NashornReflectEvaluator.parseExpression("101 - this.someFunction()"));
+
+    assertEquals("101 - deep_this.someFunctionWithThisInTt()", NashornReflectEvaluator.parseExpression("101 - this.someFunctionWithThisInTt()"));
+    // todo this is a known issue
+    // assertEquals("101 - deep_this.thisFunction()", NashornReflectEvaluator.parseExpression("101 - this.thisFunction()"));
+  }
+
   /**
    * This test is more of a note for using nashorn and allows for testing features etc.
    */

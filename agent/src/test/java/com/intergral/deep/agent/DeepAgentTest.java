@@ -17,11 +17,16 @@
 
 package com.intergral.deep.agent;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 
+import com.intergral.deep.agent.api.DeepVersion;
+import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.plugin.IPlugin.IPluginRegistration;
+import com.intergral.deep.agent.api.tracepoint.ITracepoint;
 import com.intergral.deep.agent.api.tracepoint.ITracepoint.ITracepointRegistration;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.tracepoint.handler.Callback;
@@ -58,6 +63,9 @@ class DeepAgentTest {
   void registerPlugin() {
     final IPluginRegistration iPluginRegistration = deepAgent.registerPlugin((settings, snapshot) -> null);
 
+    assertNotNull(iPluginRegistration.get());
+    assertFalse(iPluginRegistration.isAuthProvider());
+
     Mockito.verify(settings, times(1)).addPlugin(Mockito.any());
 
     iPluginRegistration.unregister();
@@ -68,6 +76,13 @@ class DeepAgentTest {
   @Test
   void registerTracepoint() {
     final ITracepointRegistration iTracepointRegistration = deepAgent.registerTracepoint("some/path", 123);
+
+    final ITracepoint iTracepoint = iTracepointRegistration.get();
+    assertEquals("some/path", iTracepoint.path());
+    assertEquals(123, iTracepoint.line());
+    assertNotNull(iTracepoint.id());
+    assertNotNull(iTracepoint.watches());
+    assertNotNull(iTracepoint.args());
 
     iTracepointRegistration.unregister();
   }
@@ -81,5 +96,10 @@ class DeepAgentTest {
     deepAgent.setEnabled(true);
 
     assertTrue(deepAgent.isEnabled());
+  }
+
+  @Test
+  void getVersion() {
+    assertEquals(DeepVersion.VERSION, deepAgent.getVersion());
   }
 }

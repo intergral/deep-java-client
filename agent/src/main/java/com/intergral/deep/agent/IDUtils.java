@@ -7,7 +7,10 @@ package com.intergral.deep.agent;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public class IDUtils {
+public final class IDUtils {
+
+  private IDUtils() {
+  }
 
   static final int BYTE_BASE16 = 2;
   private static final String ALPHABET = "0123456789abcdef";
