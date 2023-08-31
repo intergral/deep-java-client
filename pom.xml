@@ -286,6 +286,7 @@
                         </dependencies>
                         <configuration>
                             <configLocation>checkstyle.xml</configLocation>
+                            <headerLocation>LICENSE.txt</headerLocation>
                             <includeTestSourceDirectory>true</includeTestSourceDirectory>
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>true</failsOnError>

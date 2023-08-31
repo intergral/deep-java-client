@@ -404,4 +404,7 @@
       <property name="influenceFormat" value="1"/>
     </module>
   </module>
+  <module name="Header">
+    <property name="headerFile" value="${checkstyle.header.file}"/>
+  </module>
 </module>

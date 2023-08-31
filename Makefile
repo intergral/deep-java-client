@@ -4,8 +4,8 @@
 pmd:
 	mvn -U -B verify -Ppmd -DskipTests $(MVN_ARGS)
 
-,PHONY: check-formatting
-check-formatting:
+,PHONY: lint
+lint:
 	mvn -U -B validate -Plint,examples,cf-it-tests $(MVN_ARGS)
 
 .PHONY: test
