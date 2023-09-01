@@ -161,6 +161,7 @@
                                     <goal>sign</goal>
                                 </goals>
                                 <configuration>
+                                    <!--suppress MavenModelInspection -->
                                     <passphrase>${env.GPG_PASSPHRASE}</passphrase>
                                     <gpgArguments>
                                         <!--https://stackoverflow.com/questions/28859942/how-do-i-get-the-maven-gpg-plugin-to-use-a-passphrase-from-environment-variable-->
@@ -285,11 +286,13 @@
                         </dependencies>
                         <configuration>
                             <configLocation>checkstyle.xml</configLocation>
+                            <headerLocation>LICENSE.txt</headerLocation>
                             <includeTestSourceDirectory>true</includeTestSourceDirectory>
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>true</failsOnError>
                             <failOnViolation>true</failOnViolation>
                             <linkXRef>false</linkXRef>
+                            <violationSeverity>warning</violationSeverity>
                         </configuration>
                         <executions>
                             <execution>
@@ -337,6 +340,90 @@
                                 <goals>
                                     <goal>check</goal>
                                 </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>coverage</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>0.8.10</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <!-- attached to Maven test phase -->
+                            <execution>
+                                <id>report</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                    <goal>report-aggregate</goal>
+                                </goals>
+                                <configuration>
+                                    <excludes>
+                                        <!-- We cannot test this as maven doesn't like it, it also has nothing in it-->
+                                        <exclude>**/java/com/intergral/deep/**</exclude>
+                                        <!-- This type is used exclusively for debugging in development.-->
+                                        <exclude>**/*InsnPrinter.*</exclude>
+                                        <!--Testing the Agent is pretty pointless-->
+                                        <exclude>**/com/intergral/deep/agent/Agent.*</exclude>
+                                    </excludes>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>default-check</id>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <rule implementation="org.jacoco.maven.RuleConfiguration">
+                                            <element>BUNDLE</element>
+                                            <limits>
+                                                <limit implementation="org.jacoco.report.check.Limit">
+                                                    <counter>INSTRUCTION</counter>
+                                                    <value>COVEREDRATIO</value>
+                                                    <minimum>0</minimum>
+                                                </limit>
+                                                <limit implementation="org.jacoco.report.check.Limit">
+                                                    <counter>BRANCH</counter>
+                                                    <value>COVEREDRATIO</value>
+                                                    <minimum>0</minimum>
+                                                </limit>
+                                                <limit implementation="org.jacoco.report.check.Limit">
+                                                    <counter>CLASS</counter>
+                                                    <value>MISSEDCOUNT</value>
+                                                    <maximum>0</maximum>
+                                                </limit>
+                                                <limit implementation="org.jacoco.report.check.Limit">
+                                                    <counter>METHOD</counter>
+                                                    <value>MISSEDCOUNT</value>
+                                                    <maximum>0</maximum>
+                                                </limit>
+                                            </limits>
+                                        </rule>
+                                    </rules>
+                                    <excludes>
+                                        <!-- We cannot test this as maven doesn't like it, it also has nothing in it-->
+                                        <exclude>**/java/com/intergral/deep/**</exclude>
+                                        <!-- This type is used exclusively for debugging in development.-->
+                                        <exclude>**/*InsnPrinter.*</exclude>
+                                        <!--Testing the Agent is pretty pointless-->
+                                        <exclude>**/com/intergral/deep/agent/Agent.*</exclude>
+                                    </excludes>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -434,6 +521,11 @@
                 <artifactId>junit-jupiter</artifactId>
                 <version>5.9.3</version>
             </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>5.4.0</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -441,6 +533,11 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

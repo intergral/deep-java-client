@@ -18,8 +18,6 @@
 package com.intergral.deep.agent.tracepoint.inst;
 
 
-import static com.intergral.deep.agent.tracepoint.inst.TracepointInstrumentationService.loadJspBreakpoints;
-
 import com.intergral.deep.agent.tracepoint.inst.jsp.JSPUtils;
 import com.intergral.deep.agent.types.TracePointConfig;
 import java.util.List;
@@ -27,17 +25,27 @@ import java.util.Map;
 import java.util.Set;
 
 
+/**
+ * This scanner is meant to find JSP classes that have tracepoints.
+ */
 public class JSPClassScanner implements IClassScanner {
 
-  private final Map<String, TracePointConfig> removedBreakpoints;
+  private final Map<String, TracePointConfig> tracePointConfigMap;
   private final String jspSuffix;
   private final List<String> jspPackages;
 
 
-  public JSPClassScanner(final Map<String, TracePointConfig> removedBreakpoints,
+  /**
+   * Create a new JSP scanner.
+   *
+   * @param tracepoints the tracepoints
+   * @param jspSuffix the jsp suffix
+   * @param jspPackages the jsp packages
+   */
+  public JSPClassScanner(final Map<String, TracePointConfig> tracepoints,
       final String jspSuffix,
       final List<String> jspPackages) {
-    this.removedBreakpoints = removedBreakpoints;
+    this.tracePointConfigMap = tracepoints;
     this.jspSuffix = jspSuffix;
     this.jspPackages = jspPackages;
   }
@@ -45,19 +53,30 @@ public class JSPClassScanner implements IClassScanner {
 
   @Override
   public boolean scanClass(final Class<?> loadedClass) {
-    if (removedBreakpoints.isEmpty()) {
+    // if the map is empty we have already found all our tracepoints
+    if (tracePointConfigMap.isEmpty()) {
       // stop as soon as we run out of classes
       return false;
     }
+    // if this class is a jsp class then we should process it
     if (JSPUtils.isJspClass(this.jspSuffix, this.jspPackages, loadedClass.getName())) {
-      final Set<TracePointConfig> breakpoints = loadJspBreakpoints(loadedClass, removedBreakpoints);
-      if (!breakpoints.isEmpty()) {
-        for (TracePointConfig breakpoint : breakpoints) {
-          removedBreakpoints.remove(breakpoint.getId());
+      // load (from our config) the JSP version of a tracepoint.
+      final Set<TracePointConfig> tracePointConfigs = JSPUtils.loadJSPTracepoints(loadedClass, tracePointConfigMap);
+      // if we have some tracepoints
+      if (!tracePointConfigs.isEmpty()) {
+        // remove them from our config so we can end fast
+        for (TracePointConfig tracePointConfig : tracePointConfigs) {
+          tracePointConfigMap.remove(tracePointConfig.getId());
         }
+        // this class is a JSP class with at least on tracepoints
         return true;
       }
     }
     return false;
+  }
+
+  @Override
+  public boolean isComplete() {
+    return tracePointConfigMap.isEmpty();
   }
 }

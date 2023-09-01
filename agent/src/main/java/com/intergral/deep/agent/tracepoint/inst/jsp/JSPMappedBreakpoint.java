@@ -19,6 +19,9 @@ package com.intergral.deep.agent.tracepoint.inst.jsp;
 
 import com.intergral.deep.agent.types.TracePointConfig;
 
+/**
+ * This is a simple wrapper of the tracepoint config with the mapped line we need to use.
+ */
 public class JSPMappedBreakpoint extends TracePointConfig {
 
   private final int mappedLine;

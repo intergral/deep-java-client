@@ -28,7 +28,7 @@ public interface IRegistration<T> {
   void unregister();
 
   /**
-   * Get the registered item
+   * Get the registered item.
    *
    * @return the item that this registration is for.
    */

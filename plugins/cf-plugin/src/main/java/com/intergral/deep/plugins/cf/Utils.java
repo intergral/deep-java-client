@@ -17,12 +17,30 @@
 
 package com.intergral.deep.plugins.cf;
 
-public class Utils {
+/**
+ * A small collection of utils used to capture the adobe coldfusion version number.
+ */
+public final class Utils {
 
+  private Utils() {
+  }
+
+  /**
+   * Are we running on a CF server.
+   * <p>
+   * By looking at the java start up command we can tell if this is a CF server.
+   *
+   * @return {@code true} if we are on a coldfusion server.
+   */
   public static boolean isCFServer() {
     return System.getProperty("sun.java.command").contains("coldfusion");
   }
 
+  /**
+   * Try to load the coldfusion version number.
+   *
+   * @return the major version of adobe coldfusion.
+   */
   public static String loadCFVersion() {
     try {
       return String.valueOf(Thread.currentThread()

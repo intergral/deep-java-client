@@ -17,8 +17,10 @@
 
 package com.intergral.deep.agent.grpc;
 
+import com.intergral.deep.agent.ReflectionUtils;
 import com.intergral.deep.agent.api.auth.AuthProvider;
 import com.intergral.deep.agent.api.auth.IAuthProvider;
+import com.intergral.deep.agent.api.settings.ISettings;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.proto.poll.v1.PollConfigGrpc;
 import com.intergral.deep.proto.tracepoint.v1.SnapshotServiceGrpc;
@@ -41,6 +43,9 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This service handles the grpc channel and attaching the metadata to the outbound services.
+ */
 public class GrpcService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GrpcService.class);
@@ -52,6 +57,9 @@ public class GrpcService {
     this.settings = settings;
   }
 
+  /**
+   * Start the grpc service and connect the channel.
+   */
   public void start() {
     try {
       setupChannel();
@@ -94,7 +102,7 @@ public class GrpcService {
     }
 
     // Select secure or not
-    if (this.settings.getSettingAs("service.secure", Boolean.class)) {
+    if (this.settings.getSettingAs(ISettings.KEY_SERVICE_SECURE, Boolean.class)) {
       ncBuilder.useTransportSecurity();
     } else {
       ncBuilder.usePlaintext();
@@ -114,6 +122,11 @@ public class GrpcService {
     return channel;
   }
 
+  /**
+   * Get the grpc service for polling configs.
+   *
+   * @return the service to use
+   */
   public PollConfigGrpc.PollConfigBlockingStub pollService() {
     final PollConfigGrpc.PollConfigBlockingStub blockingStub = PollConfigGrpc.newBlockingStub(
         getChannel());
@@ -124,6 +137,11 @@ public class GrpcService {
         metadata));
   }
 
+  /**
+   * Get the grpc service for sending snapshots.
+   *
+   * @return the service to use
+   */
   public SnapshotServiceGrpc.SnapshotServiceStub snapshotService() {
     final SnapshotServiceGrpc.SnapshotServiceStub snapshotServiceStub = SnapshotServiceGrpc.newStub(
         getChannel());
@@ -134,7 +152,7 @@ public class GrpcService {
   }
 
   private Metadata buildMetaData() {
-    final IAuthProvider provider = AuthProvider.provider(this.settings);
+    final IAuthProvider provider = AuthProvider.provider(this.settings, ReflectionUtils.getReflection());
     final Map<String, String> headers = provider.provide();
 
     final Metadata metadata = new Metadata();

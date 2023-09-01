@@ -34,6 +34,22 @@ public abstract class AbstractEvaluator implements IEvaluator {
   }
 
 
+  /**
+   * Given an input convert to a boolean expression.
+   * <p>
+   * As Java doesn't have inherit truthiness such as JavaScript. We want to simulate it here, we will convert the following to inputs, all
+   * other inputs are {@code true}.
+   * <ul>
+   *   <li>null - All null values are {@code false}.</li>
+   *   <li>boolean = All booleans are returned as they are.</li>
+   *   <li>0 = All numbers are {@code true}, except 0 which is {@code false}</li>
+   *   <li>"true" = A string of the value {@code "true"} (ignoring case) is {@code true}, all other strings are {@code false}.</li>
+   * </ul>
+   *
+   * @param obj the value to convert
+   * @return the value as  a boolean
+   * @see Boolean#parseBoolean(String)
+   */
   public static boolean objectToBoolean(final Object obj) {
     if (obj == null) {
       return false;

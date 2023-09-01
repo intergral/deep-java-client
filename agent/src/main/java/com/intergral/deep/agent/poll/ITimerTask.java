@@ -17,10 +17,15 @@
 
 package com.intergral.deep.agent.poll;
 
+/**
+ * A task to run in the timer.
+ *
+ * @see DriftAwareThread
+ */
 public interface ITimerTask {
 
   /**
-   * This method is called by the {@link DriftAwareThread} at the end of each interval
+   * This method is called by the {@link DriftAwareThread} at the end of each interval.
    *
    * @param now the current time
    * @throws Exception if the task fails

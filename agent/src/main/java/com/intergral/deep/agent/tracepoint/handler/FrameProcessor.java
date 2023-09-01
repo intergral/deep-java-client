@@ -30,13 +30,37 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * This type deals with matching tracepoints to the current state and working out if we can collect the data.
+ */
 public class FrameProcessor extends FrameCollector implements ISnapshotContext {
 
+  /**
+   * The tracepoints that have been triggered by the Callback.
+   */
   private final Collection<TracePointConfig> tracePointConfigs;
+  /**
+   * The time as a tuple when this line Callback started.
+   *
+   * @see Utils#currentTimeNanos()
+   */
   private final long[] lineStart;
-  private Collection<TracePointConfig> filteredTracepoints;
-  private TracePointConfig currentTracePointConfig;
 
+  /**
+   * These are the tracepoints that are filtered based on state and conditions to be valid to trigger collection.
+   */
+  private Collection<TracePointConfig> filteredTracepoints;
+
+  /**
+   * Create a new processor for this Callback.
+   *
+   * @param settings          the current settings being used
+   * @param evaluator         the evaluator to use for watchers and conditions
+   * @param variables         the variables we have at this state
+   * @param tracePointConfigs the tracepoints that are part of this Callback
+   * @param lineStart         the Tuple of the time this Callback started
+   * @param stack             the stack trace to use
+   */
   public FrameProcessor(final Settings settings,
       final IEvaluator evaluator,
       final Map<String, Object> variables,
@@ -47,15 +71,30 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
     this.lineStart = lineStart;
   }
 
+  /**
+   * Using the {@link #tracePointConfigs} can we collect any data at this point.
+   * <p>
+   * This method will check the tracepoint config fire count, rate limits, windows and conditions and populate the
+   * {@link #filteredTracepoints}
+   *
+   * @return {@code true}, if the {@link #filteredTracepoints} have any values
+   */
   public boolean canCollect() {
     this.filteredTracepoints = this.tracePointConfigs.stream()
         .filter(tracePointConfig -> tracePointConfig.canFire(this.lineStart[0])
             && this.conditionPasses(tracePointConfig))
         .collect(Collectors.toList());
 
-    return this.filteredTracepoints.size() != 0;
+    return !this.filteredTracepoints.isEmpty();
   }
 
+  /**
+   * Process the tracepoints condition with the evaluator to see if the condition is {@code true}.
+   *
+   * @param tracePointConfig the config to check
+   * @return {@code false} if the condition on the tracepoint evaluates to a false
+   * @see IEvaluator#evaluate(String, Map)
+   */
   private boolean conditionPasses(final TracePointConfig tracePointConfig) {
     final String condition = tracePointConfig.getCondition();
     if (condition == null || condition.trim().isEmpty()) {
@@ -65,20 +104,27 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
     return this.evaluator.evaluate(condition, variables);
   }
 
+  /**
+   * Using the {@link #filteredTracepoints} update the config to reflect the collection config for this Callback.
+   * <p>
+   * If there are multiple tracepoints being process, the config will reflect the most inclusive, ie the higher number.
+   */
   public void configureSelf() {
-    for (TracePointConfig tracePointConfig : this.filteredTracepoints) {
-      this.frameConfig.process(tracePointConfig);
-    }
-    this.frameConfig.close();
+    configureSelf(this.filteredTracepoints);
   }
 
+  /**
+   * Collect the data into {@link EventSnapshot}.
+   *
+   * @return the collected {@link EventSnapshot}
+   */
   public Collection<EventSnapshot> collect() {
     final Collection<EventSnapshot> snapshots = new ArrayList<>();
 
     final IFrameResult processedFrame = super.processFrame();
 
     for (final TracePointConfig tracepoint : filteredTracepoints) {
-      try (AutoCloseable ignored = withTracepoint(tracepoint)) {
+      try {
         final EventSnapshot snapshot = new EventSnapshot(tracepoint,
             this.lineStart[1],
             this.settings.getResource(),
@@ -103,18 +149,9 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
     return snapshots;
   }
 
-  private AutoCloseable withTracepoint(final TracePointConfig tracepoint) {
-    this.currentTracePointConfig = tracepoint;
-    return () -> currentTracePointConfig = null;
-  }
-
-  protected <T> T getTracepointConfig(final String key, final Class<T> clazz, T def) {
-    if (currentTracePointConfig == null) {
-      return def;
-    }
-    return currentTracePointConfig.getArg(key, clazz, def);
-  }
-
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public String evaluateExpression(final String expression) throws EvaluationException {
     try {
@@ -125,8 +162,24 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
     }
   }
 
+  /**
+   * This defines a functional interface to allow for creating difference processors in the Callback.
+   */
   public interface IFactory {
 
+    /**
+     * Create a new processor.
+     *
+     * @param settings          the current settings being used
+     * @param evaluator         the evaluator to use for watchers and conditions
+     * @param variables         the variables we have at this state
+     * @param tracePointConfigs the tracepoints that are part of this Callback
+     * @param lineStart         the Tuple of the time this Callback started
+     * @param stack             the stack trace to use
+     * @return the new {@link FrameProcessor}
+     * @see FrameProcessor
+     * @see com.intergral.deep.agent.tracepoint.cf.CFFrameProcessor
+     */
     FrameProcessor provide(Settings settings, IEvaluator evaluator, Map<String, Object> variables,
         Collection<TracePointConfig> tracePointConfigs, long[] lineStart,
         StackTraceElement[] stack);

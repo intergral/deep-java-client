@@ -17,15 +17,39 @@
 
 package com.intergral.deep.agent.tracepoint.inst.jsp;
 
+import com.intergral.deep.agent.tracepoint.inst.InstUtils;
+import com.intergral.deep.agent.tracepoint.inst.jsp.sourcemap.SmapUtils;
+import com.intergral.deep.agent.tracepoint.inst.jsp.sourcemap.SourceMap;
+import com.intergral.deep.agent.tracepoint.inst.jsp.sourcemap.SourceMapParser;
+import com.intergral.deep.agent.types.TracePointConfig;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * Utilities for JSP classes.
+ */
 public class JSPUtils {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(JSPUtils.class);
 
   private JSPUtils() {
   }
 
 
+  /**
+   * Is this class a jsp class.
+   *
+   * @param jspSuffix       the jsp suffix
+   * @param jspPackages     the jsp packages
+   * @param loadedClassName the clas name to check
+   * @return {@code true} if this is a jsp class
+   */
   public static boolean isJspClass(final String jspSuffix,
       final List<String> jspPackages,
       final String loadedClassName) {
@@ -36,7 +60,7 @@ public class JSPUtils {
   private static String getJspClassname(final String jspSuffix,
       final List<String> jspPackages,
       final String className) {
-    if (jspSuffix.isEmpty() || className.endsWith(jspSuffix)) {
+    if (jspSuffix == null || jspSuffix.isEmpty() || className.endsWith(jspSuffix)) {
       for (final String jspPackage : jspPackages) {
         if (className.startsWith(jspPackage)) {
           return className.substring(jspPackage.length() + 1);
@@ -50,9 +74,15 @@ public class JSPUtils {
   }
 
 
-  public static SourceMap getSourceMap(final Class<?> c) {
+  /**
+   * Load a source map for the given class.
+   *
+   * @param clazz the class
+   * @return the source map or {@code null}
+   */
+  public static SourceMap getSourceMap(final Class<?> clazz) {
     try {
-      final String rtn = SmapUtils.lookUp(c);
+      final String rtn = SmapUtils.lookUp(clazz);
       final SourceMapParser parser;
       if (rtn != null) {
         parser = new SourceMapParser(rtn);
@@ -60,20 +90,63 @@ public class JSPUtils {
       }
       return null;
     } catch (IOException ioe) {
-      ioe.printStackTrace();
+      LOGGER.error("Failed to load source map", ioe);
       return null;
     }
   }
 
 
+  /**
+   * Load the source map for this class file.
+   *
+   * @param classfileBuffer the class file as bytes
+   * @return the loaded source map, or {@code null}
+   */
   public static SourceMap getSourceMap(byte[] classfileBuffer) {
     try {
       final String rtn = SmapUtils.parseBytes(classfileBuffer);
       final SourceMapParser parser = new SourceMapParser(rtn);
       return parser.parse();
     } catch (IOException ioe) {
-      ioe.printStackTrace();
+      LOGGER.error("Failed to load source map", ioe);
       return null;
     }
+  }
+
+  /**
+   * Load the tracepoints for this class.
+   *
+   * @param loadedClass the class to check
+   * @param jsp         the tracepoints
+   * @return the matches tracepoints
+   */
+  public static Set<TracePointConfig> loadJSPTracepoints(final Class<?> loadedClass,
+      final Map<String, TracePointConfig> jsp) {
+    return loadJSPTracepoints(getSourceMap(loadedClass), jsp);
+  }
+
+  /**
+   * Load jsp tracepoints using source map.
+   *
+   * @param sourceMap the source map
+   * @param jsp       the tracepoints
+   * @return the matches tracepoints
+   */
+  public static Set<TracePointConfig> loadJSPTracepoints(final SourceMap sourceMap,
+      final Map<String, TracePointConfig> jsp) {
+    if (sourceMap == null) {
+      return Collections.emptySet();
+    }
+
+    final Set<TracePointConfig> matchedJsp = new HashSet<>();
+    final List<String> filenames = sourceMap.getFilenames();
+    for (Map.Entry<String, TracePointConfig> entry : jsp.entrySet()) {
+      final TracePointConfig value = entry.getValue();
+      final String fileName = InstUtils.fileName(value.getPath());
+      if (filenames.contains(fileName)) {
+        matchedJsp.add(value);
+      }
+    }
+    return matchedJsp;
   }
 }

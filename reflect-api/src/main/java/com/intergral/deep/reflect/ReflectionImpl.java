@@ -17,18 +17,24 @@
 
 package com.intergral.deep.reflect;
 
+import com.intergral.deep.agent.api.DeepRuntimeException;
 import com.intergral.deep.agent.api.reflection.IReflection;
 import com.intergral.deep.agent.api.utils.ArrayIterator;
 import com.intergral.deep.agent.api.utils.CompoundIterator;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * The version of reflection used before modules where added.
+ */
 public class ReflectionImpl implements IReflection {
 
   @Override
@@ -50,7 +56,17 @@ public class ReflectionImpl implements IReflection {
     } catch (final Exception e) {
       return false;
     }
+  }
 
+
+  @Override
+  public boolean setAccessible(final Class<?> clazz, final Constructor<?> constructor) {
+    try {
+      constructor.setAccessible(true);
+      return true;
+    } catch (final Exception e) {
+      return false;
+    }
   }
 
 
@@ -66,6 +82,7 @@ public class ReflectionImpl implements IReflection {
     if (method != null) {
       try {
         setAccessible(target.getClass(), method);
+        //noinspection unchecked
         return (T) method.invoke(target, args);
       } catch (IllegalAccessException | InvocationTargetException e) {
         return null;
@@ -94,7 +111,7 @@ public class ReflectionImpl implements IReflection {
     return null;
   }
 
-
+  @Override
   public Field getField(final Object obj, final String fieldName) {
     Class<?> clazz = obj.getClass();
     while (clazz != null) {
@@ -141,7 +158,6 @@ public class ReflectionImpl implements IReflection {
     }
     final Field[] fields = clazz.getFields();
     final Field[] declaredFields = clazz.getDeclaredFields();
-    //noinspection unchecked
     return new CompoundIterator<>(new ArrayIterator<>(fields), new ArrayIterator<>(declaredFields));
   }
 
@@ -162,7 +178,30 @@ public class ReflectionImpl implements IReflection {
   @Override
   public Set<String> getModifiers(final Field field) {
     final int modifiers = field.getModifiers();
+    if (modifiers == 0) {
+      return Collections.emptySet();
+    }
     final String string = Modifier.toString(modifiers);
     return Arrays.stream(string.split(" ")).collect(Collectors.toSet());
+  }
+
+  @Override
+  public Constructor<?> findConstructor(final Class<?> clazz, final Class<?>... args) {
+    try {
+      return clazz.getConstructor(args);
+    } catch (NoSuchMethodException e) {
+      return null;
+    }
+  }
+
+  @Override
+  public <T> T callConstructor(final Constructor<?> constructor, final Object... args) {
+    try {
+      setAccessible(constructor.getDeclaringClass(), constructor);
+      //noinspection unchecked
+      return (T) constructor.newInstance(args);
+    } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
+      throw new DeepRuntimeException("Cannot call constructor: " + constructor, e);
+    }
   }
 }

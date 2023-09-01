@@ -18,13 +18,23 @@
 package com.intergral.deep.agent;
 
 import java.time.Instant;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Utils {
+/**
+ * Collection of utilities for general java related tasks.
+ */
+public final class Utils {
 
-  public static int getVersion() {
+  private Utils() {
+  }
+
+  /**
+   * Get the current version of Java running in this JVM.
+   *
+   * @return the java version number
+   */
+  public static int getJavaVersion() {
     String version = System.getProperty("java.version");
     return extractVersion(version);
   }
@@ -55,38 +65,49 @@ public class Utils {
     return new long[]{now.toEpochMilli(), Long.parseLong(format)};
   }
 
+  /**
+   * Create a new map from the input.
+   *
+   * @param map the input map
+   * @param <T> the key type
+   * @return a new map with the same values are the input, or a new empty map
+   */
   public static <T> Map<String, T> newMap(final Map<String, T> map) {
     if (map == null) {
-      return Collections.emptyMap();
+      return new HashMap<>();
     }
     return new HashMap<>(map);
   }
 
 
   /**
-   * FROM: https://stackoverflow.com/a/38947571
+   * Check if a string ends with a value, ignoring the case.
    *
    * @param str    the string to search
    * @param suffix the value to serch for
    * @return true if {@code str} ends with {@code suffix}, disregarding case sensitivity
+   * @see <a href="https://stackoverflow.com/a/38947571">Source</a>
    */
   public static boolean endsWithIgnoreCase(String str, String suffix) {
     int suffixLength = suffix.length();
     return str.regionMatches(true, str.length() - suffixLength, suffix, 0, suffixLength);
   }
 
+  /**
+   * This will create a string representation of the object passed in.
+   *
+   * @param obj the value to create a string from
+   * @return the string form of the object
+   */
   public static String valueOf(final Object obj) {
     if (obj == null) {
       return "null";
     }
 
     String hash;
+    // sometimes (on bad objects) .toString will fail. So we need to protect against that.
     try {
-      final String tmp = String.valueOf(obj);
-      // FR-5298 - Protected again NullPointerException when stepping in
-      //Stringbuilder.<init>
-      tmp.length();
-      return tmp;
+      return String.valueOf(obj);
     } catch (final Throwable e1) {
       // From Object.toString();
       hash = String.valueOf(System.identityHashCode(obj));
@@ -95,15 +116,29 @@ public class Utils {
   }
 
 
-  public static String trim(String str, final String trimStr) {
-    while (str.startsWith(trimStr)) {
+  /**
+   * Trim a string from another string.
+   *
+   * @param str     the target string
+   * @param prefix the value to remove from the string
+   * @return the new string
+   */
+  public static String trimPrefix(String str, final String prefix) {
+    while (str.startsWith(prefix)) {
       str = str.substring(1);
     }
     return str;
   }
 
 
-  public static ITrimResult trim(final String str, final int maxLength) {
+  /**
+   * Trim a string to a specified length.
+   *
+   * @param str       the target string
+   * @param maxLength the max length to make the string
+   * @return a {@link ITrimResult}, so we can know if the string was trimmed
+   */
+  public static ITrimResult truncate(final String str, final int maxLength) {
     if (str.length() > maxLength) {
       return new ITrimResult() {
         @Override
@@ -134,12 +169,12 @@ public class Utils {
 
 
   /**
-   * The result of a trim operation
+   * The result of a trim operation.
    */
   public interface ITrimResult {
 
     /**
-     * The value to use, might be truncated
+     * The value to use, might be truncated.
      *
      * @return the value
      */
@@ -147,7 +182,7 @@ public class Utils {
 
 
     /**
-     * Has the value been truncated
+     * Has the value been truncated.
      *
      * @return {@code true} if the value was truncated
      */

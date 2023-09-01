@@ -17,8 +17,8 @@
 
 package com.intergral.deep.agent.push;
 
-import com.intergral.deep.agent.api.plugin.ISnapshotContext;
 import com.intergral.deep.agent.api.plugin.IPlugin;
+import com.intergral.deep.agent.api.plugin.ISnapshotContext;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.grpc.GrpcService;
 import com.intergral.deep.agent.settings.Settings;
@@ -30,6 +30,9 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This service deals with pushing the collected data to the remote services.
+ */
 public class PushService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PushService.class);
@@ -42,25 +45,16 @@ public class PushService {
     this.grpcService = grpcService;
   }
 
+  /**
+   * Decorate and push the provided snapshot.
+   *
+   * @param snapshot the snapshot to push
+   * @param context  the context of where the snapshot is collected
+   */
   public void pushSnapshot(final EventSnapshot snapshot, final ISnapshotContext context) {
     decorate(snapshot, context);
     final Snapshot grpcSnapshot = PushUtils.convertToGrpc(snapshot);
-    this.grpcService.snapshotService().send(grpcSnapshot, new StreamObserver<SnapshotResponse>() {
-      @Override
-      public void onNext(final SnapshotResponse value) {
-        LOGGER.debug("Sent snapshot: {}", snapshot.getID());
-      }
-
-      @Override
-      public void onError(final Throwable t) {
-        LOGGER.error("Error sending snapshot: {}", snapshot.getID(), t);
-      }
-
-      @Override
-      public void onCompleted() {
-
-      }
-    });
+    this.grpcService.snapshotService().send(grpcSnapshot, new LoggingObserver(snapshot.getID()));
   }
 
   private void decorate(final EventSnapshot snapshot, final ISnapshotContext context) {
@@ -76,5 +70,30 @@ public class PushService {
       }
     }
     snapshot.close();
+  }
+
+  static class LoggingObserver implements StreamObserver<SnapshotResponse> {
+
+    private final String id;
+
+    public LoggingObserver(final String id) {
+      this.id = id;
+    }
+
+    @Override
+    public void onNext(final SnapshotResponse value) {
+      LOGGER.debug("Sent snapshot: {}", id);
+
+    }
+
+    @Override
+    public void onError(final Throwable t) {
+      LOGGER.error("Error sending snapshot: {}", id, t);
+    }
+
+    @Override
+    public void onCompleted() {
+
+    }
   }
 }

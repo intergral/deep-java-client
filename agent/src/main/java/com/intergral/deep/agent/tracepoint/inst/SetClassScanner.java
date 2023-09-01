@@ -20,6 +20,9 @@ package com.intergral.deep.agent.tracepoint.inst;
 
 import java.util.Set;
 
+/**
+ * Scans a set of classes for classes we want to modify.
+ */
 public class SetClassScanner implements IClassScanner {
 
   private final Set<String> classNames;
@@ -36,5 +39,10 @@ public class SetClassScanner implements IClassScanner {
         || this.classNames.contains(allLoadedClass.getSimpleName())
         || allLoadedClass.getName().contains("$")
         && this.classNames.contains(InstUtils.internalClassStripInner(allLoadedClass));
+  }
+
+  @Override
+  public boolean isComplete() {
+    return classNames.isEmpty();
   }
 }

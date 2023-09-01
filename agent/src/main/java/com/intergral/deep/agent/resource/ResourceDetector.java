@@ -1,23 +1,11 @@
 /*
- *     Copyright (C) 2023  Intergral GmbH
- *
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU Affero General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU Affero General Public License for more details.
- *
- *     You should have received a copy of the GNU Affero General Public License
- *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.intergral.deep.agent.resource;
 
-import com.intergral.deep.agent.api.resource.ConfigurationException;
+import com.intergral.deep.agent.api.DeepRuntimeException;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.resource.ResourceAttributes;
 import com.intergral.deep.agent.api.spi.ConditionalResourceProvider;
@@ -32,22 +20,35 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class ResourceDetector {
+/**
+ * Utilities to create the resource for this agent.
+ */
+public final class ResourceDetector {
+
+  private ResourceDetector() {
+  }
 
   // Visible for testing
   static final String ATTRIBUTE_PROPERTY = "deep.resource.attributes";
   static final String SERVICE_NAME_PROPERTY = "deep.service.name";
   static final String DISABLED_ATTRIBUTE_KEYS = "deep.resource.disabled.keys";
+  static final String ENABLED_PROVIDERS_KEY = "deep.java.enabled.resource.providers";
+  static final String DISABLED_PROVIDERS_KEY = "deep.java.disabled.resource.providers";
 
-  public static Resource configureResource(
-      Settings config,
-      ClassLoader serviceClassLoader) {
+  /**
+   * Create and configure a resource for this agent.
+   *
+   * @param settings           the settings for the agent
+   * @param serviceClassLoader the class loader to use to load the SPI services
+   * @return the loaded resource
+   */
+  public static Resource configureResource(Settings settings, ClassLoader serviceClassLoader) {
     Resource result = Resource.create(Collections.emptyMap());
 
     Set<String> enabledProviders =
-        new HashSet<>(config.getAsList("deep.java.enabled.resource.providers"));
+        new HashSet<>(settings.getAsList(ENABLED_PROVIDERS_KEY));
     Set<String> disabledProviders =
-        new HashSet<>(config.getAsList("deep.java.disabled.resource.providers"));
+        new HashSet<>(settings.getAsList(DISABLED_PROVIDERS_KEY));
 
     for (ResourceProvider resourceProvider :
         SpiUtil.loadOrdered(ResourceProvider.class, serviceClassLoader)) {
@@ -59,29 +60,29 @@ public class ResourceDetector {
         continue;
       }
       if (resourceProvider instanceof ConditionalResourceProvider
-          && !((ConditionalResourceProvider) resourceProvider).shouldApply(config, result)) {
+          && !((ConditionalResourceProvider) resourceProvider).shouldApply(settings, result)) {
         continue;
       }
-      result = result.merge(resourceProvider.createResource(config));
+      result = result.merge(resourceProvider.createResource(settings));
     }
 
-    result = result.merge(createEnvironmentResource(config));
+    result = result.merge(createEnvironmentResource(settings));
 
-    result = filterAttributes(result, config);
+    result = filterAttributes(result, settings);
 
     return result;
   }
 
-  private static Resource createEnvironmentResource(Settings config) {
-    return Resource.create(getAttributes(config), null);
+  private static Resource createEnvironmentResource(Settings settings) {
+    return Resource.create(getAttributes(settings), null);
   }
 
   // visible for testing
-  static Map<String, Object> getAttributes(Settings configProperties) {
+  static Map<String, Object> getAttributes(Settings settings) {
     Map<String, Object> resourceAttributes = new HashMap<>();
     try {
       for (Map.Entry<String, String> entry :
-          configProperties.getMap(ATTRIBUTE_PROPERTY).entrySet()) {
+          settings.getMap(ATTRIBUTE_PROPERTY).entrySet()) {
         resourceAttributes.put(
             entry.getKey(),
             // Attributes specified via deep.resource.attributes follow the W3C Baggage spec and
@@ -91,9 +92,9 @@ public class ResourceDetector {
       }
     } catch (UnsupportedEncodingException e) {
       // Should not happen since always using standard charset
-      throw new ConfigurationException("Unable to decode resource attributes.", e);
+      throw new DeepRuntimeException("Unable to decode resource attributes.", e);
     }
-    String serviceName = configProperties.getSettingAs(SERVICE_NAME_PROPERTY, String.class);
+    String serviceName = settings.getSettingAs(SERVICE_NAME_PROPERTY, String.class);
     if (serviceName != null) {
       resourceAttributes.put(ResourceAttributes.SERVICE_NAME, serviceName);
     }
@@ -101,8 +102,8 @@ public class ResourceDetector {
   }
 
   // visible for testing
-  static Resource filterAttributes(Resource resource, Settings configProperties) {
-    Set<String> disabledKeys = new HashSet<>(configProperties.getAsList(
+  static Resource filterAttributes(Resource resource, Settings settings) {
+    Set<String> disabledKeys = new HashSet<>(settings.getAsList(
         DISABLED_ATTRIBUTE_KEYS));
 
     final Map<String, Object> attributes = resource.getAttributes();

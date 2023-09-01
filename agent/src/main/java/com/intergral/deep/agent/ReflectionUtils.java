@@ -24,12 +24,18 @@ import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.Set;
 
-public class ReflectionUtils {
+/**
+ * A collection of utils that simplify the use of reflection.
+ */
+public final class ReflectionUtils {
+
+  private ReflectionUtils() {
+  }
 
   private static final IReflection reflection;
 
   static {
-    if (Utils.getVersion() >= 9) {
+    if (Utils.getJavaVersion() >= 9) {
       reflection = new com.intergral.deep.reflect.Java9ReflectionImpl();
     } else {
       reflection = new ReflectionImpl();
@@ -40,28 +46,12 @@ public class ReflectionUtils {
     return reflection;
   }
 
-  public static boolean setAccessible(final Class<?> clazz, final Field field) {
-    return getReflection().setAccessible(clazz, field);
-  }
-
-
-  public static boolean setAccessible(final Class<?> clazz, final Method method) {
-    return getReflection().setAccessible(clazz, method);
-  }
-
-
   public static <T> T callMethod(Object target, String methodName, Object... args) {
     return getReflection().callMethod(target, methodName, args);
   }
 
-
   public static Method findMethod(Class<?> clazz, String methodName, Class<?>... argTypes) {
     return getReflection().findMethod(clazz, methodName, argTypes);
-  }
-
-
-  public static Field getField(Object target, String fieldName) {
-    return getReflection().getField(target, fieldName);
   }
 
   public static <T> T getFieldValue(Object target, String fieldName) {

@@ -20,6 +20,9 @@ package com.intergral.deep.agent.types.snapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This is a captured variable, it is referenced via {@link VariableID}.
+ */
 public class Variable {
 
   private final String varType;
@@ -28,6 +31,14 @@ public class Variable {
   private final boolean truncated;
   private final List<VariableID> children = new ArrayList<>();
 
+  /**
+   * Create a new variable.
+   *
+   * @param varType      the variable type
+   * @param valString    the variable value as a string
+   * @param identityCode the variable id
+   * @param truncated    is the value of this variable truncated
+   */
   public Variable(final String varType, final String valString, final String identityCode,
       final boolean truncated) {
 

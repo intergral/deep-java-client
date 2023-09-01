@@ -23,6 +23,10 @@ import org.objectweb.asm.ClassWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This type helps improve the ability to {@link #getCommonSuperClass}. Essentially adding support to use the class loader used to load the
+ * class and dealing with some known cases of optional types.
+ */
 public class ClassLoaderAwareClassWriter extends ClassWriter {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ClassLoaderAwareClassWriter.class);

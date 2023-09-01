@@ -33,7 +33,7 @@ public class ShippedToolsJarProvider implements ByteBuddyAgent.AttachmentProvide
 
 
   /**
-   * Create a new provider
+   * Create a new provider.
    *
    * @param tools the file object for the tools jar to use
    */

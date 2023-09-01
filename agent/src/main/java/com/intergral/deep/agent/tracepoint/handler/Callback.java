@@ -23,8 +23,8 @@ import com.intergral.deep.agent.api.plugin.LazyEvaluator;
 import com.intergral.deep.agent.push.PushService;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.tracepoint.TracepointConfigService;
+import com.intergral.deep.agent.tracepoint.cf.CFEvaluator;
 import com.intergral.deep.agent.tracepoint.cf.CFFrameProcessor;
-import com.intergral.deep.agent.tracepoint.cf.CFUtils;
 import com.intergral.deep.agent.tracepoint.evaluator.EvaluatorService;
 import com.intergral.deep.agent.tracepoint.inst.asm.Visitor;
 import com.intergral.deep.agent.types.TracePointConfig;
@@ -37,17 +37,23 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Callback {
+/**
+ * This type is the main entry point that is used to callback from injected code.
+ */
+public final class Callback {
+
+  private Callback() {
+  }
 
   //    @SuppressWarnings("AnonymousHasLambdaAlternative")
-//    public static final ThreadLocal<Deque<CallbackHook>> CALLBACKS = new ThreadLocal<Deque<CallbackHook>>()
-//    {
-//        @Override
-//        protected Deque<CallbackHook> initialValue()
-//        {
-//            return new ArrayDeque<>();
-//        }
-//    };
+  //    public static final ThreadLocal<Deque<CallbackHook>> CALLBACKS = new ThreadLocal<Deque<CallbackHook>>()
+  //    {
+  //        @Override
+  //        protected Deque<CallbackHook> initialValue()
+  //        {
+  //            return new ArrayDeque<>();
+  //        }
+  //    };
   private static final Logger LOGGER = LoggerFactory.getLogger(Callback.class);
   @SuppressWarnings("AnonymousHasLambdaAlternative")
   private static final ThreadLocal<Boolean> FIRING = new ThreadLocal<Boolean>() {
@@ -58,15 +64,23 @@ public class Callback {
   };
   private static Settings SETTINGS;
 
-  private static TracepointConfigService BREAKPOINT_SERVICE;
+  private static TracepointConfigService TRACEPOINT_SERVICE;
   private static PushService PUSH_SERVICE;
   private static int offset;
 
-  public static void init(final Settings settings,
-      final TracepointConfigService breakpointService,
+  /**
+   * Initialise the callback with the deep services.
+   *
+   * @param settings                the deep settings
+   * @param tracepointConfigService the tracepoint service
+   * @param pushService             the push service
+   */
+  public static void init(
+      final Settings settings,
+      final TracepointConfigService tracepointConfigService,
       final PushService pushService) {
     Callback.SETTINGS = settings;
-    Callback.BREAKPOINT_SERVICE = breakpointService;
+    Callback.TRACEPOINT_SERVICE = tracepointConfigService;
     Callback.PUSH_SERVICE = pushService;
     if (Visitor.CALLBACK_CLASS == Callback.class) {
       offset = 3;
@@ -77,7 +91,7 @@ public class Callback {
 
 
   /**
-   * The main entry point for CF ASM injected breakpoints
+   * The main entry point for CF ASM injected breakpoints.
    *
    * @param bpIds     the bp ids to trigger
    * @param filename  the filename of the breakpoint hit
@@ -89,7 +103,7 @@ public class Callback {
       final int lineNo,
       final Map<String, Object> variables) {
     try {
-      final IEvaluator evaluator = new LazyEvaluator(() -> CFUtils.findCfEval(variables));
+      final IEvaluator evaluator = new LazyEvaluator(new CFEvaluator.Loader(variables));
       commonCallback(bpIds, filename, lineNo, variables, evaluator, CFFrameProcessor::new);
     } catch (Throwable t) {
       LOGGER.debug("Unable to process tracepoint {}:{}", filename, lineNo, t);
@@ -98,7 +112,7 @@ public class Callback {
 
 
   /**
-   * The main entry point for non CF ASM injected breakpoints
+   * The main entry point for non CF ASM injected breakpoints.
    *
    * @param bpIds     the bp ids to trigger
    * @param filename  the filename of the breakpoint hit
@@ -134,11 +148,11 @@ public class Callback {
       LOGGER.trace("callBack for {}:{} -> {}", filename, lineNo, tracepointIds);
 
       // possible race condition but unlikely
-      if (Callback.BREAKPOINT_SERVICE == null) {
+      if (Callback.TRACEPOINT_SERVICE == null) {
         return;
       }
 
-      final Collection<TracePointConfig> tracePointConfigs = Callback.BREAKPOINT_SERVICE.loadTracepointConfigs(
+      final Collection<TracePointConfig> tracePointConfigs = Callback.TRACEPOINT_SERVICE.loadTracepointConfigs(
           tracepointIds);
 
       StackTraceElement[] stack = Thread.currentThread().getStackTrace();
@@ -171,132 +185,133 @@ public class Callback {
     }
   }
 
-  // the below methods are here as they are called from instrumented classes. This is a throwback to NV that we will address in later releases
+  // the below methods are here as they are called from instrumented classes.
+  // This is a throwback to NV that we will address in later releases
   public static void callBackException(final Throwable t) {
-//        System.out.println( "callBackException" );
-//        try
-//        {
-//            LOGGER.debug( "Capturing throwable", t );
-//            final CallbackHook element = CALLBACKS.get().peekLast();
-//            if( element != null && element.isHook())
-//            {
-//                element.setThrowable( t );
-//            }
-//        }
-//        catch( Throwable tt )
-//        {
-//            LOGGER.debug( "Error processing callback", tt );
-//        }
+    //        System.out.println( "callBackException" );
+    //        try
+    //        {
+    //            LOGGER.debug( "Capturing throwable", t );
+    //            final CallbackHook element = CALLBACKS.get().peekLast();
+    //            if( element != null && element.isHook())
+    //            {
+    //                element.setThrowable( t );
+    //            }
+    //        }
+    //        catch( Throwable tt )
+    //        {
+    //            LOGGER.debug( "Error processing callback", tt );
+    //        }
 
   }
 
 
   public static void callBackFinally(final Set<String> breakpointIds,
       final Map<String, Object> map) {
-//        System.out.println( "callBackFinally" );
-//        for( String breakpointId : breakpointIds )
-//        {
-//            try
-//            {
-//                LOGGER.debug( "{}: Processing finally", breakpointId );
-//                final Deque<CallbackHook> hooks = CALLBACKS.get();
-//                final CallbackHook pop = hooks.pollLast();
-//                LOGGER.debug( "Dequeue state: {}", hooks );
-//                if( pop == null || !pop.isHook() )
-//                {
-//                    LOGGER.debug( "No callback pending. {}", pop );
-//                    continue;
-//                }
-//
-//                final boolean processFrameStack = (pop.value.getType().equals( ITracepoint.STACK_TYPE )) || pop.value.getType()
-//                        .equals( ITracepoint.FRAME_TYPE ) || pop.value.getType().equals( ITracepoint.LOG_POINT_TYPE )
-//                        || pop.value.getType().equals( ITracepoint.NO_FRAME_TYPE );
-//
-//                final List<IStackFrame> frames;
-//                if( pop.value.getArg( ITracepoint.LINE_HOOK_ARG_KEY ).equals( ITracepoint.LINE_HOOK_DATA_RIGHT ) )
-//                {
-//                    frames = pop.snapshotHandler.processFrames( map, processFrameStack, System.currentTimeMillis() );
-//                }
-//                else
-//                {
-//                    frames = pop.frames;
-//                }
-//
-//                // trim frames to our type
-//                @SuppressWarnings({ "RedundantTypeArguments", "Convert2Diamond" })
-//                final IRequestDecorator iRequestDecorator = pop.snapshotHandler.generateSnapshotData( pop.watchValues, pop.value,
-//                        frames, Collections.<String>emptySet(),
-//                        NVError.fromThrowable( pop.throwable, new HashMap<String, String>() ),
-//                        System.currentTimeMillis(), Callback.CLIENT_CONFIG.getTags() );
-//
-//                final EventSnapshot eventSnapshot = iRequestDecorator.getBody();
-//                addDynamicTags( pop.value, eventSnapshot );
-//
-//                sendEvent( iRequestDecorator, eventSnapshot );
-//            }
-//            catch( Throwable t )
-//            {
-//                LOGGER.debug( "Error processing callback", t );
-//            }
-//        }
+    //        System.out.println( "callBackFinally" );
+    //        for( String breakpointId : breakpointIds )
+    //        {
+    //            try
+    //            {
+    //                LOGGER.debug( "{}: Processing finally", breakpointId );
+    //                final Deque<CallbackHook> hooks = CALLBACKS.get();
+    //                final CallbackHook pop = hooks.pollLast();
+    //                LOGGER.debug( "Dequeue state: {}", hooks );
+    //                if( pop == null || !pop.isHook() )
+    //                {
+    //                    LOGGER.debug( "No callback pending. {}", pop );
+    //                    continue;
+    //                }
+    //
+    //                final boolean processFrameStack = (pop.value.getType().equals( ITracepoint.STACK_TYPE )) || pop.value.getType()
+    //                        .equals( ITracepoint.FRAME_TYPE ) || pop.value.getType().equals( ITracepoint.LOG_POINT_TYPE )
+    //                        || pop.value.getType().equals( ITracepoint.NO_FRAME_TYPE );
+    //
+    //                final List<IStackFrame> frames;
+    //                if( pop.value.getArg( ITracepoint.LINE_HOOK_ARG_KEY ).equals( ITracepoint.LINE_HOOK_DATA_RIGHT ) )
+    //                {
+    //                    frames = pop.snapshotHandler.processFrames( map, processFrameStack, System.currentTimeMillis() );
+    //                }
+    //                else
+    //                {
+    //                    frames = pop.frames;
+    //                }
+    //
+    //                // trim frames to our type
+    //                @SuppressWarnings({ "RedundantTypeArguments", "Convert2Diamond" })
+    //                final IRequestDecorator iRequestDecorator = pop.snapshotHandler.generateSnapshotData( pop.watchValues, pop.value,
+    //                        frames, Collections.<String>emptySet(),
+    //                        NVError.fromThrowable( pop.throwable, new HashMap<String, String>() ),
+    //                        System.currentTimeMillis(), Callback.CLIENT_CONFIG.getTags() );
+    //
+    //                final EventSnapshot eventSnapshot = iRequestDecorator.getBody();
+    //                addDynamicTags( pop.value, eventSnapshot );
+    //
+    //                sendEvent( iRequestDecorator, eventSnapshot );
+    //            }
+    //            catch( Throwable t )
+    //            {
+    //                LOGGER.debug( "Error processing callback", t );
+    //            }
+    //        }
   }
 
-//    public static class CallbackHook
-//    {
-//
-//        private final SnapshotHandler snapshotHandler;
-//        private final List<IWatcherResult> watchValues;
-//        private final ITracepoint value;
-//        private final List<IStackFrame> frames;
-//        private Throwable throwable;
-//
-//
-//        public CallbackHook( final SnapshotHandler snapshotHandler,
-//                             final List<IWatcherResult> watchValues,
-//                             final ITracepoint value,
-//                             final List<IStackFrame> frames )
-//        {
-//            this.snapshotHandler = snapshotHandler;
-//            this.watchValues = watchValues;
-//            this.value = value;
-//            this.frames = frames;
-//        }
-//
-//
-//        public CallbackHook()
-//        {
-//            this.snapshotHandler = null;
-//            this.watchValues = null;
-//            this.value = null;
-//            this.frames = null;
-//        }
-//
-//
-//        /**
-//         * This will return {@code true} when there is a live hook for this.
-//         *
-//         * @return {@code true} if this is a hook else {@code false}.
-//         */
-//        public boolean isHook()
-//        {
-//            return this.snapshotHandler != null;
-//        }
-//
-//
-//        void setThrowable( final Throwable t )
-//        {
-//            this.throwable = t;
-//        }
-//
-//
-//        @Override
-//        public String toString()
-//        {
-//            if( value == null )
-//            {
-//                return "Marker for non callback";
-//            }
-//            return String.format( "%s:%s", value.getRelPath(), value.getLineNo() );
-//        }
-//    }
+  //    public static class CallbackHook
+  //    {
+  //
+  //        private final SnapshotHandler snapshotHandler;
+  //        private final List<IWatcherResult> watchValues;
+  //        private final ITracepoint value;
+  //        private final List<IStackFrame> frames;
+  //        private Throwable throwable;
+  //
+  //
+  //        public CallbackHook( final SnapshotHandler snapshotHandler,
+  //                             final List<IWatcherResult> watchValues,
+  //                             final ITracepoint value,
+  //                             final List<IStackFrame> frames )
+  //        {
+  //            this.snapshotHandler = snapshotHandler;
+  //            this.watchValues = watchValues;
+  //            this.value = value;
+  //            this.frames = frames;
+  //        }
+  //
+  //
+  //        public CallbackHook()
+  //        {
+  //            this.snapshotHandler = null;
+  //            this.watchValues = null;
+  //            this.value = null;
+  //            this.frames = null;
+  //        }
+  //
+  //
+  //        /**
+  //         * This will return {@code true} when there is a live hook for this.
+  //         *
+  //         * @return {@code true} if this is a hook else {@code false}.
+  //         */
+  //        public boolean isHook()
+  //        {
+  //            return this.snapshotHandler != null;
+  //        }
+  //
+  //
+  //        void setThrowable( final Throwable t )
+  //        {
+  //            this.throwable = t;
+  //        }
+  //
+  //
+  //        @Override
+  //        public String toString()
+  //        {
+  //            if( value == null )
+  //            {
+  //                return "Marker for non callback";
+  //            }
+  //            return String.format( "%s:%s", value.getRelPath(), value.getLineNo() );
+  //        }
+  //    }
 }

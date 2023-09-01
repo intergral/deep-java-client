@@ -17,9 +17,13 @@
 
 package com.intergral.deep.reflect;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+/**
+ * The version of reflection that deals with modules.
+ */
 public class Java9ReflectionImpl extends ReflectionImpl {
 
   @Override
@@ -41,6 +45,19 @@ public class Java9ReflectionImpl extends ReflectionImpl {
       openModule(clazz);
 
       method.setAccessible(true);
+      return true;
+    } catch (final Exception e) {
+      return false;
+    }
+  }
+
+
+  @Override
+  public boolean setAccessible(final Class<?> clazz, final Constructor<?> constructor) {
+    try {
+      openModule(clazz);
+
+      constructor.setAccessible(true);
       return true;
     } catch (final Exception e) {
       return false;

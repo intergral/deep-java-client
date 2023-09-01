@@ -52,7 +52,8 @@ public interface IPlugin {
    * Is this plugin active.
    * <p>
    * By default, this will check the Deep settings for the plugin name. e.g. the setting com.intergral.deep.plugin.JavaPlugin.active=false
-   * will disable the JavaPlugin. The normal settings rules apply, e.g. deep. or DEEP_ as a prefix when using system properties or environment variables.
+   * will disable the JavaPlugin. The normal settings rules apply, e.g. deep. or DEEP_ as a prefix when using system properties
+   * or environment variables.
    *
    * @param settings the current deep settings.
    * @return {@code false} if setting is 'false', otherwise {@code true}
@@ -73,10 +74,10 @@ public interface IPlugin {
   interface IPluginRegistration extends IRegistration<IPlugin> {
 
     /**
-     * Indicates if this plugin is currently set to be the auth provider
+     * Indicates if this plugin is currently set to be the auth provider.
      *
-     * @return {@code true} if the registered plugin is an {@link com.intergral.deep.agent.api.auth.IAuthProvider} and deep is configured to
-     * use this provider, else {@code false}
+     * @return {@code true} if the registered plugin is an {@link com.intergral.deep.agent.api.auth.IAuthProvider} and deep is configured
+     *     to use this provider, else {@code false}
      */
     boolean isAuthProvider();
   }

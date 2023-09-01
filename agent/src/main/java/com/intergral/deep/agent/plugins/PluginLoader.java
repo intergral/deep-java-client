@@ -18,6 +18,8 @@
 package com.intergral.deep.agent.plugins;
 
 import com.intergral.deep.agent.api.plugin.IPlugin;
+import com.intergral.deep.agent.api.reflection.IReflection;
+import com.intergral.deep.agent.api.reflection.ReflectionUtils;
 import com.intergral.deep.agent.settings.Settings;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -25,19 +27,31 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PluginLoader {
+/**
+ * this type deals with loading the plugins.
+ */
+public final class PluginLoader {
+
+  private PluginLoader() {
+  }
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PluginLoader.class);
 
-  public static List<IPlugin> loadPlugins(final Settings settings) {
+  /**
+   * Using the current config load as many plugins as we can.
+   *
+   * @param settings   the settings for deep
+   * @param reflection the reflection service to use
+   * @return the list of active and loaded plugins
+   */
+  public static List<IPlugin> loadPlugins(final Settings settings, final IReflection reflection) {
     final List<String> plugins = settings.getAsList("plugins");
     final List<IPlugin> loadedPlugins = new ArrayList<>();
     for (String plugin : plugins) {
       try {
         final Class<?> aClass = Class.forName(plugin);
-        final Constructor<?> constructor = aClass.getConstructor();
-        final Object newInstance = constructor.newInstance();
-        final IPlugin asPlugin = (IPlugin) newInstance;
+        final Constructor<?> constructor = ReflectionUtils.findConstructor(aClass, reflection);
+        final IPlugin asPlugin = ReflectionUtils.callConstructor(constructor, settings, reflection);
         if (asPlugin.isActive(settings)) {
           loadedPlugins.add(asPlugin);
         }

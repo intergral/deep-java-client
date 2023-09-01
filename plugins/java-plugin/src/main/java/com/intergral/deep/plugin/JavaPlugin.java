@@ -17,13 +17,16 @@
 
 package com.intergral.deep.plugin;
 
-import com.intergral.deep.agent.api.plugin.ISnapshotContext;
 import com.intergral.deep.agent.api.plugin.IPlugin;
+import com.intergral.deep.agent.api.plugin.ISnapshotContext;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This plugin captures the thread name of the thread the snapshot was cpatured on.
+ */
 public class JavaPlugin implements IPlugin {
 
   private final Map<String, String> basic = new HashMap<>();

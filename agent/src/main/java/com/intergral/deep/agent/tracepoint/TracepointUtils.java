@@ -21,10 +21,23 @@ import com.intergral.deep.agent.Utils;
 import com.intergral.deep.agent.tracepoint.inst.InstUtils;
 import com.intergral.deep.agent.types.TracePointConfig;
 
-public class TracepointUtils {
+/**
+ * Utilities for tracepoint configuration.
+ */
+public final class TracepointUtils {
 
+  private TracepointUtils() {
+  }
+
+  /**
+   * We normally get set the source file name, we need to convert this to a Java class name.
+   *
+   * @param tp the tracepoint to process
+   * @return the internal class name to install the tracepoint in, or {@code cfm} or {@code jsp} if the computed class is a CFM or JSP
+   *     class.
+   */
   public static String estimatedClassRoot(final TracePointConfig tp) {
-    // the arg class_name is sent from ATP as it has the full class name already
+    // we allow the class name to be sent for specific cases
     final String className = tp.getArg("class_name", String.class, null);
     if (className != null) {
       return InstUtils.internalClass(className);
@@ -39,11 +52,12 @@ public class TracepointUtils {
   }
 
 
-  static String parseFullClassName(final String rawRelPath, final String srcRootArg) {
+  private static String parseFullClassName(final String rawRelPath, final String srcRootArg) {
+    // cf classes are handled specially
     if (rawRelPath.endsWith(".cfm") || rawRelPath.endsWith(".cfc")) {
       return "cfm";
     }
-
+    // jsp classes are handled specially
     if (rawRelPath.endsWith(".jsp")) {
       return "jsp";
     }
@@ -60,23 +74,23 @@ public class TracepointUtils {
     }
     if (srcRootArg != null) {
       if (relPath.startsWith(srcRootArg)) {
-        return Utils.trim(relPath.substring(srcRootArg.length()), "/");
+        return Utils.trimPrefix(relPath.substring(srcRootArg.length()), "/");
       }
     } else if (relPath.contains("/src/main/")) {
       final String mainDir = relPath.substring(relPath.indexOf("/src/main/") + 11);
       final int i = mainDir.indexOf('/');
-      return Utils.trim(mainDir.substring(i), "/");
+      return Utils.trimPrefix(mainDir.substring(i), "/");
     } else if (relPath.contains("/src/test/")) {
       final String mainDir = relPath.substring(relPath.indexOf("/src/test/") + 11);
       final int i = mainDir.indexOf('/');
-      return Utils.trim(mainDir.substring(i), "/");
+      return Utils.trimPrefix(mainDir.substring(i), "/");
     }
-    final String trim = Utils.trim(relPath, "/");
+    final String trim = Utils.trimPrefix(relPath, "/");
     // this is just to ensure the file name is never empty
     // this only happens on non class files such as '.gitignore'
     // rather then return empty name we return the raw path
     if (trim.isEmpty()) {
-      return Utils.trim(rawRelPath, "/");
+      return Utils.trimPrefix(rawRelPath, "/");
     }
     return trim;
   }

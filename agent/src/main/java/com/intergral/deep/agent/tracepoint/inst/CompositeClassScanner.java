@@ -25,6 +25,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * A collection of scanners to run to collect classes to modify.
+ */
 public class CompositeClassScanner implements IClassScanner {
 
   private final Set<IClassScanner> scanner = new HashSet<>();
@@ -46,6 +49,12 @@ public class CompositeClassScanner implements IClassScanner {
   }
 
 
+  /**
+   * Scan the loaded classes for classes we should modify.
+   *
+   * @param inst the instrumentation
+   * @return an array of classes to modify
+   */
   public Class<?>[] scanAll(final Instrumentation inst) {
     final List<Class<?>> classes = new ArrayList<>();
     final Class<?>[] allLoadedClasses = inst.getAllLoadedClasses();
@@ -55,7 +64,21 @@ public class CompositeClassScanner implements IClassScanner {
           && scanClass(allLoadedClass)) {
         classes.add(allLoadedClass);
       }
+      // stop iteration as soon as scanners are complete
+      if (isComplete()) {
+        break;
+      }
     }
     return classes.toArray(new Class<?>[0]);
+  }
+
+  @Override
+  public boolean isComplete() {
+    for (IClassScanner classScanner : scanner) {
+      if (!classScanner.isComplete()) {
+        return false;
+      }
+    }
+    return true;
   }
 }

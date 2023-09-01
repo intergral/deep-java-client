@@ -41,6 +41,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This is the agent that is provided via the API, and is what holds all deep together.
+ */
 public class DeepAgent implements IDeep {
 
   private final Settings settings;
@@ -49,6 +52,12 @@ public class DeepAgent implements IDeep {
   private final TracepointConfigService tracepointConfig;
   private final PushService pushService;
 
+  /**
+   * Create a new deep agent.
+   *
+   * @param settings                         the settings
+   * @param tracepointInstrumentationService the tracepoint instrumentation service
+   */
   public DeepAgent(final Settings settings,
       TracepointInstrumentationService tracepointInstrumentationService) {
     this.settings = settings;
@@ -60,10 +69,13 @@ public class DeepAgent implements IDeep {
     Callback.init(settings, tracepointConfig, pushService);
   }
 
+  /**
+   * Start deep.
+   */
   public void start() {
     final Resource resource = ResourceDetector.configureResource(settings,
         DeepAgent.class.getClassLoader());
-    final List<IPlugin> iLoadedPlugins = PluginLoader.loadPlugins(settings);
+    final List<IPlugin> iLoadedPlugins = PluginLoader.loadPlugins(settings, ReflectionUtils.getReflection());
     this.settings.setPlugins(iLoadedPlugins);
     this.settings.setResource(Resource.DEFAULT.merge(resource));
     this.grpcService.start();
@@ -75,6 +87,7 @@ public class DeepAgent implements IDeep {
     return DeepVersion.VERSION;
   }
 
+  @Override
   public IPluginRegistration registerPlugin(final IPlugin plugin) {
     this.settings.addPlugin(plugin);
     final boolean isAuthProvider;
@@ -151,7 +164,7 @@ public class DeepAgent implements IDeep {
 
   @Override
   public boolean isEnabled() {
-    return this.settings.getSettingAs(ISettings.KEY_ENABLED, Boolean.class);
+    return this.settings.isActive();
   }
 
   @Override

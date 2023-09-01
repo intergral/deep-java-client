@@ -19,6 +19,10 @@ package com.intergral.deep.agent.tracepoint.handler;
 
 import com.intergral.deep.agent.types.TracePointConfig;
 
+/**
+ * This config holds the general config to use when processing a callback. The config is defined from all the tracepoints that are trigger
+ * on a line.
+ */
 public class FrameConfig {
 
   private static final int DEFAULT_MAX_VAR_DEPTH = 5;
@@ -37,6 +41,13 @@ public class FrameConfig {
   private int maxWatchVars = -1;
   private int maxTpProcessTime = -1;
 
+  private boolean cfRaw = false;
+
+  /**
+   * Process a tracepoint into the config.
+   *
+   * @param tracePointConfig the tracepoint to process
+   */
   public void process(final TracePointConfig tracePointConfig) {
     maxVarDepth = Math.max(tracePointConfig.getArg("MAX_VAR_DEPTH", Integer.class, -1),
         maxVarDepth);
@@ -69,8 +80,16 @@ public class FrameConfig {
         this.stackType = stackType;
       }
     }
+
+    final Boolean cfRaw = tracePointConfig.getArg("cf.raw", Boolean.class, null);
+    if (cfRaw != null && cfRaw) {
+      this.cfRaw = true;
+    }
   }
 
+  /**
+   * When we have finished processing all the tracepoints we {@code close} the config to set the final config for this callback.
+   */
   public void close() {
     maxVarDepth = maxVarDepth == -1 ? DEFAULT_MAX_VAR_DEPTH : maxVarDepth;
     maxVariables = maxVariables == -1 ? DEFAULT_MAX_VARIABLES : maxVariables;
@@ -83,6 +102,12 @@ public class FrameConfig {
     stackType = stackType == null ? TracePointConfig.STACK : stackType;
   }
 
+  /**
+   * Using the {@link #frameType} should we collect the variables on this frame.
+   *
+   * @param currentFrameIndex the current frame index.
+   * @return {@code true} if we should collect the variables.
+   */
   public boolean shouldCollectVars(final int currentFrameIndex) {
     if (this.frameType.equals(TracePointConfig.NO_FRAME_TYPE)) {
       return false;
@@ -95,19 +120,49 @@ public class FrameConfig {
     return this.frameType.equals(TracePointConfig.ALL_FRAME_TYPE);
   }
 
+  /**
+   * The max number of variables this callback should collect.
+   *
+   * @return the max variables
+   */
   public int maxVariables() {
     return this.maxVariables;
   }
 
+  /**
+   * The max length of any string.
+   *
+   * @return the max string length
+   */
   public int maxStringLength() {
     return this.maxStrLength;
   }
 
+  /**
+   * The max depth of variables to collect.
+   *
+   * @return the max variable depth
+   */
   public int maxDepth() {
     return this.maxVarDepth;
   }
 
+  /**
+   * The max number of items in a collection we should collect.
+   *
+   * @return the max collection size
+   */
   public int maxCollectionSize() {
     return this.maxCollectionSize;
+  }
+
+  /**
+   * Is this frame set to cf raw.
+   * cf raw allows the collection of the java variables instead of the mapped cf variables.
+   *
+   * @return {@code true} if we want to collect the raw cf variables.
+   */
+  public boolean isCfRaw() {
+    return this.cfRaw;
   }
 }

@@ -26,31 +26,38 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Scans the classes for CF classes we want to modify.
+ */
 public class CFClassScanner implements IClassScanner {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CFClassScanner.class);
-  private final Map<String, TracePointConfig> removedBreakpoints;
+  protected final Map<String, TracePointConfig> tracePointConfigMap;
 
 
-  public CFClassScanner(final Map<String, TracePointConfig> removedBreakpoints) {
-    this.removedBreakpoints = removedBreakpoints;
+  public CFClassScanner(final Map<String, TracePointConfig> tracePointConfigMap) {
+    this.tracePointConfigMap = tracePointConfigMap;
   }
 
 
   @Override
   public boolean scanClass(final Class<?> loadedClass) {
-    if (removedBreakpoints.isEmpty()) {
+    // if the map is empty we have already found all our tracepoints
+    if (tracePointConfigMap.isEmpty()) {
       // stop as soon as we run out of classes
       return false;
     }
 
+    // if this is a CF class then process it
     if (CFUtils.isCfClass(loadedClass.getName())) {
       try {
-        final Set<TracePointConfig> breakpoints = loadCfBreakpoints(loadedClass,
-            removedBreakpoints);
+        // try to load CF tracepoint - we try-catch as sometimes cfm won't give us a location we can use
+        final Set<TracePointConfig> breakpoints = loadCfTracepoint(loadedClass, tracePointConfigMap);
+        // if we found some tracepoints
         if (!breakpoints.isEmpty()) {
+          // remove them from our config so we can end fast
           for (TracePointConfig breakpoint : breakpoints) {
-            removedBreakpoints.remove(breakpoint.getId());
+            tracePointConfigMap.remove(breakpoint.getId());
           }
           return true;
         }
@@ -63,15 +70,29 @@ public class CFClassScanner implements IClassScanner {
   }
 
 
-  private Set<TracePointConfig> loadCfBreakpoints(final Class<?> loadedClass,
-      final Map<String, TracePointConfig> values) {
+  /**
+   * We need to convert the class name from CF which is normally some hashed version of the file path e.g. cftestList2ecfm1060358347, into a
+   * file path to source.
+   *
+   * @param loadedClass the class we are processing
+   * @param values      the current tracepoint configs we are looking to match
+   * @return the matched tracepoints
+   */
+  private Set<TracePointConfig> loadCfTracepoint(
+      final Class<?> loadedClass,
+      final Map<String, TracePointConfig> values
+  ) {
     final URL location = getLocation(loadedClass);
+    // Lucee will not give us the code location using protection domain
     if (location == null) {
-      return TracepointInstrumentationService.loadCfBreakpoints(
+      // if we cannot get the code source then we guess the source using the provided path name
+      return CFUtils.loadCfTracepoints(
           CFUtils.guessSource(loadedClass.getName()),
           values);
     }
-    return TracepointInstrumentationService.loadCfBreakpoints(location, values);
+    // Adobe CF should provide the location to the source, so we can use that.
+    // todo it is possible to run precompiled CF code which would possibly have a different source location
+    return CFUtils.loadCfTracepoints(location, values);
   }
 
 
@@ -82,5 +103,10 @@ public class CFClassScanner implements IClassScanner {
 
   URL getLocation(final ProtectionDomain protectionDomain) {
     return protectionDomain.getCodeSource().getLocation();
+  }
+
+  @Override
+  public boolean isComplete() {
+    return tracePointConfigMap.isEmpty();
   }
 }

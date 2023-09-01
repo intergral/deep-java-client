@@ -23,7 +23,7 @@ package com.intergral.deep.agent.api.plugin;
 public interface ISnapshotContext {
 
   /**
-   * Evaluate an expression in the frame of the tracepoint that triggered this snapshot
+   * Evaluate an expression in the frame of the tracepoint that triggered this snapshot.
    *
    * @param expression the express to evaluate
    * @return the result of the expression as a string

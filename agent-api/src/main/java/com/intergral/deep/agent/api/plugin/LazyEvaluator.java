@@ -18,6 +18,8 @@
 package com.intergral.deep.agent.api.plugin;
 
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This type allows the evaluator to be loaded only if it is needed. ie. if we have no watches or conditions there is no need for an
@@ -25,6 +27,7 @@ import java.util.Map;
  */
 public class LazyEvaluator extends AbstractEvaluator {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(LazyEvaluator.class);
   private static final Exception NO_EVALUATOR_EXCEPTION = new RuntimeException(
       "No evaluator available.");
   private final IEvaluatorLoader loader;
@@ -39,6 +42,9 @@ public class LazyEvaluator extends AbstractEvaluator {
       try {
         this.evaluator = this.loader.load();
       } catch (Exception e) {
+        LOGGER.error("Could not load evaluator", e);
+      }
+      if (this.evaluator == null) {
         this.evaluator = new AbstractEvaluator() {
           @Override
           public Object evaluateExpression(final String expression, final Map<String, Object> values) throws Throwable {
@@ -55,8 +61,17 @@ public class LazyEvaluator extends AbstractEvaluator {
     return load().evaluateExpression(expression, values);
   }
 
+  /**
+   * This type allows us to lazy load an evaluator when it is first used. This is helpful, as it can be expensive to load the evaluator, and
+   * we only want to do that if and when we need it.
+   */
   public interface IEvaluatorLoader {
 
+    /**
+     * Load the evaluator.
+     *
+     * @return the evaluator, or {@code null}
+     */
     IEvaluator load();
   }
 }

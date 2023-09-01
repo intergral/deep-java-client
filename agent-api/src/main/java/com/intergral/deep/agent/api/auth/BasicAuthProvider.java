@@ -22,6 +22,18 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
 
+/**
+ * This is an {@link IAuthProvider} that will attach basic authorization to the outbound requests.
+ * <p>
+ * This provider can be set using {@code service.auth.provider=com.intergral.deep.agent.api.auth.BasicAuthProvider}. The  username and
+ * password that is configured onto requests can be set with the setting:
+ * <ul>
+ *   <li>{@code service.username=yourusername}</li>
+ *   <li>{@code service.password=yourpassword}</li>
+ * </ul>
+ * <p>
+ * These values are then base64 encoded and attached to the outbound requests as the {@code authorization} header.
+ */
 public class BasicAuthProvider implements IAuthProvider {
 
   private final ISettings settings;

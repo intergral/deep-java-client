@@ -18,7 +18,13 @@
 package com.intergral.deep.agent.api.utils;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
+/**
+ * An iterator that can iterate across multiple iterators.
+ *
+ * @param <T> the type of the object in the iterators
+ */
 public class CompoundIterator<T> implements Iterator<T> {
 
   private final Iterator<T>[] iterators;
@@ -47,7 +53,7 @@ public class CompoundIterator<T> implements Iterator<T> {
 
       @Override
       public T next() {
-        return null;
+        throw new NoSuchElementException("end of compound iterator");
       }
     };
   }

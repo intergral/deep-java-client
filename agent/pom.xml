@@ -150,6 +150,23 @@
       <artifactId>asm-tree</artifactId>
       <scope>compile</scope>
     </dependency>
+
+    <!-- Test Dependencies-->
+    <dependency>
+      <groupId>com.intergral.deep.tests</groupId>
+      <artifactId>test-utils</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- We add this just so we can load the jsp classes, we don't care about updating this. -->
+    <!-- If this is updated the jsp test files might need to be recompiled on the new version.   -->
+    <!--suppress VulnerableLibrariesLocal -->
+    <dependency>
+      <groupId>org.apache.tomcat</groupId>
+      <artifactId>tomcat-jasper</artifactId>
+      <version>9.0.6</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -463,17 +480,9 @@
             <configuration>
               <trimStackTrace>false</trimStackTrace>
               <systemProperties>
-                <!--                                <property>-->
-                <!--                                    <name>deep.callback.class</name>-->
-                <!--                                    <value>com.nerdvision.agent.snapshot.Callback</value>-->
-                <!--                                </property>-->
-                <!--                                <property>-->
-                <!--                                    <name>deep.hook.class</name>-->
-                <!--                                    <value>com.nerdvision.agent.plugins.MethodHook</value>-->
-                <!--                                </property>-->
                 <property>
-                  <name>deep.logging.level</name>
-                  <value>INFO</value>
+                  <name>deep.callback.class</name>
+                  <value>com.intergral.deep.agent.tracepoint.handler.Callback</value>
                 </property>
               </systemProperties>
             </configuration>

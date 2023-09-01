@@ -20,7 +20,36 @@
   "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
   "https://checkstyle.org/dtds/suppressions_1_2.dtd">
 <suppressions>
-  <suppress checks="JavadocStyleCheck" files=".*Test(Target|).java"/>
+  <!-- Relax the requirements for test files  -->
   <suppress checks="MissingJavadocMethod" files=".*Test(Target|).java"/>
   <suppress checks="MissingJavadocType" files=".*Test(Target|).java"/>
+  <suppress checks="MissingJavadocMethod" files=".*Mock.*.java"/>
+  <suppress checks="MissingJavadocType" files=".*Mock.*.java"/>
+  <suppress checks="MissingJavadocType" files=".*/tests/.*"/>
+  <suppress checks="MissingJavadocMethod" files=".*/tests/.*"/>
+  <suppress checks="AvoidStarImport" files=".*Test(Target|).java"/>
+  <!-- These files are imported from external libraries and should not have our copyright -->
+  <suppress id="license-agpl" files=".*resource/Resource.*"/>
+  <suppress id="license-agpl" files=".*resource/SpiUtil.*"/>
+  <suppress id="license-agpl" files=".*api/spi.*"/>
+  <suppress id="license-agpl" files=".*agent/IDUtils.*"/>
+  <!-- properties files do not match java comments  -->
+  <suppress id="license-agpl" files=".*.properties"/>
+  <!-- these files are used as targets for tracepoints and we want to ensure they do not change, so we ignore them  -->
+  <suppress checks=".*" files=".*/test/target/.*"/>
+  <!-- These types are mock classes used to load cf, lucee and railo tests we do not want to scan them  -->
+  <suppress checks=".*" files=".*/coldfusion/.*"/>
+  <suppress checks=".*" files=".*/lucee/.*"/>
+  <suppress checks=".*" files=".*/railo/.*"/>
+  <!-- Checkstyle doesn't like unnamed scope blocks  -->
+  <suppress checks="Indentation" files=".*SourceMapParserTest.java"/>
+  <suppress checks="Indentation" files=".*TracepointConfigServiceTest.java"/>
+  <suppress checks="Indentation" files=".*SettingsTest.java"/>
+  <!-- CF methods use uppercase names  -->
+  <suppress checks="MethodName" files=".*CFUtilsTest.java"/>
+  <!-- Visitor is complex so ignore line length to let us better format this class  -->
+  <suppress checks="LineLength" files=".*Visitor.java"/>
+  <!-- No need to doc source map atm -->
+  <suppress checks="MissingJavadocType" files=".*/jsp/sourcemap/.*"/>
+  <suppress checks="MissingJavadocMethod" files=".*/jsp/sourcemap/.*"/>
 </suppressions>

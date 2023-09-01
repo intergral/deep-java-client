@@ -29,6 +29,9 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This service deals with mapping the response from polls into actions to install tracepoints.
+ */
 public class TracepointConfigService implements ITracepointConfig {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(TracepointConfigService.class);
@@ -76,6 +79,16 @@ public class TracepointConfigService implements ITracepointConfig {
         .collect(Collectors.toList());
   }
 
+  /**
+   * Add a new tracepoint via code api.
+   *
+   * @param path    the tracepoint path
+   * @param line    the tracepoint line
+   * @param args    the tracepoint args
+   * @param watches the tracepoint watches
+   * @return the new tracepoint config
+   * @see com.intergral.deep.agent.api.IDeep#registerTracepoint(String, int)
+   */
   public TracePointConfig addCustom(final String path, final int line, final Map<String, String> args,
       final Collection<String> watches) {
     final TracePointConfig tracePointConfig = new TracePointConfig(UUID.randomUUID().toString(), path, line, args, watches);
@@ -84,7 +97,20 @@ public class TracepointConfigService implements ITracepointConfig {
     return tracePointConfig;
   }
 
+  /**
+   * Remove a custom tracepoint.
+   *
+   * @param tracePointConfig the tracepoint to remove
+   * @see com.intergral.deep.agent.api.IDeep#registerTracepoint(String, int)
+   */
   public void removeCustom(final TracePointConfig tracePointConfig) {
-    this.customTracepoints.removeIf(current -> current.getId().equals(tracePointConfig.getId()));
+    final boolean removed = this.customTracepoints.removeIf(current -> current.getId().equals(tracePointConfig.getId()));
+    if (removed) {
+      this.processChange();
+    }
+  }
+
+  public long lastUpdate() {
+    return this.lastUpdate;
   }
 }

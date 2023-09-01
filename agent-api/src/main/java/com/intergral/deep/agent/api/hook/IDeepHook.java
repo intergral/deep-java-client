@@ -20,9 +20,22 @@ package com.intergral.deep.agent.api.hook;
 import com.intergral.deep.agent.api.IDeep;
 import com.intergral.deep.agent.api.reflection.IReflection;
 
+/**
+ * This type is used to pass an object from the agent to the API. It should not be directly used by clients.
+ */
 public interface IDeepHook {
 
+  /**
+   * Get the deep service from the agent.
+   *
+   * @return the deep agent.
+   */
   IDeep deepService();
 
+  /**
+   * Get the configured reflection api.
+   *
+   * @return the reflection api.
+   */
   IReflection reflectionService();
 }

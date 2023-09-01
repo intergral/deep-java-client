@@ -31,6 +31,9 @@ import org.objectweb.asm.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * We need to load classes without loading classes, so we have this type that lets us do this.
+ */
 public class ClassInfo {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ClassInfo.class);
@@ -45,6 +48,13 @@ public class ClassInfo {
   private final ClassLoader loader;
 
 
+  /**
+   * Create a new Class Info.
+   *
+   * @param type        the type to load
+   * @param loader      the loader to use
+   * @param classReader the class reader to use
+   */
   public ClassInfo(final String type, final ClassLoader loader, final ClassReader classReader) {
     this.loader = loader;
     this.type = Type.getObjectType(type);
@@ -52,16 +62,15 @@ public class ClassInfo {
   }
 
   /**
-   * This method should not be used out side of this type!
+   * This method should not be used outside of this type!
    * <p>
    * The intention for this method is to reduce the number of exceptions being generated.
    *
    * @param type   the internal type, or class, name to look for.
    * @param loader the class loader to start from
-   * @param thro   whether or not to throw the exception on a error.
+   * @param thro   whether to throw the exception on a error.
    * @return either the {@link ClassInfo} for the given type, or null if it could not be found. If
-   * {@code thro} is {@code true} then a {@link ClassInfoNotFoundException} is throw when the class
-   * cannot be found.
+   *     {@code thro} is {@code true} then a {@link ClassInfoNotFoundException} is throw when the class cannot be found.
    */
   @SuppressWarnings("Duplicates")
   static ClassInfo loadClassInfo(final String type, final ClassLoader loader, final boolean thro) {
@@ -131,15 +140,15 @@ public class ClassInfo {
     return null;
   }
 
-  private static boolean isRailoClassLoader(final ClassLoader loader) {
+  static boolean isRailoClassLoader(final ClassLoader loader) {
     return loader.getClass().getName().equals(RAILO_LOADER);
   }
 
-  private static boolean isLuceeClassLoader(final ClassLoader loader) {
+  static boolean isLuceeClassLoader(final ClassLoader loader) {
     return loader.getClass().getName().equals(LUCEE_LOADER);
   }
 
-  private static boolean isSafeLoader(final ClassLoader loader) {
+  static boolean isSafeLoader(final ClassLoader loader) {
     final String name = loader.getClass().getName();
     return SAFE_LOADERS.contains(name);
   }
@@ -204,7 +213,7 @@ public class ClassInfo {
   }
 
 
-  public boolean implementsInterface(final ClassInfo that) {
+  boolean implementsInterface(final ClassInfo that) {
     for (ClassInfo c = this; c != null; c = c.getSuperclass()) {
       ClassInfo[] tis = c.getInterfaces();
       for (ClassInfo ti : tis) {
@@ -227,7 +236,7 @@ public class ClassInfo {
   }
 
 
-  public boolean isAssignableFrom(final ClassInfo that) {
+  boolean isAssignableFrom(final ClassInfo that) {
     if (this == that) {
       return true;
     }

@@ -17,6 +17,9 @@
 
 package com.intergral.deep.agent.tracepoint.inst.asm;
 
+/**
+ * Used to indicate that a {@link ClassInfo} could not be loaded for a give type.
+ */
 public class ClassInfoNotFoundException extends RuntimeException {
 
   private final String type;

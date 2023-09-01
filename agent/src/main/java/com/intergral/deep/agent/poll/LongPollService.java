@@ -17,7 +17,6 @@
 
 package com.intergral.deep.agent.poll;
 
-import com.intergral.deep.agent.Utils;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.grpc.GrpcService;
 import com.intergral.deep.agent.settings.Settings;
@@ -35,18 +34,31 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * This service deals with polling the remote service for tracepoint configs.
+ */
 public class LongPollService implements ITimerTask {
   private final Settings settings;
   private final GrpcService grpcService;
   private final DriftAwareThread thread;
   private ITracepointConfig tracepointConfig;
 
+  /**
+   * Create a new service.
+   *
+   * @param settings    the deep settings
+   * @param grpcService the deep grpc service
+   */
   public LongPollService(final Settings settings, final GrpcService grpcService) {
     this.settings = settings;
     this.grpcService = grpcService;
     this.thread = new DriftAwareThread(LongPollService.class.getSimpleName(),
         this,
         settings.getSettingAs("poll.timer", Integer.class));
+  }
+
+  void setTracepointConfig(final ITracepointConfig tracepointConfig) {
+    this.tracepointConfig = tracepointConfig;
   }
 
   public void start(final ITracepointConfig tracepointConfig) {
@@ -69,7 +81,7 @@ public class LongPollService implements ITimerTask {
     }
 
     final PollRequest pollRequest = builder
-        .setTsNanos(Utils.currentTimeNanos()[1])
+        .setTsNanos(now)
         .setResource(buildResource())
         .build();
 

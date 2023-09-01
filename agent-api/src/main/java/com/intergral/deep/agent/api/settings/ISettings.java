@@ -21,10 +21,13 @@ import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.resource.Resource;
 import java.util.Map;
 
+/**
+ * The exposed API for the Deep settings.
+ */
 public interface ISettings {
 
   /**
-   * This is the settings key for the configured auth provider
+   * This is the settings key for the configured auth provider.
    */
   String KEY_AUTH_PROVIDER = "service.auth.provider";
 
@@ -34,16 +37,62 @@ public interface ISettings {
   String KEY_ENABLED = "enabled";
 
   /**
-   * This is the setting key for the service url
+   * This is the setting key for the service url.
    */
   String KEY_SERVICE_URL = "service.url";
 
-  <T> T getSettingAs(String key, Class<T> clazz);
-
-  Map<String, String> getMap(String attributeProperty);
+  /**
+   * This is the setting key for the service secure setting.
+   */
+  String KEY_SERVICE_SECURE = "service.secure";
 
   /**
-   * Returns the resource that describes this client
+   * This is the setting key for the plugin list.
+   */
+  String PLUGINS = "plugins";
+
+  /**
+   * To let us calculate the class and file names for JSP classes we need to know the JSP suffix that is being used by monitored service.
+   * <p>
+   * By default, tomcat take index.jsp and make it into index_jsp.class, but this suffix can be configured.
+   */
+  String JSP_SUFFIX = "jsp.suffix";
+  /**
+   * It is possible to put compiled JSP classes into specified packages, some versions put this in a {@code jsp} package, some use
+   * {@code org.apache.jsp} (newer).
+   */
+  String JSP_PACKAGES = "jsp.packages";
+
+  /**
+   * Define which packages we should include as being part of your app.
+   */
+  String APP_FRAMES_INCLUDES = "in.app.include";
+
+  /**
+   * Define which packages we should exclude as being part of your app.
+   */
+  String APP_FRAMES_EXCLUDES = "in.app.include";
+
+  /**
+   * Get a setting from the config as a given type.
+   *
+   * @param key   the key for the setting
+   * @param clazz the type to return as
+   * @param <T>   the type to return as
+   * @return the value as the given type
+   */
+  <T> T getSettingAs(String key, Class<T> clazz);
+
+  /**
+   * Get the property as a map.
+   *
+   * @param key the for the setting
+   * @return the value as a map
+   */
+  Map<String, String> getMap(String key);
+
+  /**
+   * Returns the resource that describes this client.
    *
    * @return the {@link Resource}
    */

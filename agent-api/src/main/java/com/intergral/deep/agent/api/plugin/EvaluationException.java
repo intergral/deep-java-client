@@ -28,7 +28,7 @@ public class EvaluationException extends Exception {
   private final String expression;
 
   /**
-   * Create a new exception
+   * Create a new exception.
    *
    * @param expression the expression that failed
    * @param cause      the failure
@@ -39,7 +39,7 @@ public class EvaluationException extends Exception {
   }
 
   /**
-   * Get the expression
+   * Get the expression.
    *
    * @return {@link #expression}
    */

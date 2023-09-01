@@ -27,11 +27,23 @@ import java.lang.instrument.Instrumentation;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
+/**
+ * This type is called from the {@link Agent} via reflection to load the agent after the jar we are in has been attached to the class path.
+ */
 public class AgentImpl {
+
+  private AgentImpl() {
+  }
 
   private static final CountDownLatch LATCH = new CountDownLatch(1);
   private static DeepAgent deepAgent;
 
+  /**
+   * Start the deep agent.
+   *
+   * @param inst the instrumentation object
+   * @param args the agent arguments
+   */
   public static void startup(final Instrumentation inst, final Map<String, String> args) {
     final Settings settings = Settings.build(args);
     Logger.configureLogging(settings);
@@ -47,11 +59,25 @@ public class AgentImpl {
     LATCH.countDown();
   }
 
+  /**
+   * await the load of the dep api.
+   *
+   * @return the loaded api object
+   * @throws InterruptedException if interupted
+   */
+  // called via reflection
   public static Object awaitLoadAPI() throws InterruptedException {
     LATCH.await();
     return loadDeepAPI();
   }
 
+  /**
+   * Load the deep API to be used outside the agent.
+   * <p>
+   * This method is defined as returning {@link Object} to not cause unwanted class loading of the type {@link IDeepHook}.
+   *
+   * @return a new instance of {@link IDeepHook}
+   */
   public static Object loadDeepAPI() {
     if (deepAgent == null) {
       throw new IllegalStateException("Must start DEEP first");

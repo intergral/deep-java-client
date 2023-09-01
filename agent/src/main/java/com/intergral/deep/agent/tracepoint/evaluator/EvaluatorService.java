@@ -22,12 +22,23 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EvaluatorService {
+/**
+ * General wrapper around non CF evaluators.
+ */
+public final class EvaluatorService {
+
+  private EvaluatorService() {
+  }
 
   private static final Logger LOGGER = LoggerFactory.getLogger(EvaluatorService.class);
   private static final Exception NO_EVALUATOR_EXCEPTION = new RuntimeException(
       "No evaluator available.");
 
+  /**
+   * Create an evaluator.
+   *
+   * @return the new evaluator.
+   */
   public static IEvaluator createEvaluator() {
     final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
     final IEvaluator iEvaluator = NashornReflectEvaluator.loadEvaluator(contextClassLoader);
