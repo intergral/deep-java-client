@@ -198,7 +198,7 @@ public abstract class ACFTest {
     assertNotNull(snapshot);
 
     final StackFrame topFrame = snapshot.getFrames(0);
-    assertEquals("/app/CTA/tests/testFile.cfm", topFrame.getFileName());
+    assertEquals("app/CTA/tests/testFile.cfm", topFrame.getFileName());
     assertEquals("runPage", topFrame.getMethodName());
     assertTrue(topFrame.getAppFrame());
 
