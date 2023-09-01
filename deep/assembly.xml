@@ -35,6 +35,12 @@
         <include>${project.groupId}:${project.artifactId}:*:${project.version}</include>
       </includes>
     </dependencySet>
+    <dependencySet>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>net.bytebuddy:byte-buddy-agent:*</include>
+      </includes>
+    </dependencySet>
   </dependencySets>
   <files>
     <file>
