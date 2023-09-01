@@ -21,7 +21,7 @@ jobs:
           cache: 'maven'
 
       - name: Run tests
-        run: make test
+        run: make coverage
 
       # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
       - name: Update dependency graph
