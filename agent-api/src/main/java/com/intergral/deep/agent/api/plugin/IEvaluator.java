@@ -19,10 +19,30 @@ package com.intergral.deep.agent.api.plugin;
 
 import java.util.Map;
 
+/**
+ * This defines an evaluator, and evaluator is used to evaluate expression at runtime. ie allows a watch or condition to execute within the
+ * scope of the tracepoint.
+ */
 public interface IEvaluator {
 
+  /**
+   * Evaluate an expression as a boolean response.
+   *
+   * @param expression the expression to evaluate
+   * @param values     the variables that the expression can evaluate against
+   * @return {@code true} if the expression evaluates to truthy value.
+   * @see AbstractEvaluator#objectToBoolean(Object)
+   */
   boolean evaluate(final String expression, final Map<String, Object> values);
 
+  /**
+   * Evaluate an expression to the value.
+   *
+   * @param expression the expression to evaluate
+   * @param values     the variables that the expression can evaluate against
+   * @return the result of the expression
+   * @throws Throwable if the expression fails
+   */
   Object evaluateExpression(final String expression, final Map<String, Object> values)
       throws Throwable;
 }

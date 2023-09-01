@@ -22,6 +22,9 @@ import com.intergral.deep.agent.api.settings.ISettings;
 import com.intergral.deep.agent.api.spi.ResourceProvider;
 import java.util.Collections;
 
+/**
+ * A resource provider that detects the hava version to add to the resource.
+ */
 public class JavaResourceDetector implements ResourceProvider {
 
   @Override

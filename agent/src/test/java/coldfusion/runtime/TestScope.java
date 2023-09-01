@@ -20,6 +20,6 @@ package coldfusion.runtime;
 import java.util.HashMap;
 
 @SuppressWarnings("ALL")
-public class TestScope extends HashMap
-{
+public class TestScope extends HashMap {
+
 }

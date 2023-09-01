@@ -24,8 +24,10 @@ import javax.servlet.jsp.tagext.Tag;
 
 @SuppressWarnings("ALL")
 public abstract class CfJspPage {
+
   public Tag parent;
   public NeoPageContext pageContext = new NeoPageContext();
+
   protected void bindPageVariables(VariableScope varscope, LocalScope locscope) {
 
   }
@@ -33,15 +35,17 @@ public abstract class CfJspPage {
   protected Variable bindPageVariable(String varName, VariableScope varScope, LocalScope locScope) {
     return null;
   }
+
   protected abstract Object runPage();
 
   public Tag _initTag(Class clazz, int slot, Tag parent) throws IOException {
     return new OutputTag();
   }
 
-  public void _setCurrentLineNo(int lineNo) {}
+  public void _setCurrentLineNo(int lineNo) {
+  }
 
-  public void _whitespace(JspWriter out, String msg){
+  public void _whitespace(JspWriter out, String msg) {
 
   }
 }

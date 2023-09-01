@@ -17,18 +17,34 @@
 
 package com.intergral.deep.agent.types.snapshot;
 
+/**
+ * The result of a watch expression evaluation.
+ */
 public class WatchResult {
 
   private final String error;
   private final VariableID result;
   private final String expression;
 
+
+  /**
+   * Create a bad result.
+   *
+   * @param expression the expression
+   * @param error      the error
+   */
   public WatchResult(final String expression, final String error) {
     this.expression = expression;
     this.error = error;
     this.result = null;
   }
 
+  /**
+   * Create a good result.
+   *
+   * @param expression the expression
+   * @param result     the result
+   */
   public WatchResult(final String expression, final VariableID result) {
     this.expression = expression;
     this.error = null;

@@ -48,6 +48,9 @@ import org.objectweb.asm.tree.ClassNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This service deals with detecting which classes need to be transformed and uses the visitor to instrument the classes as needed.
+ */
 public class TracepointInstrumentationService implements ClassFileTransformer {
 
   public static final long COMPUTE_ON_CLASS_VERSION = Long.getLong("nv.compute.class.version", 50L);
@@ -60,18 +63,24 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
   private final List<String> jspPackages;
 
   /**
-   * We process JSP classes specially, so we collect them all under this class key
+   * We process JSP classes specially, so we collect them all under this class key.
    */
-  private final String JSP_CLASS_KEY = "jsp";
+  private static final String JSP_CLASS_KEY = "jsp";
 
   /**
-   * We process CFM classes specially, so we collect them all under this class key
+   * We process CFM classes specially, so we collect them all under this class key.
    */
-  private final String CFM_CLASS_KEY = "cfm";
+  private static final String CFM_CLASS_KEY = "cfm";
 
   private Map<String, Map<String, TracePointConfig>> classPrefixTracepoints = new ConcurrentHashMap<>();
 
 
+  /**
+   * Create a new service.
+   *
+   * @param inst     the instrumentation service
+   * @param settings the deep settings
+   */
   public TracepointInstrumentationService(final Instrumentation inst, final Settings settings) {
     this.inst = inst;
     this.disPath = settings.getSettingAs("transform.path", String.class);
@@ -80,6 +89,13 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
     this.jspSuffix = settings.getSettingAs("jsp.suffix", String.class);
   }
 
+  /**
+   * Initialise the tracepoint service with the deep services.
+   *
+   * @param inst     the instrumentation to use
+   * @param settings the settings for deep
+   * @return the configured service
+   */
   public static TracepointInstrumentationService init(final Instrumentation inst,
       final Settings settings) {
     final TracepointInstrumentationService tracepointInstrumentationService = new TracepointInstrumentationService(
@@ -92,8 +108,7 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
   }
 
   /**
-   * Process the new config from the services and determine which classes need to be transformed,
-   * and trigger transformation.
+   * Process the new config from the services and determine which classes need to be transformed, and trigger transformation.
    *
    * @param breakpointResponse the new list of tracepoints that have been received from the server.
    */
@@ -144,9 +159,9 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
 
     // scanner to handle JSP classes
     if (this.classPrefixTracepoints.containsKey(JSP_CLASS_KEY) || existingTracepoints.containsKey(JSP_CLASS_KEY)) {
-      final Map<String, TracePointConfig> jsp = this.classPrefixTracepoints.get(this.JSP_CLASS_KEY);
+      final Map<String, TracePointConfig> jsp = this.classPrefixTracepoints.get(JSP_CLASS_KEY);
       final IClassScanner jspScanner = reTransFormJSPClasses(Utils.newMap(jsp),
-          Utils.newMap(existingTracepoints.get(this.JSP_CLASS_KEY)));
+          Utils.newMap(existingTracepoints.get(JSP_CLASS_KEY)));
       compositeClassScanner.addScanner(jspScanner);
     }
 
@@ -172,7 +187,7 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
   }
 
   /**
-   * Calculate the classes to scan for JSP
+   * Calculate the classes to scan for JSP.
    *
    * @param newJSPState      the new JSP state
    * @param previousJSPState the previous JSP state
@@ -208,7 +223,7 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
   }
 
   /**
-   * Calculate the classes to scan for CFM
+   * Calculate the classes to scan for CFM.
    *
    * @param newCFMState      the new CFM state
    * @param previousCFMState the previous CFM state
@@ -284,11 +299,11 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
     if (matchedTracepoints.isEmpty() && !this.classPrefixTracepoints.containsKey(CFM_CLASS_KEY)
         && !this.classPrefixTracepoints.containsKey(JSP_CLASS_KEY)) {
       return null;
-    }
-    // no breakpoints for this class, but we have a cfm breakpoints, and this is a cfm class
-    else if (matchedTracepoints.isEmpty()
+    } else if (matchedTracepoints.isEmpty()
         && this.classPrefixTracepoints.containsKey(CFM_CLASS_KEY)
         && CFUtils.isCfClass(classNameP)) {
+      // no breakpoints for this class, but we have a cfm breakpoints, and this is a cfm class
+
       final Map<String, TracePointConfig> cfm = this.classPrefixTracepoints.get(CFM_CLASS_KEY);
       final URL location = getLocation(protectionDomain);
       if (location == null) {
@@ -297,20 +312,19 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
         // no need to expand frames here as we only need the version and source file
         reader.accept(cn, ClassReader.SKIP_FRAMES | ClassReader.SKIP_CODE);
         final String sourceFile = cn.sourceFile;
-        iBreakpoints = CFUtils.loadCfBreakpoints(sourceFile, cfm);
+        iBreakpoints = CFUtils.loadCfTracepoints(sourceFile, cfm);
       } else {
-        iBreakpoints = CFUtils.loadCfBreakpoints(location, cfm);
+        iBreakpoints = CFUtils.loadCfTracepoints(location, cfm);
       }
       if (iBreakpoints.isEmpty()) {
         return null;
       }
       isCf = true;
-    }
-    // no breakpoints for this class, but we have a jsp breakpoints, and this is a jsp class
-    else if (matchedTracepoints.isEmpty()
+    } else if (matchedTracepoints.isEmpty()
         && this.classPrefixTracepoints.containsKey(JSP_CLASS_KEY)
         && JSPUtils.isJspClass(this.jspSuffix, this.jspPackages,
         InstUtils.externalClassName(className))) {
+      // no breakpoints for this class, but we have a jsp breakpoints, and this is a jsp class
       isCf = false;
       final SourceMap sourceMap = JSPUtils.getSourceMap(classfileBuffer);
       if (sourceMap == null) {
@@ -332,13 +346,13 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
           if (mappedLines.isEmpty()) {
             continue;
           }
+          // todo should we install on all lines?
           final int start = mappedLines.get(0).getStart();
           iBreakpoints.add(new JSPMappedBreakpoint(rawBreakpoint, start));
         }
       }
-    }
-    // else there is a tracepoint for this class
-    else {
+    } else {
+      // else there is a tracepoint for this class
       isCf = false;
       iBreakpoints = matchedTracepoints;
     }

@@ -21,6 +21,9 @@ import com.intergral.deep.agent.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A thread that can run a {@link ITimerTask} accounting for drifting time.
+ */
 public class DriftAwareThread extends Thread {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DriftAwareThread.class);
@@ -34,6 +37,8 @@ public class DriftAwareThread extends Thread {
 
 
   /**
+   * Create a new thread.
+   *
    * @param name     the name for the thread
    * @param runnable the {@link ITimerTask} to execute
    * @param interval the interval in ms between each execution
@@ -178,7 +183,7 @@ public class DriftAwareThread extends Thread {
   }
 
 
-  public void stopTask() {
+  void stopTask() {
     synchronized (this.samplerLock) {
       this.stopSampler();
       this.samplerLock.notifyAll();

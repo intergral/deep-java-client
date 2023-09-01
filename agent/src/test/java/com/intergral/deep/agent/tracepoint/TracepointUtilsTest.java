@@ -38,8 +38,10 @@ class TracepointUtilsTest {
 
     assertEquals("jsp", TracepointUtils.estimatedClassRoot(new MockTracepointConfig("some.jsp").withArg("src_root", "src/")));
 
-    assertEquals("hello/world/HelloController", TracepointUtils.estimatedClassRoot(new MockTracepointConfig("/src/main/java/hello/world/HelloController.java").withArg("src_root", "/src/main/java")));
-    assertEquals("hello/world/HelloController", TracepointUtils.estimatedClassRoot(new MockTracepointConfig("/src/main/java/hello/world/HelloController.java")));
+    assertEquals("hello/world/HelloController", TracepointUtils.estimatedClassRoot(
+        new MockTracepointConfig("/src/main/java/hello/world/HelloController.java").withArg("src_root", "/src/main/java")));
+    assertEquals("hello/world/HelloController",
+        TracepointUtils.estimatedClassRoot(new MockTracepointConfig("/src/main/java/hello/world/HelloController.java")));
 
     assertEquals("docker/Dockerfile", TracepointUtils.estimatedClassRoot(new MockTracepointConfig("/docker/Dockerfile")));
     assertEquals(".gitignore", TracepointUtils.estimatedClassRoot(new MockTracepointConfig("/.gitignore")));

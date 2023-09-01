@@ -7,6 +7,9 @@ package com.intergral.deep.agent;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * Utilities related to snapshot ids.
+ */
 public final class IDUtils {
 
   private IDUtils() {
@@ -16,6 +19,11 @@ public final class IDUtils {
   private static final String ALPHABET = "0123456789abcdef";
   private static final char[] ENCODING = buildEncodingArray();
 
+  /**
+   * Create a new random id for a snapshot.
+   *
+   * @return the new id
+   */
   public static String randomId() {
     final ThreadLocalRandom current = ThreadLocalRandom.current();
     final long longId = current.nextLong();

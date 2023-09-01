@@ -19,6 +19,9 @@ package com.intergral.deep.agent.types.snapshot;
 
 import java.util.Collection;
 
+/**
+ * A stack frame is the description of frame withing a stack.
+ */
 public class StackFrame {
 
   private final String className;
@@ -31,6 +34,19 @@ public class StackFrame {
   private final String transpiledFile;
   private final int transpiledLine;
 
+  /**
+   * Create a new stack frame.
+   *
+   * @param fileName       the file name
+   * @param lineNumber     the line number
+   * @param className      the class name
+   * @param methodName     the method name
+   * @param appFrame       is this an app frame
+   * @param nativeFrame    is this a native frame
+   * @param frameVariables the variables on the frame
+   * @param transpiledFile the transpiled file name
+   * @param transpiledLine the transpiled line number
+   */
   public StackFrame(final String fileName, final int lineNumber, final String className,
       final String methodName, final boolean appFrame, final boolean nativeFrame,
       final Collection<VariableID> frameVariables, final String transpiledFile, final int transpiledLine) {

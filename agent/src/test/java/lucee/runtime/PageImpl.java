@@ -20,13 +20,14 @@ package lucee.runtime;
 import lucee.runtime.type.UDFProperties;
 
 @SuppressWarnings("ALL")
-public class PageImpl
-{
-    protected UDFProperties[] udfs;
+public class PageImpl {
 
-    protected void setPageSource(PageSource source){}
+  protected UDFProperties[] udfs;
 
-    public static class SomePageImpl extends PageImpl {
+  protected void setPageSource(PageSource source) {
+  }
 
-    }
+  public static class SomePageImpl extends PageImpl {
+
+  }
 }

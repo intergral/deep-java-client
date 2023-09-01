@@ -18,6 +18,6 @@
 package railo.commons.lang;
 
 @SuppressWarnings("ALL")
-public class PCLBlock  extends ClassLoader{
+public class PCLBlock extends ClassLoader {
 
 }

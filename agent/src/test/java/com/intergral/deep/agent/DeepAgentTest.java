@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 
 import com.intergral.deep.agent.api.DeepVersion;
-import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.plugin.IPlugin.IPluginRegistration;
 import com.intergral.deep.agent.api.tracepoint.ITracepoint;
 import com.intergral.deep.agent.api.tracepoint.ITracepoint.ITracepointRegistration;

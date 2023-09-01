@@ -22,16 +22,19 @@ import coldfusion.tagext.GenericTag;
 @SuppressWarnings("ALL")
 public class OutputTag extends GenericTag {
 
-  public int doStartTag(){
+  public int doStartTag() {
     return 1;
   }
-  public int doAfterBody(){
+
+  public int doAfterBody() {
     return 0;
   }
-  public int doEndTag(){
+
+  public int doEndTag() {
     return 0;
   }
-  public int doCatch(){
+
+  public int doCatch() {
     return 0;
   }
 }

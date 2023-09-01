@@ -17,12 +17,26 @@
 
 package com.intergral.deep.agent.api;
 
+/**
+ * A general exception used by deep to throw {@link RuntimeException}.
+ */
 public class DeepRuntimeException extends RuntimeException {
 
+  /**
+   * Create a new exception with a message.
+   *
+   * @param message the error message
+   */
   public DeepRuntimeException(final String message) {
     super(message);
   }
 
+  /**
+   * Create a new exception with a message and cause.
+   *
+   * @param message the error message
+   * @param cause the cause of the error
+   */
   public DeepRuntimeException(final String message, final Throwable cause) {
     super(message, cause);
   }

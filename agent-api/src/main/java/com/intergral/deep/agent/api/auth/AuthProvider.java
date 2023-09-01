@@ -26,10 +26,25 @@ import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.Map;
 
-public class AuthProvider {
+/**
+ * A utility class to load the configured {@link IAuthProvider}.
+ */
+public final class AuthProvider {
+
+  private AuthProvider() {
+  }
 
   private static final NoopProvider NOOP_PROVIDER = new NoopProvider();
 
+  /**
+   * Load the configured {@link IAuthProvider}.
+   * <p>
+   * This will always return a {@link IAuthProvider}.
+   *
+   * @param settings   the current settings
+   * @param reflection the reflection service that is available
+   * @return the loaded {@link IAuthProvider}
+   */
   public static IAuthProvider provider(final ISettings settings, final IReflection reflection) {
     final String serviceAuthProvider = settings.getSettingAs("service.auth.provider", String.class);
     if (serviceAuthProvider == null || serviceAuthProvider.trim().isEmpty()) {

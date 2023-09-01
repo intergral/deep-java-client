@@ -42,7 +42,6 @@ import com.intergral.deep.proto.poll.v1.PollRequest;
 import com.intergral.deep.proto.poll.v1.PollResponse;
 import com.intergral.deep.proto.poll.v1.ResponseType;
 import com.intergral.deep.proto.tracepoint.v1.TracePointConfig;
-import com.intergral.deep.tests.ResettableCountDownLatch;
 import com.intergral.deep.tests.grpc.TestPollService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -165,7 +164,8 @@ class LongPollServiceTest {
     response = PollResponse.newBuilder().setResponseType(ResponseType.UPDATE).setCurrentHash("123").addResponse(
             TracePointConfig.newBuilder().setPath("/some/file/path.py").setLineNumber(123).setID("tp-1")
                 .putAllArgs(Collections.singletonMap("key", "value")).addWatches("i watch").addTargeting(
-                    KeyValue.newBuilder().setKey("key").setValue(AnyValue.newBuilder().setStringValue("some string").build()).build()).build())
+                    KeyValue.newBuilder().setKey("key")
+                        .setValue(AnyValue.newBuilder().setStringValue("some string").build()).build()).build())
         .build();
 
     longPollService.run(100);

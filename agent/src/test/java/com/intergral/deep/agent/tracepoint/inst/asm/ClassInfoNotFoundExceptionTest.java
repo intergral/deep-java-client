@@ -17,7 +17,7 @@
 
 package com.intergral.deep.agent.tracepoint.inst.asm;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +27,7 @@ class ClassInfoNotFoundExceptionTest {
   void coverage() {
     assertEquals("some test", new ClassInfoNotFoundException("some test", "some type").getMessage());
     assertEquals("some type", new ClassInfoNotFoundException("some test", "some type").getType());
-    assertEquals("some cause", new ClassInfoNotFoundException("some test", "some type", new RuntimeException("some cause")).getCause().getMessage());
+    assertEquals("some cause",
+        new ClassInfoNotFoundException("some test", "some type", new RuntimeException("some cause")).getCause().getMessage());
   }
 }

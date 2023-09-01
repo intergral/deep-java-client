@@ -20,5 +20,6 @@ package lucee.runtime.type.ref;
 @SuppressWarnings("ALL")
 public class VariableReference {
 
-  public void set(double d){}
+  public void set(double d) {
+  }
 }

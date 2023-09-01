@@ -127,6 +127,11 @@ public abstract class VariableProcessor {
     return lookup;
   }
 
+  /**
+   * We need to configure the {@link #frameConfig} based on the tracepoints we are capturing.
+   *
+   * @param configs the tracepoints to configure with
+   */
   public void configureSelf(final Iterable<TracePointConfig> configs) {
     for (TracePointConfig tracePointConfig : configs) {
       this.frameConfig.process(tracePointConfig);
@@ -224,7 +229,7 @@ public abstract class VariableProcessor {
   }
 
   /**
-   * Is the object a type of array
+   * Is the object a type of array.
    *
    * @param value the object to check
    * @return {@code true} if the object is a form of array, else {@code false}
@@ -235,7 +240,7 @@ public abstract class VariableProcessor {
   }
 
   /**
-   * Is the object a type of collection, not including array
+   * Is the object a type of collection, not including array.
    *
    * @param value the object to check
    * @return {@code true} if the object is a {@link Collection}, else {@code false}.
@@ -271,7 +276,7 @@ public abstract class VariableProcessor {
 
     if (cacheId != null) {
       return new VariableResponse(new VariableID(cacheId,
-          value.getKey(),
+          value.getName(),
           value.getModifiers(),
           value.getOriginalName()), false);
     }
@@ -279,7 +284,7 @@ public abstract class VariableProcessor {
     // if we do not have a cache_id - then create one
     final String varId = newVarId(identityCode);
     final VariableID variableId = new VariableID(varId,
-        value.getKey(),
+        value.getName(),
         value.getModifiers(),
         value.getOriginalName());
 
@@ -422,7 +427,7 @@ public abstract class VariableProcessor {
     }
 
     /**
-     * The interface of an item named by the named iterator
+     * The interface of an item named by the named iterator.
      */
     public interface INamedItem {
 
@@ -437,7 +442,7 @@ public abstract class VariableProcessor {
   }
 
   /**
-   * Use the named iterator to name map values with the map key
+   * Use the named iterator to name map values with the map key.
    */
   private static class NamedMapIterator extends NamedIterable<Map.Entry<Object, Object>> {
 

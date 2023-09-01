@@ -36,7 +36,7 @@ public class TestInterceptor implements ServerInterceptor {
   }
 
   public Context.Key<String> contextKey() {
-    if(contextKey == null){
+    if (contextKey == null) {
       contextKey = Context.key(key);
     }
     return contextKey;

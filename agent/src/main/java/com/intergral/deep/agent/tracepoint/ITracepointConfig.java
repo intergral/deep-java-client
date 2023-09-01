@@ -51,7 +51,7 @@ public interface ITracepointConfig {
   String currentHash();
 
   /**
-   * Load the full configs for the given tracepoints ids
+   * Load the full configs for the given tracepoints ids.
    *
    * @param tracepointId the tracepoint ids
    * @return a collection of all the matched tracepoints

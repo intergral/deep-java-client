@@ -11,6 +11,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.ServiceLoader;
 
+/**
+ * Utilities to load SPI services.
+ */
 public final class SpiUtil {
 
   private SpiUtil() {

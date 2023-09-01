@@ -20,6 +20,9 @@ package com.intergral.deep.agent.api.utils;
 import java.lang.reflect.Array;
 import java.util.Iterator;
 
+/**
+ * An iterator that will iterate an array, but does so using the {@link Array} class.
+ */
 public class ArrayObjectIterator implements Iterator<Object> {
 
   private final int length;

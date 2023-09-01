@@ -80,6 +80,10 @@ import org.objectweb.asm.util.TraceMethodVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+/**
+ * This visitor is the main magic of deep. It deals with install the callbacks into the user code, based on the tracepoints.
+ */
 @SuppressWarnings({"DuplicatedCode", "CommentedOutCode"})
 public class Visitor extends ClassVisitor {
 
@@ -125,6 +129,13 @@ public class Visitor extends ClassVisitor {
     }
   }
 
+  /**
+   * Create a new visitor.
+   *
+   * @param v    the asm visitor that calls this
+   * @param bps  the tracepoints we want to install
+   * @param isCf is this a cf class
+   */
   public Visitor(final ClassVisitor v, final Collection<TracePointConfig> bps, final boolean isCf) {
     super(ASM8, v);
     this.bps = bps;
@@ -172,6 +183,142 @@ public class Visitor extends ClassVisitor {
     filename = source;
   }
 
+  /**
+   * Converts primatives to objects so we can put them in the map.
+   *
+   * @param index      variable index
+   * @param clazz      variable class
+   * @param loadOpcode opcode
+   * @param primitive  is primitive variable
+   * @return the instruction list
+   */
+  private static InsnList box(final int index, final Type primitive, final Class<?> clazz,
+      final int loadOpcode) {
+    final InsnList boxOperations = new InsnList();
+    boxOperations.add(new VarInsnNode(loadOpcode, index));
+    // Call Double.valueOf or Long.valueOf etc
+    boxOperations.add(new MethodInsnNode(INVOKESTATIC, Type.getInternalName(clazz), "valueOf",
+        Type.getMethodDescriptor(Type.getType(clazz), primitive), false));
+    return boxOperations;
+  }
+
+  /**
+   * Generates a XXLOAD operation for a specific variable slot type.
+   *
+   * @param t     variable type
+   * @param index variable index
+   * @return the instruction list
+   */
+  static InsnList loadVariable(final Type t, final int index) {
+    final int sort = t.getSort();
+    switch (sort) {
+      case Type.BYTE:
+        return box(index, Type.BYTE_TYPE, Byte.class, ILOAD);
+      case Type.CHAR:
+        return box(index, Type.CHAR_TYPE, Character.class, ILOAD);
+      case Type.DOUBLE:
+        return box(index, Type.DOUBLE_TYPE, Double.class, DLOAD);
+      case Type.FLOAT:
+        return box(index, Type.FLOAT_TYPE, Float.class, FLOAD);
+      case Type.INT:
+        return box(index, Type.INT_TYPE, Integer.class, ILOAD);
+      case Type.LONG:
+        return box(index, Type.LONG_TYPE, Long.class, LLOAD);
+      case Type.SHORT:
+        return box(index, Type.SHORT_TYPE, Short.class, ILOAD);
+      case Type.BOOLEAN:
+        return box(index, Type.BOOLEAN_TYPE, Boolean.class, ILOAD);
+      case Type.ARRAY:
+      case Type.OBJECT:
+        final InsnList ops = new InsnList();
+        ops.add(new VarInsnNode(ALOAD, index));
+        return ops;
+      default:
+        // Something is very strange
+        LOGGER.error("loadVariable - Unknown type : {}", t);
+        final InsnList valueGetter = new InsnList();
+        valueGetter.add(new LdcInsnNode("Unknown type :" + t));
+        return valueGetter;
+    }
+  }
+
+  private boolean isSuperCall(final AbstractInsnNode node) {
+    // need a method node
+    if (!(node instanceof MethodInsnNode)) {
+      return false;
+    }
+
+    // we need to use INVOKESPECIAL on constructors
+    if (node.getOpcode() != INVOKESPECIAL) {
+      return false;
+    }
+
+    // all constructors have the same name
+    if (!((MethodInsnNode) node).name.equals("<init>")) {
+      return false;
+    }
+
+    // check the super name against this call
+    return ((MethodInsnNode) node).owner.equals(this.superName);
+  }
+
+  private boolean isThrow(final AbstractInsnNode node, final LabelNode start) {
+    if (start == null) {
+      return false;
+    }
+
+    if (!(node instanceof InsnNode)) {
+      return false;
+    }
+
+    final int opcode = node.getOpcode();
+    return opcode == ATHROW;
+  }
+
+  private boolean isNextLine(final AbstractInsnNode node, final LabelNode start) {
+    if (start == null) {
+      return false;
+    }
+
+    return node.getType() == AbstractInsnNode.LINE;
+  }
+
+  private boolean isReturn(final AbstractInsnNode node, final LabelNode start) {
+    if (start == null) {
+      return false;
+    }
+
+    if (!(node instanceof InsnNode)) {
+      return false;
+    }
+
+    final int opcode = node.getOpcode();
+    switch (opcode) {
+      case Opcodes.RETURN:
+      case Opcodes.IRETURN:
+      case Opcodes.LRETURN:
+      case Opcodes.FRETURN:
+      case Opcodes.ARETURN:
+      case Opcodes.DRETURN:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private boolean isStatic(final int access) {
+    return (access & Opcodes.ACC_STATIC) == Opcodes.ACC_STATIC;
+  }
+
+  private boolean noneOrJustThis(final List<LocalVariableNode> localVariables) {
+    if (localVariables.isEmpty()) {
+      return true;
+    }
+    if (localVariables.size() == 1) {
+      return localVariables.get(0).name.equals("this");
+    }
+    return false;
+  }
 
   @Override
   public MethodVisitor visitMethod(int access, String name, String desc, String signature,
@@ -515,13 +662,13 @@ public class Visitor extends ClassVisitor {
         }
 
         //  Use this to debug the raw byte code instruction changes in the even the visitors fail
-//          if(changed)
-//          {
-//              for( AbstractInsnNode instruction : instructions )
-//              {
-//                  System.out.println(InsnPrinter.prettyPrint( instruction ));
-//              }
-//          }
+        //  if(changed)
+        //  {
+        //      for( AbstractInsnNode instruction : instructions )
+        //      {
+        //          System.out.println(InsnPrinter.prettyPrint( instruction ));
+        //      }
+        //  }
 
         this.accept(jsrInlinerAdapter);
 
@@ -667,154 +814,8 @@ public class Visitor extends ClassVisitor {
     };
   }
 
-
-  private boolean isSuperCall(final AbstractInsnNode node) {
-    // need a method node
-    if (!(node instanceof MethodInsnNode)) {
-      return false;
-    }
-
-    // we need to use INVOKESPECIAL on constructors
-    if (node.getOpcode() != INVOKESPECIAL) {
-      return false;
-    }
-
-    // all constructors have the same name
-    if (!((MethodInsnNode) node).name.equals("<init>")) {
-      return false;
-    }
-
-    // check the super name against this call
-    return ((MethodInsnNode) node).owner.equals(this.superName);
-  }
-
-
-  private boolean isThrow(final AbstractInsnNode node, final LabelNode start) {
-    if (start == null) {
-      return false;
-    }
-
-    if (!(node instanceof InsnNode)) {
-      return false;
-    }
-
-    final int opcode = node.getOpcode();
-    return opcode == ATHROW;
-  }
-
-
-  private boolean isNextLine(final AbstractInsnNode node, final LabelNode start) {
-    if (start == null) {
-      return false;
-    }
-
-    return node.getType() == AbstractInsnNode.LINE;
-  }
-
-
-  private boolean isReturn(final AbstractInsnNode node, final LabelNode start) {
-    if (start == null) {
-      return false;
-    }
-
-    if (!(node instanceof InsnNode)) {
-      return false;
-    }
-
-    final int opcode = node.getOpcode();
-    switch (opcode) {
-      case Opcodes.RETURN:
-      case Opcodes.IRETURN:
-      case Opcodes.LRETURN:
-      case Opcodes.FRETURN:
-      case Opcodes.ARETURN:
-      case Opcodes.DRETURN:
-        return true;
-      default:
-        return false;
-    }
-  }
-
-
-  private boolean isStatic(final int access) {
-    return (access & Opcodes.ACC_STATIC) == Opcodes.ACC_STATIC;
-  }
-
-
-  private boolean noneOrJustThis(final List<LocalVariableNode> localVariables) {
-    if (localVariables.isEmpty()) {
-      return true;
-    }
-    if (localVariables.size() == 1) {
-      return localVariables.get(0).name.equals("this");
-    }
-    return false;
-  }
-
-
   /**
-   * Generates a XXLOAD operation for a specific variable slot type.
-   *
-   * @param t     variable type
-   * @param index variable index
-   * @return the instruction list
-   */
-  static InsnList loadVariable(final Type t, final int index) {
-    final int sort = t.getSort();
-    switch (sort) {
-      case Type.BYTE:
-        return box(index, Type.BYTE_TYPE, Byte.class, ILOAD);
-      case Type.CHAR:
-        return box(index, Type.CHAR_TYPE, Character.class, ILOAD);
-      case Type.DOUBLE:
-        return box(index, Type.DOUBLE_TYPE, Double.class, DLOAD);
-      case Type.FLOAT:
-        return box(index, Type.FLOAT_TYPE, Float.class, FLOAD);
-      case Type.INT:
-        return box(index, Type.INT_TYPE, Integer.class, ILOAD);
-      case Type.LONG:
-        return box(index, Type.LONG_TYPE, Long.class, LLOAD);
-      case Type.SHORT:
-        return box(index, Type.SHORT_TYPE, Short.class, ILOAD);
-      case Type.BOOLEAN:
-        return box(index, Type.BOOLEAN_TYPE, Boolean.class, ILOAD);
-      case Type.ARRAY:
-      case Type.OBJECT:
-        final InsnList ops = new InsnList();
-        ops.add(new VarInsnNode(ALOAD, index));
-        return ops;
-      default:
-        // Something is very strange
-        LOGGER.error("loadVariable - Unknown type : {}", t);
-        final InsnList valueGetter = new InsnList();
-        valueGetter.add(new LdcInsnNode("Unknown type :" + t));
-        return valueGetter;
-    }
-  }
-
-
-  /**
-   * Converts primatives to objects so we can put them in the map
-   *
-   * @param index      variable index
-   * @param clazz      variable class
-   * @param loadOpcode opcode
-   * @param primitive  is primitive variable
-   * @return the instruction list
-   */
-  private static InsnList box(final int index, final Type primitive, final Class<?> clazz,
-      final int loadOpcode) {
-    final InsnList boxOperations = new InsnList();
-    boxOperations.add(new VarInsnNode(loadOpcode, index));
-    // Call Double.valueOf or Long.valueOf etc
-    boxOperations.add(new MethodInsnNode(INVOKESTATIC, Type.getInternalName(clazz), "valueOf",
-        Type.getMethodDescriptor(Type.getType(clazz), primitive), false));
-    return boxOperations;
-  }
-
-
-  /**
-   * This is used in a comment on line 509 and is left in place for debugging
+   * This is used in a comment on line 509 and is left in place for debugging.
    */
   @SuppressWarnings("unused")
   public static class InsnPrinter {
@@ -823,7 +824,7 @@ public class Visitor extends ClassVisitor {
     private static final TraceMethodVisitor methodPrinter = new TraceMethodVisitor(printer);
 
 
-    public static String prettyPrint(AbstractInsnNode insnNode) {
+    static String prettyPrint(AbstractInsnNode insnNode) {
       insnNode.accept(methodPrinter);
       StringWriter sw = new StringWriter();
       printer.print(new PrintWriter(sw));

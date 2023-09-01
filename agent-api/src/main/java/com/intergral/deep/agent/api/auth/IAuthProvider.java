@@ -19,10 +19,14 @@ package com.intergral.deep.agent.api.auth;
 
 import java.util.Map;
 
+/**
+ * Allows for custom auth providers to be configured. These can be provided as an instantiatable class using the class name via the setting
+ * {@code service.auth.provider}. Alternatively a plugin can be configured as an auth provider.
+ */
 public interface IAuthProvider {
 
   /**
-   * Provide the headers that should be attached to the GRPC calls
+   * Provide the headers that should be attached to the GRPC calls.
    *
    * @return a Map of the header values
    */

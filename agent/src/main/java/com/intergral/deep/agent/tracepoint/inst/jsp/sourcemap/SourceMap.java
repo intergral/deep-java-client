@@ -97,7 +97,7 @@ public class SourceMap {
 
 
   /**
-   * Look a linenumber from a output file to a filename and linenumner
+   * Look a linenumber from a output file to a filename and linenumber.
    *
    * @param lineNumber the linenumber to look for (i.e. include_005ftime_jsp.java:91)
    * @return the filename and linenumber it maps to (i.e. time.jsp:1)

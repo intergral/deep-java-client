@@ -44,7 +44,6 @@ import com.intergral.deep.test.target.BPTestTarget;
 import com.intergral.deep.tests.inst.ByteClassLoader;
 import com.intergral.deep.tests.snapshot.SnapshotUtils;
 import com.intergral.deep.tests.snapshot.SnapshotUtils.IVariableScan;
-import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -74,6 +73,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 /**
+ * We test the visitor by using the transformer to modify classes.
+ * <p>
  * This test can be used to play with visitor, it uses the {@link BPTestTarget} class to install tracepoints into
  * <p>
  * To run this use the 'VisitorTest' saved config for idea, or add
@@ -240,7 +241,8 @@ class VisitorTest {
     assertEquals("my test", thisName.variable().getValue());
 
     // there should however be a value for the 'super.name' field that is set to the known value
-    final IVariableScan superName = SnapshotUtils.findVarByName("BPSuperClass.name", variable.getChildrenList(), snapshot.getVarLookupMap());
+    final IVariableScan superName = SnapshotUtils.findVarByName("BPSuperClass.name", variable.getChildrenList(),
+        snapshot.getVarLookupMap());
     assertTrue(superName.found());
     assertEquals("i am a namemy test", superName.variable().getValue());
 
@@ -305,7 +307,8 @@ class VisitorTest {
     assertEquals("null", thisName.variable().getValue());
 
     // there should however be a value for the 'super.name' field that is set to the known value
-    final IVariableScan superName = SnapshotUtils.findVarByName("BPSuperClass.name", variable.getChildrenList(), snapshot.getVarLookupMap());
+    final IVariableScan superName = SnapshotUtils.findVarByName("BPSuperClass.name", variable.getChildrenList(),
+        snapshot.getVarLookupMap());
     assertTrue(superName.found());
     assertEquals("i am a namemy test", superName.variable().getValue());
 
@@ -1308,26 +1311,27 @@ class VisitorTest {
 
     // we cannot load the cf class in test case for some reason
     // consistent issues with verifier
-//    byteClassLoader.setBytes(name, transformed);
-//    final List<String> classes = Arrays.asList("java.lang.Object", "coldfusion.tagext.io.OutputTag", "coldfusion.runtime.NeoPageContext",
-//        "coldfusion.runtime.CfJspPage", "coldfusion.runtime.CFPage");
-//    for (String s : classes) {
-//      final Class<?> aClass = byteClassLoader.loadClass(s);
-//      assertNotNull(aClass);
-//      assertEquals(aClass.getName(), s);
-//    }
-//    final Class<?> aClass = byteClassLoader.loadClass(name);
-//
-//    final Constructor<?> constructor = aClass.getConstructor();
-//    final Object instance = constructor.newInstance();
-//    final Method runPage = aClass.getDeclaredMethod("runPage");
-//    runPage.setAccessible(true);
-//    runPage.invoke(instance);
-//
-//    final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
-//
-//    Mockito.verify(pushService, Mockito.times(1))
-//        .pushSnapshot(argumentCaptor.capture(), Mockito.any());
+    //    byteClassLoader.setBytes(name, transformed);
+    //    final List<String> classes = Arrays.asList("java.lang.Object", "coldfusion.tagext.io.OutputTag",
+    //    "coldfusion.runtime.NeoPageContext",
+    //        "coldfusion.runtime.CfJspPage", "coldfusion.runtime.CFPage");
+    //    for (String s : classes) {
+    //      final Class<?> aClass = byteClassLoader.loadClass(s);
+    //      assertNotNull(aClass);
+    //      assertEquals(aClass.getName(), s);
+    //    }
+    //    final Class<?> aClass = byteClassLoader.loadClass(name);
+    //
+    //    final Constructor<?> constructor = aClass.getConstructor();
+    //    final Object instance = constructor.newInstance();
+    //    final Method runPage = aClass.getDeclaredMethod("runPage");
+    //    runPage.setAccessible(true);
+    //    runPage.invoke(instance);
+    //
+    //    final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
+    //
+    //    Mockito.verify(pushService, Mockito.times(1))
+    //        .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
   }
 
@@ -1392,8 +1396,7 @@ class VisitorTest {
   }
 
   @Test
-  void luceeVisitorTest()
-      throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+  void luceeVisitorTest() throws Exception {
     final MockTracepointConfig tracepointConfig = new MockTracepointConfig("/tests/testFile.cfm", 3);
     tracepointRef.set(Collections.singletonList(tracepointConfig));
     // we need to process the jsp tracepoints

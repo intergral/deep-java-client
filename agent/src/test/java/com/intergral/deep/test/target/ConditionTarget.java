@@ -18,5 +18,6 @@
 package com.intergral.deep.test.target;
 
 public class ConditionTarget {
+
   public int i = 100;
 }

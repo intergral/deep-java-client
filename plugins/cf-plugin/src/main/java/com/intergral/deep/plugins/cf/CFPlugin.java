@@ -17,12 +17,17 @@
 
 package com.intergral.deep.plugins.cf;
 
-import com.intergral.deep.agent.api.plugin.ISnapshotContext;
 import com.intergral.deep.agent.api.plugin.IPlugin;
+import com.intergral.deep.agent.api.plugin.ISnapshotContext;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
 import java.util.HashMap;
 
+/**
+ * This plugin is activated when we are running on an adobe CF server.
+ * <p>
+ * This plugin will attach the cf version and the cf app name to the captured snapshots.
+ */
 public class CFPlugin implements IPlugin {
 
   @Override

@@ -22,6 +22,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
+/**
+ * A mock tracepoint config to make it easier to create during testing.
+ */
 public class MockTracepointConfig extends TracePointConfig {
 
   public MockTracepointConfig() {

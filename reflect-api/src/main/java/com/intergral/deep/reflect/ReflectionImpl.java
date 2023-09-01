@@ -32,6 +32,9 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * The version of reflection used before modules where added.
+ */
 public class ReflectionImpl implements IReflection {
 
   @Override
@@ -108,7 +111,7 @@ public class ReflectionImpl implements IReflection {
     return null;
   }
 
-
+  @Override
   public Field getField(final Object obj, final String fieldName) {
     Class<?> clazz = obj.getClass();
     while (clazz != null) {

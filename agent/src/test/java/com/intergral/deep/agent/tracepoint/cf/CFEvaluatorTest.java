@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.intergral.deep.agent.api.plugin.IEvaluator;
 import com.intergral.deep.agent.tracepoint.cf.CFEvaluator.Loader;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import lucee.runtime.PageContextImpl;

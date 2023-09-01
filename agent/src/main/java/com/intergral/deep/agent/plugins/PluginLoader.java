@@ -27,6 +27,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * this type deals with loading the plugins.
+ */
 public final class PluginLoader {
 
   private PluginLoader() {
@@ -34,6 +37,13 @@ public final class PluginLoader {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PluginLoader.class);
 
+  /**
+   * Using the current config load as many plugins as we can.
+   *
+   * @param settings   the settings for deep
+   * @param reflection the reflection service to use
+   * @return the list of active and loaded plugins
+   */
   public static List<IPlugin> loadPlugins(final Settings settings, final IReflection reflection) {
     final List<String> plugins = settings.getAsList("plugins");
     final List<IPlugin> loadedPlugins = new ArrayList<>();

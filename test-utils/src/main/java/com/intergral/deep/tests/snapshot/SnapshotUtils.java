@@ -31,7 +31,7 @@ public final class SnapshotUtils {
   }
 
   /**
-   * Scan a snapshot for a variable with the given name
+   * Scan a snapshot for a variable with the given name.
    *
    * @param name     the variable name
    * @param snapshot the snapshot

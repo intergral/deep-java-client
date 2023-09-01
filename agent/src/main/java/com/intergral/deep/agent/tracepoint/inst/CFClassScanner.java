@@ -26,6 +26,9 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Scans the classes for CF classes we want to modify.
+ */
 public class CFClassScanner implements IClassScanner {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CFClassScanner.class);
@@ -83,13 +86,13 @@ public class CFClassScanner implements IClassScanner {
     // Lucee will not give us the code location using protection domain
     if (location == null) {
       // if we cannot get the code source then we guess the source using the provided path name
-      return CFUtils.loadCfBreakpoints(
+      return CFUtils.loadCfTracepoints(
           CFUtils.guessSource(loadedClass.getName()),
           values);
     }
     // Adobe CF should provide the location to the source, so we can use that.
     // todo it is possible to run precompiled CF code which would possibly have a different source location
-    return CFUtils.loadCfBreakpoints(location, values);
+    return CFUtils.loadCfTracepoints(location, values);
   }
 
 

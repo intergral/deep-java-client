@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LazyEvaluator extends AbstractEvaluator {
 
-  private final static Logger LOGGER = LoggerFactory.getLogger(LazyEvaluator.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(LazyEvaluator.class);
   private static final Exception NO_EVALUATOR_EXCEPTION = new RuntimeException(
       "No evaluator available.");
   private final IEvaluatorLoader loader;
@@ -51,7 +51,7 @@ public class LazyEvaluator extends AbstractEvaluator {
             throw NO_EVALUATOR_EXCEPTION;
           }
         };
-    }
+      }
     }
     return this.evaluator;
   }
@@ -61,8 +61,17 @@ public class LazyEvaluator extends AbstractEvaluator {
     return load().evaluateExpression(expression, values);
   }
 
+  /**
+   * This type allows us to lazy load an evaluator when it is first used. This is helpful, as it can be expensive to load the evaluator, and
+   * we only want to do that if and when we need it.
+   */
   public interface IEvaluatorLoader {
 
+    /**
+     * Load the evaluator.
+     *
+     * @return the evaluator, or {@code null}
+     */
     IEvaluator load();
   }
 }

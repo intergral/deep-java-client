@@ -24,6 +24,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * A node is a value to process in the BFS. It also links children to parents to ensure hierarchy in variables.
+ */
 public class Node {
 
   final NodeValue value;
@@ -32,17 +35,36 @@ public class Node {
   int depth = 0;
 
 
+  /**
+   * Create a new node for the BFS.
+   *
+   * @param value  the value to wrap
+   * @param parent the parent of this node
+   */
   public Node(final NodeValue value, final IParent parent) {
     this(value, new HashSet<>(), parent);
   }
 
 
+  /**
+   * Create a new node for the BFS.
+   *
+   * @param value    the value to wrap
+   * @param children the children of this node
+   * @param parent   the parent of this node
+   */
   public Node(final NodeValue value, final Set<Node> children, final IParent parent) {
     this.value = value;
     this.parent = parent;
     this.children = children;
   }
 
+  /**
+   * Start the breadth first search of the nodes.
+   *
+   * @param root     the root node to start from
+   * @param consumer the consumer to use to collect more nodes.
+   */
   public static void breadthFirstSearch(final Node root, final IConsumer consumer) {
     final List<Node> queue = new LinkedList<>();
 
@@ -60,6 +82,11 @@ public class Node {
     }
   }
 
+  /**
+   * Add child nodes.
+   *
+   * @param children the children to add
+   */
   public void addChildren(final Set<Node> children) {
     for (Node child : children) {
       child.depth = this.depth + 1;
@@ -82,16 +109,22 @@ public class Node {
   }
 
 
+  /**
+   * The parent of a processed node.
+   */
   public interface IParent {
 
     void addChild(final VariableID child);
 
-    default boolean isCollection(){
+    default boolean isCollection() {
       return false;
     }
   }
 
 
+  /**
+   * The consumer of the nodes when running a BFS.
+   */
   public interface IConsumer {
 
     boolean processNode(Node node);
@@ -103,7 +136,7 @@ public class Node {
    */
   public static class NodeValue {
 
-    private final String key;
+    private final String name;
     private final Object value;
     private final String originalName;
     private final Set<String> modifiers;
@@ -112,16 +145,24 @@ public class Node {
       this(key, value, null, Collections.emptySet());
     }
 
-    public NodeValue(final String key, final Object value, final String originalName,
+    /**
+     * Create a new node value.
+     *
+     * @param name         the name of the value
+     * @param value        the value to wrap
+     * @param originalName the original name of the value
+     * @param modifiers    the value modifiers
+     */
+    public NodeValue(final String name, final Object value, final String originalName,
         final Set<String> modifiers) {
-      this.key = key;
+      this.name = name;
       this.value = value;
       this.originalName = originalName;
       this.modifiers = modifiers;
     }
 
-    public String getKey() {
-      return key;
+    public String getName() {
+      return name;
     }
 
     public Object getValue() {

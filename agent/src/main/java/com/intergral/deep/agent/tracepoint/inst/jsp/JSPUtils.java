@@ -31,13 +31,25 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Utilities for JSP classes.
+ */
 public class JSPUtils {
 
-  private final static Logger LOGGER = LoggerFactory.getLogger(JSPUtils.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(JSPUtils.class);
+
   private JSPUtils() {
   }
 
 
+  /**
+   * Is this class a jsp class.
+   *
+   * @param jspSuffix       the jsp suffix
+   * @param jspPackages     the jsp packages
+   * @param loadedClassName the clas name to check
+   * @return {@code true} if this is a jsp class
+   */
   public static boolean isJspClass(final String jspSuffix,
       final List<String> jspPackages,
       final String loadedClassName) {
@@ -62,9 +74,15 @@ public class JSPUtils {
   }
 
 
-  public static SourceMap getSourceMap(final Class<?> c) {
+  /**
+   * Load a source map for the given class.
+   *
+   * @param clazz the class
+   * @return the source map or {@code null}
+   */
+  public static SourceMap getSourceMap(final Class<?> clazz) {
     try {
-      final String rtn = SmapUtils.lookUp(c);
+      final String rtn = SmapUtils.lookUp(clazz);
       final SourceMapParser parser;
       if (rtn != null) {
         parser = new SourceMapParser(rtn);
@@ -78,6 +96,12 @@ public class JSPUtils {
   }
 
 
+  /**
+   * Load the source map for this class file.
+   *
+   * @param classfileBuffer the class file as bytes
+   * @return the loaded source map, or {@code null}
+   */
   public static SourceMap getSourceMap(byte[] classfileBuffer) {
     try {
       final String rtn = SmapUtils.parseBytes(classfileBuffer);
@@ -89,11 +113,25 @@ public class JSPUtils {
     }
   }
 
+  /**
+   * Load the tracepoints for this class.
+   *
+   * @param loadedClass the class to check
+   * @param jsp         the tracepoints
+   * @return the matches tracepoints
+   */
   public static Set<TracePointConfig> loadJSPTracepoints(final Class<?> loadedClass,
       final Map<String, TracePointConfig> jsp) {
     return loadJSPTracepoints(getSourceMap(loadedClass), jsp);
   }
 
+  /**
+   * Load jsp tracepoints using source map.
+   *
+   * @param sourceMap the source map
+   * @param jsp       the tracepoints
+   * @return the matches tracepoints
+   */
   public static Set<TracePointConfig> loadJSPTracepoints(final SourceMap sourceMap,
       final Map<String, TracePointConfig> jsp) {
     if (sourceMap == null) {

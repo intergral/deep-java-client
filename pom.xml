@@ -292,6 +292,7 @@
                             <failsOnError>true</failsOnError>
                             <failOnViolation>true</failOnViolation>
                             <linkXRef>false</linkXRef>
+                            <violationSeverity>warning</violationSeverity>
                         </configuration>
                         <executions>
                             <execution>

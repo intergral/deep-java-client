@@ -18,13 +18,12 @@
 package coldfusion.runtime;
 
 @SuppressWarnings("ALL")
-public class UDFMethod
-{
-    private final String key;
+public class UDFMethod {
+
+  private final String key;
 
 
-    public UDFMethod( final String key )
-    {
-        this.key = key;
-    }
+  public UDFMethod(final String key) {
+    this.key = key;
+  }
 }

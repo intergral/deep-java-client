@@ -27,6 +27,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * We want to map the variables from the Java variables to the CF variables. So we have a custom processor for CF that lets us perform this
+ * mapping.
+ */
 public class CFFrameProcessor extends FrameProcessor {
 
   public CFFrameProcessor(final Settings settings,
@@ -128,7 +132,7 @@ public class CFFrameProcessor extends FrameProcessor {
 
 
   /**
-   * Special handling for lucee scopes
+   * Special handling for lucee scopes.
    *
    * @param variables the variables
    * @return the scopes for lucee

@@ -20,6 +20,6 @@ package lucee.runtime.scope;
 import java.util.HashMap;
 
 @SuppressWarnings("ALL")
-public class MockLuceeScope extends HashMap<Object, Object>
-{
+public class MockLuceeScope extends HashMap<Object, Object> {
+
 }

@@ -23,6 +23,14 @@ import java.util.Collection;
 
 public class AssertUtils {
 
+  /**
+   * Assert that a collection contains an item that matches the function.
+   *
+   * @param list            the collection to scan
+   * @param compareFunction the function to run
+   * @param <T>             the type of items in the collection
+   * @return the result of the compare
+   */
   public static <T> int assertContains(final Collection<T> list, final ICompareFunction<T> compareFunction) {
     int index = -1;
     for (final T listItem : list) {

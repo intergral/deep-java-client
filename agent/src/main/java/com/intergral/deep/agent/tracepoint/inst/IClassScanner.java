@@ -17,9 +17,23 @@
 
 package com.intergral.deep.agent.tracepoint.inst;
 
+/**
+ * Used to define a method to scan the loaded classes.
+ */
 public interface IClassScanner {
 
+  /**
+   * Scan this class.
+   *
+   * @param clazz the class to sacn
+   * @return {@code true} if we should include this class
+   */
   boolean scanClass(final Class<?> clazz);
 
+  /**
+   * Is this class scanner complete.
+   *
+   * @return {@code true} if this scanner has nothing more to find
+   */
   boolean isComplete();
 }

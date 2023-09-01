@@ -25,6 +25,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The evaluator to use when running a CF Callback.
+ */
 public class CFEvaluator extends AbstractEvaluator {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CFEvaluator.class);
@@ -49,6 +52,9 @@ public class CFEvaluator extends AbstractEvaluator {
     return null;
   }
 
+  /**
+   * The loader to use when executing a CF Callback.
+   */
   public static class Loader implements IEvaluatorLoader {
 
     private final Map<String, Object> variables;

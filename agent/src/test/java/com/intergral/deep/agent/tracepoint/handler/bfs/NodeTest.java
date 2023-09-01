@@ -17,7 +17,7 @@
 
 package com.intergral.deep.agent.tracepoint.handler.bfs;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import com.intergral.deep.agent.tracepoint.handler.bfs.Node.IParent;
 import com.intergral.deep.agent.types.snapshot.VariableID;
@@ -27,11 +27,8 @@ class NodeTest {
 
   @Test
   void coverage() {
-    assertFalse(new IParent(){
-      @Override
-      public void addChild(final VariableID child) {
+    assertFalse(((IParent) child -> {
 
-      }
-    }.isCollection());
+    }).isCollection());
   }
 }

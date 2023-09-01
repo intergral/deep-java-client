@@ -37,18 +37,19 @@ class DriftAwareThreadTest {
 
   @Test
   public void delay2() throws Exception {
-    class lwrap {
+    class LWrap {
 
-      long n;
+      long now;
     }
-    final lwrap lwrap = new lwrap();
+
+    final LWrap lwrap = new LWrap();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
     final long currentTimeMillis = System.currentTimeMillis();
     final DriftAwareThread driftAwareThread = new DriftAwareThread("Test", new ITimerTask() {
       @Override
       public void run(final long now) {
         assertTrue((now + 10000) >= currentTimeMillis);
-        lwrap.n = now;
+        lwrap.now = now;
         countDownLatch.countDown();
       }
 
@@ -61,7 +62,7 @@ class DriftAwareThreadTest {
     driftAwareThread.start(10000);
     countDownLatch.await();
     driftAwareThread.stopTask();
-    assertTrue((lwrap.n + 10000) >= currentTimeMillis);
+    assertTrue((lwrap.now + 10000) >= currentTimeMillis);
   }
 
 

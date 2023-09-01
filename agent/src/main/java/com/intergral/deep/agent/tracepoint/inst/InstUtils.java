@@ -17,16 +17,31 @@
 
 package com.intergral.deep.agent.tracepoint.inst;
 
+/**
+ * Utilities to help with instrumentation.
+ */
 public final class InstUtils {
 
   private InstUtils() {
   }
 
+  /**
+   * Get the external class name.
+   *
+   * @param className the class name
+   * @return the external class name
+   */
   public static String externalClassName(final String className) {
     return className.replaceAll("/", ".");
   }
 
 
+  /**
+   * Get the name of the file from the path.
+   *
+   * @param relPath the path to a file
+   * @return the name of the file
+   */
   public static String fileName(final String relPath) {
     final int lastIndexOf = relPath.lastIndexOf('/');
     if (lastIndexOf == -1) {
@@ -36,27 +51,59 @@ public final class InstUtils {
   }
 
 
-  public static String internalClassStripInner(final Class<?> allLoadedClass) {
-    return internalClassStripInner(allLoadedClass.getName());
+  /**
+   * Convert the class name to the internal class name, remove any inner class names.
+   *
+   * @param clazz the class
+   * @return the internal class name without the inner classes
+   */
+  public static String internalClassStripInner(final Class<?> clazz) {
+    return internalClassStripInner(clazz.getName());
   }
 
 
-  public static String internalClassStripInner(final String allLoadedClass) {
-    final int index = allLoadedClass.indexOf('$');
+  /**
+   * Convert the class name to the internal class name, remove any inner class names.
+   *
+   * @param className the name of the class
+   * @return the internal class name without the inner classes
+   */
+  public static String internalClassStripInner(final String className) {
+    final int index = className.indexOf('$');
     if (index == -1) {
-      return internalClass(allLoadedClass);
+      return internalClass(className);
     }
-    return internalClass(allLoadedClass.substring(0, index));
+    return internalClass(className.substring(0, index));
   }
 
+  /**
+   * Get the internal class name.
+   *
+   * @param clazz the name of the class
+   * @return the internal name of the class
+   */
   public static String internalClass(final String clazz) {
     return clazz.replaceAll("\\.", "/");
   }
 
+  /**
+   * Get the internal class name.
+   *
+   * @param clazz the class
+   * @return the internal name of the class
+   */
   public static String internalClass(final Class<?> clazz) {
     return internalClass(clazz.getName());
   }
 
+  /**
+   * Get the short version of the class name.
+   * <p>
+   * Sometimes {@link Class#getSimpleName()} doesn't return a name. So we need one that always returns a name.
+   *
+   * @param className the class name
+   * @return the name of the class without the package
+   */
   public static String shortClassName(final String className) {
     return className.substring(className.lastIndexOf('.') + 1);
   }

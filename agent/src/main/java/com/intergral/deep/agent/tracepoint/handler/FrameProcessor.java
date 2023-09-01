@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 public class FrameProcessor extends FrameCollector implements ISnapshotContext {
 
   /**
-   * The tracepoints that have been triggered by the Callback
+   * The tracepoints that have been triggered by the Callback.
    */
   private final Collection<TracePointConfig> tracePointConfigs;
   /**
@@ -52,7 +52,7 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
   private Collection<TracePointConfig> filteredTracepoints;
 
   /**
-   * Create a new processor for this Callback
+   * Create a new processor for this Callback.
    *
    * @param settings          the current settings being used
    * @param evaluator         the evaluator to use for watchers and conditions
@@ -89,7 +89,7 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
   }
 
   /**
-   * Process the tracepoints condition with the evaluator to see if the condition is {@code true}
+   * Process the tracepoints condition with the evaluator to see if the condition is {@code true}.
    *
    * @param tracePointConfig the config to check
    * @return {@code false} if the condition on the tracepoint evaluates to a false
@@ -163,12 +163,12 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
   }
 
   /**
-   * This defines a functional interface to allow for creating difference processors in the Callback
+   * This defines a functional interface to allow for creating difference processors in the Callback.
    */
   public interface IFactory {
 
     /**
-     * Create a new processor
+     * Create a new processor.
      *
      * @param settings          the current settings being used
      * @param evaluator         the evaluator to use for watchers and conditions

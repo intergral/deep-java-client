@@ -21,6 +21,9 @@ import com.intergral.deep.agent.Utils;
 import com.intergral.deep.agent.tracepoint.inst.InstUtils;
 import com.intergral.deep.agent.types.TracePointConfig;
 
+/**
+ * Utilities for tracepoint configuration.
+ */
 public final class TracepointUtils {
 
   private TracepointUtils() {
@@ -31,7 +34,7 @@ public final class TracepointUtils {
    *
    * @param tp the tracepoint to process
    * @return the internal class name to install the tracepoint in, or {@code cfm} or {@code jsp} if the computed class is a CFM or JSP
-   * class.
+   *     class.
    */
   public static String estimatedClassRoot(final TracePointConfig tp) {
     // we allow the class name to be sent for specific cases

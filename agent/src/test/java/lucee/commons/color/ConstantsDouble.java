@@ -19,5 +19,6 @@ package lucee.commons.color;
 
 @SuppressWarnings("ALL")
 public class ConstantsDouble {
-public static Double _100 = Double.valueOf(100.0d);
+
+  public static Double _100 = Double.valueOf(100.0d);
 }

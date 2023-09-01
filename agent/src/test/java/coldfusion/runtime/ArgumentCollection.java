@@ -18,6 +18,6 @@
 package coldfusion.runtime;
 
 @SuppressWarnings("ALL")
-public class ArgumentCollection extends TestScope
-{
+public class ArgumentCollection extends TestScope {
+
 }

@@ -19,5 +19,6 @@ package com.intergral.deep.test.target;
 
 @SuppressWarnings("ALL")
 public class VariableSuperSuperTest {
+
   public static int i = 11;
 }

@@ -21,10 +21,13 @@ import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.resource.Resource;
 import java.util.Map;
 
+/**
+ * The exposed API for the Deep settings.
+ */
 public interface ISettings {
 
   /**
-   * This is the settings key for the configured auth provider
+   * This is the settings key for the configured auth provider.
    */
   String KEY_AUTH_PROVIDER = "service.auth.provider";
 
@@ -34,17 +37,17 @@ public interface ISettings {
   String KEY_ENABLED = "enabled";
 
   /**
-   * This is the setting key for the service url
+   * This is the setting key for the service url.
    */
   String KEY_SERVICE_URL = "service.url";
 
   /**
-   * This is the setting key for the service secure setting
+   * This is the setting key for the service secure setting.
    */
   String KEY_SERVICE_SECURE = "service.secure";
 
   /**
-   * This is the setting key for the plugin list
+   * This is the setting key for the plugin list.
    */
   String PLUGINS = "plugins";
 
@@ -70,12 +73,26 @@ public interface ISettings {
    */
   String APP_FRAMES_EXCLUDES = "in.app.include";
 
+  /**
+   * Get a setting from the config as a given type.
+   *
+   * @param key   the key for the setting
+   * @param clazz the type to return as
+   * @param <T>   the type to return as
+   * @return the value as the given type
+   */
   <T> T getSettingAs(String key, Class<T> clazz);
 
-  Map<String, String> getMap(String attributeProperty);
+  /**
+   * Get the property as a map.
+   *
+   * @param key the for the setting
+   * @return the value as a map
+   */
+  Map<String, String> getMap(String key);
 
   /**
-   * Returns the resource that describes this client
+   * Returns the resource that describes this client.
    *
    * @return the {@link Resource}
    */

@@ -18,10 +18,9 @@
 package lucee.runtime;
 
 @SuppressWarnings("ALL")
-public class PageContextImpl
-{
-    public String evaluate( final String expression )
-    {
-        return expression;
-    }
+public class PageContextImpl {
+
+  public String evaluate(final String expression) {
+    return expression;
+  }
 }

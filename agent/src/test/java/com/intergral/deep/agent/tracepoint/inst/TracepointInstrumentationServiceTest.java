@@ -21,10 +21,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.times;
 
-import com.intergral.deep.Person;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.types.TracePointConfig;
 import com.intergral.deep.test.MockTracepointConfig;
+import com.intergral.deep.test.target.Person;
 import com.intergral.deep.tests.inst.ByteClassLoader;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
@@ -166,7 +166,8 @@ class TracepointInstrumentationServiceTest {
     Mockito.when(instrumentation.getAllLoadedClasses()).thenReturn(new Class[]{jspClass});
     Mockito.when(instrumentation.isModifiableClass(jspClass)).thenReturn(true);
 
-    tracepointInstrumentationService.processBreakpoints(Collections.singletonList(new MockTracepointConfig("/src/main/webapp/tests/string.jsp")));
+    tracepointInstrumentationService.processBreakpoints(
+        Collections.singletonList(new MockTracepointConfig("/src/main/webapp/tests/string.jsp")));
 
     Mockito.verify(instrumentation, times(1)).retransformClasses(jspClass);
     tracepointInstrumentationService.processBreakpoints(Collections.emptyList());

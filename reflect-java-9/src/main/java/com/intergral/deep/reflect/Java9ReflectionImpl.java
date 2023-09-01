@@ -21,6 +21,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+/**
+ * The version of reflection that deals with modules.
+ */
 public class Java9ReflectionImpl extends ReflectionImpl {
 
   @Override

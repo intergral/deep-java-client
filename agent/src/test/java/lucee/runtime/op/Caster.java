@@ -19,14 +19,16 @@ package lucee.runtime.op;
 
 @SuppressWarnings("ALL")
 public class Caster {
-  public static Double toDouble(double d){
-    return d;
-  }
-  public static double toDoubleValue(Double d){
+
+  public static Double toDouble(double d) {
     return d;
   }
 
-  public static String toString(Object obj){
+  public static double toDoubleValue(Double d) {
+    return d;
+  }
+
+  public static String toString(Object obj) {
     return "";
   }
 }

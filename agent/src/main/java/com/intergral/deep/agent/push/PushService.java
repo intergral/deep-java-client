@@ -30,6 +30,9 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This service deals with pushing the collected data to the remote services.
+ */
 public class PushService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PushService.class);
@@ -42,6 +45,12 @@ public class PushService {
     this.grpcService = grpcService;
   }
 
+  /**
+   * Decorate and push the provided snapshot.
+   *
+   * @param snapshot the snapshot to push
+   * @param context  the context of where the snapshot is collected
+   */
   public void pushSnapshot(final EventSnapshot snapshot, final ISnapshotContext context) {
     decorate(snapshot, context);
     final Snapshot grpcSnapshot = PushUtils.convertToGrpc(snapshot);

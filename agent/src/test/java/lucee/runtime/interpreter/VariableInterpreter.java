@@ -22,7 +22,7 @@ import lucee.runtime.type.ref.VariableReference;
 @SuppressWarnings("ALL")
 public class VariableInterpreter {
 
-  public static VariableReference getVariableReference(lucee.runtime.PageContext ctx, String name){
+  public static VariableReference getVariableReference(lucee.runtime.PageContext ctx, String name) {
     return new VariableReference();
   }
 }

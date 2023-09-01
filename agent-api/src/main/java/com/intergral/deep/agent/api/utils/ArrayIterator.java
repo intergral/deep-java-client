@@ -19,6 +19,11 @@ package com.intergral.deep.agent.api.utils;
 
 import java.util.Iterator;
 
+/**
+ * An iterator that will iterate an array.
+ *
+ * @param <T> the type of the objects in the array
+ */
 public class ArrayIterator<T> implements Iterator<T> {
 
   private final T[] value;

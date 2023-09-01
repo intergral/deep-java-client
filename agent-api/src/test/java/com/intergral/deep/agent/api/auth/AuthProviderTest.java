@@ -18,7 +18,6 @@
 package com.intergral.deep.agent.api.auth;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.intergral.deep.agent.api.auth.AuthProvider.NoopProvider;
 import com.intergral.deep.agent.api.plugin.IPlugin;
@@ -32,13 +31,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 class AuthProviderTest {
-
-  @Test
-  void coverage() {
-    // for coverage
-    //noinspection ObviousNullCheck,InstantiationOfUtilityClass
-    assertNotNull(new AuthProvider());
-  }
 
   @Test
   void canProvide() {

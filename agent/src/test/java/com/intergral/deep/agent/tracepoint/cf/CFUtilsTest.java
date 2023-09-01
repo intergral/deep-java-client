@@ -126,7 +126,7 @@ class CFUtilsTest {
     hashMap.put("this", this);
     assertNull(CFUtils.findUdfName(hashMap, "cf123546123$funcFINDFILES", 0));
 
-    hashMap.put("this", new CFUDFTest("findUDFName"));
+    hashMap.put("this", new CfUdfTest("findUDFName"));
     assertEquals("findUDFName", CFUtils.findUdfName(hashMap, "cf123546123$funcFINDFILES", 0));
   }
 
@@ -150,7 +150,7 @@ class CFUtilsTest {
     map.put("this", this);
     assertSame(this, CFUtils.findPage(map));
 
-    map.put("this", new CFUDFTest("findPage"));
+    map.put("this", new CfUdfTest("findPage"));
 
     assertNull(CFUtils.findPage(map));
 
@@ -189,7 +189,7 @@ class CFUtilsTest {
 
   @Test
   void loadCfTracepoints() {
-    final Set<TracePointConfig> tracePointConfigs = CFUtils.loadCfBreakpoints("some/file.cfm",
+    final Set<TracePointConfig> tracePointConfigs = CFUtils.loadCfTracepoints("some/file.cfm",
         Collections.singletonMap("cfm", new MockTracepointConfig("some/file.cfm")));
     assertEquals(1, tracePointConfigs.size());
   }
@@ -210,9 +210,9 @@ class CFUtilsTest {
   }
 
 
-  public static class CFUDFTest extends UDFMethod {
+  public static class CfUdfTest extends UDFMethod {
 
-    public CFUDFTest(final String key) {
+    public CfUdfTest(final String key) {
       super(key);
     }
   }

@@ -17,6 +17,9 @@
 
 package com.intergral.deep.agent.tracepoint.inst.asm;
 
+/**
+ * Used to force ASM to skip a class, if we could not get the source information.
+ */
 public class SkipException extends Error {
 
   public SkipException() {

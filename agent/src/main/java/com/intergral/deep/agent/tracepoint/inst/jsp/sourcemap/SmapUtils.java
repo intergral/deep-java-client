@@ -29,7 +29,8 @@ import org.slf4j.LoggerFactory;
 
 public final class SmapUtils {
 
-  private final static Logger LOGGER = LoggerFactory.getLogger(SmapUtils.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(SmapUtils.class);
+
   private SmapUtils() {
   }
 

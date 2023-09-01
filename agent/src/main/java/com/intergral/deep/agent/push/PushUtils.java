@@ -35,11 +35,20 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Utilities to convert to grpc snapshot types.
+ */
 public final class PushUtils {
 
   private PushUtils() {
   }
 
+  /**
+   * Convert an internal snapshot into a grpc snapshot.
+   *
+   * @param snapshot the internal snapshot to convert
+   * @return the converted snapshot
+   */
   public static Snapshot convertToGrpc(final EventSnapshot snapshot) {
     return Snapshot.newBuilder()
         .setID(ByteString.copyFromUtf8(snapshot.getID()))
@@ -143,6 +152,12 @@ public final class PushUtils {
     return frameVariables.stream().map(PushUtils::convertVariableID).collect(Collectors.toList());
   }
 
+  /**
+   * Convert a variable lookup into grpc variables.
+   *
+   * @param varLookup the lookup to convert
+   * @return the converted variables
+   */
   public static Map<String, Variable> convertVarLookup(
       final Map<String, com.intergral.deep.agent.types.snapshot.Variable> varLookup) {
     return varLookup.entrySet()

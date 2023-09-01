@@ -19,8 +19,8 @@ package com.intergral.deep.agent.tracepoint.evaluator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.intergral.deep.Person;
 import com.intergral.deep.agent.api.plugin.IEvaluator;
+import com.intergral.deep.test.target.Person;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +58,8 @@ public class NashornReflectEvaluatorTest {
     assertEquals("max(deep_this.someFunction(), 123)", NashornReflectEvaluator.parseExpression("max(this.someFunction(), 123)"));
     assertEquals("101 - deep_this.someFunction()", NashornReflectEvaluator.parseExpression("101 - this.someFunction()"));
 
-    assertEquals("101 - deep_this.someFunctionWithThisInTt()", NashornReflectEvaluator.parseExpression("101 - this.someFunctionWithThisInTt()"));
+    assertEquals("101 - deep_this.someFunctionWithThisInTt()",
+        NashornReflectEvaluator.parseExpression("101 - this.someFunctionWithThisInTt()"));
     // todo this is a known issue
     // assertEquals("101 - deep_this.thisFunction()", NashornReflectEvaluator.parseExpression("101 - this.thisFunction()"));
   }
@@ -69,9 +70,9 @@ public class NashornReflectEvaluatorTest {
   @Test
   @Disabled
   void nashornRandomUsage() throws Exception {
-    final HashMap<String, String> hashMap = new HashMap<String, String>() {{
-      put("name", "ben");
-    }};
+    final HashMap<String, String> hashMap = new HashMap<>();
+    hashMap.put("name", "ben");
+
     javax.script.ScriptEngineManager mgr = new javax.script.ScriptEngineManager();
     final List<ScriptEngineFactory> engineFactories = mgr.getEngineFactories();
 
@@ -81,18 +82,18 @@ public class NashornReflectEvaluatorTest {
 
     javax.script.ScriptEngine engine = mgr.getEngineByName("JavaScript");
     final javax.script.Bindings bindings = engine.createBindings();
-//        bindings.put( "obj", hashMap );
-//        bindings.put( "person", new Person( new Person( "mary" ), "bob" ) );
-    bindings.putAll(new HashMap<String, Object>() {{
-      put("obj", hashMap);
-      put("person", new Person(new Person("mary"), "qwe"));
-      put("qq", NashornReflectEvaluatorTest.this);
-    }});
+    //        bindings.put( "obj", hashMap );
+    //        bindings.put( "person", new Person( new Person( "mary" ), "bob" ) );
+    final HashMap<String, Object> toMerge = new HashMap<>();
+    toMerge.put("obj", hashMap);
+    toMerge.put("person", new Person(new Person("mary"), "qwe"));
+    toMerge.put("qq", NashornReflectEvaluatorTest.this);
+    bindings.putAll(toMerge);
 
     System.out.println(engine.eval("person", bindings));
     System.out.println(engine.eval("person.name", bindings));
     System.out.println(engine.eval("person.getParent()", bindings));
-//        System.out.println( engine.eval( "System.exit()", bindings ) );
+    //        System.out.println( engine.eval( "System.exit()", bindings ) );
     final Object eval = engine.eval("qq", bindings);
     System.out.println(eval);
     System.out.println(engine.eval("qq.name", bindings));

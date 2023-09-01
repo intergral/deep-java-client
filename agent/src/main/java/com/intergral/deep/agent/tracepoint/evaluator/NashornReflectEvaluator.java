@@ -46,6 +46,12 @@ public class NashornReflectEvaluator extends AbstractEvaluator {
     this.engine = engine;
   }
 
+  /**
+   * Load the evaluator.
+   *
+   * @param loader the class loader to use
+   * @return the evaluator or {@code null} if Nashorn is not available.
+   */
   public static IEvaluator loadEvaluator(final ClassLoader loader) {
     // this stops us from trying to load nashorn again if it failed
     if (!NASHORN_AVAILABLE) {

@@ -19,6 +19,9 @@ package com.intergral.deep.agent.types.snapshot;
 
 import java.util.Set;
 
+/**
+ * A VariableID is the reference to a variable in the snapshot variable lookup.
+ */
 public class VariableID {
 
   private final String id;
@@ -26,6 +29,14 @@ public class VariableID {
   private final Set<String> modifiers;
   private final String originalName;
 
+  /**
+   * Create a new variable ID.
+   *
+   * @param id the variable id
+   * @param name the variable name
+   * @param modifiers the modifiers
+   * @param originalName the orignal name
+   */
   public VariableID(final String id, final String name, final Set<String> modifiers,
       final String originalName) {
 

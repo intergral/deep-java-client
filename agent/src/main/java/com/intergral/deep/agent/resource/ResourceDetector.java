@@ -20,6 +20,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Utilities to create the resource for this agent.
+ */
 public final class ResourceDetector {
 
   private ResourceDetector() {
@@ -32,6 +35,13 @@ public final class ResourceDetector {
   static final String ENABLED_PROVIDERS_KEY = "deep.java.enabled.resource.providers";
   static final String DISABLED_PROVIDERS_KEY = "deep.java.disabled.resource.providers";
 
+  /**
+   * Create and configure a resource for this agent.
+   *
+   * @param settings           the settings for the agent
+   * @param serviceClassLoader the class loader to use to load the SPI services
+   * @return the loaded resource
+   */
   public static Resource configureResource(Settings settings, ClassLoader serviceClassLoader) {
     Resource result = Resource.create(Collections.emptyMap());
 

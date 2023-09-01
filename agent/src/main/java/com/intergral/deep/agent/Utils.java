@@ -21,13 +21,16 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Collection of utilities for general java related tasks.
+ */
 public final class Utils {
 
   private Utils() {
   }
 
   /**
-   * Get the current version of Java running in this JVM
+   * Get the current version of Java running in this JVM.
    *
    * @return the java version number
    */
@@ -63,7 +66,7 @@ public final class Utils {
   }
 
   /**
-   * Create a new map from the input
+   * Create a new map from the input.
    *
    * @param map the input map
    * @param <T> the key type
@@ -78,11 +81,12 @@ public final class Utils {
 
 
   /**
-   * FROM: <a href="https://stackoverflow.com/a/38947571">view source</a>
+   * Check if a string ends with a value, ignoring the case.
    *
    * @param str    the string to search
    * @param suffix the value to serch for
    * @return true if {@code str} ends with {@code suffix}, disregarding case sensitivity
+   * @see <a href="https://stackoverflow.com/a/38947571">Source</a>
    */
   public static boolean endsWithIgnoreCase(String str, String suffix) {
     int suffixLength = suffix.length();
@@ -113,7 +117,7 @@ public final class Utils {
 
 
   /**
-   * Trim a string from another string
+   * Trim a string from another string.
    *
    * @param str     the target string
    * @param prefix the value to remove from the string
@@ -128,7 +132,7 @@ public final class Utils {
 
 
   /**
-   * Trim a string to a specified length
+   * Trim a string to a specified length.
    *
    * @param str       the target string
    * @param maxLength the max length to make the string
@@ -165,12 +169,12 @@ public final class Utils {
 
 
   /**
-   * The result of a trim operation
+   * The result of a trim operation.
    */
   public interface ITrimResult {
 
     /**
-     * The value to use, might be truncated
+     * The value to use, might be truncated.
      *
      * @return the value
      */
@@ -178,7 +182,7 @@ public final class Utils {
 
 
     /**
-     * Has the value been truncated
+     * Has the value been truncated.
      *
      * @return {@code true} if the value was truncated
      */

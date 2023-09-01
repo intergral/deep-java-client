@@ -24,6 +24,9 @@ import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.Set;
 
+/**
+ * A collection of utils that simplify the use of reflection.
+ */
 public final class ReflectionUtils {
 
   private ReflectionUtils() {

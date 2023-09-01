@@ -18,7 +18,6 @@
 package com.intergral.deep.agent.plugins;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.intergral.deep.agent.ReflectionUtils;
 import com.intergral.deep.agent.api.plugin.IPlugin;

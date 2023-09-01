@@ -34,12 +34,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * This service deals with polling the remote service for tracepoint configs.
+ */
 public class LongPollService implements ITimerTask {
   private final Settings settings;
   private final GrpcService grpcService;
   private final DriftAwareThread thread;
   private ITracepointConfig tracepointConfig;
 
+  /**
+   * Create a new service.
+   *
+   * @param settings    the deep settings
+   * @param grpcService the deep grpc service
+   */
   public LongPollService(final Settings settings, final GrpcService grpcService) {
     this.settings = settings;
     this.grpcService = grpcService;

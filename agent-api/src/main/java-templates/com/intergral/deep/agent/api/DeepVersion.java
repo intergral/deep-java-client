@@ -19,5 +19,5 @@ package com.intergral.deep.agent.api;
 
 public interface DeepVersion {
 
-  public static final String VERSION = "${project.version}";
+  String VERSION = "${project.version}";
 }

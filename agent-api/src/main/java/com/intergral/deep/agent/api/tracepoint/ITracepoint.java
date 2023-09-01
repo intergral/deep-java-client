@@ -21,18 +21,50 @@ import com.intergral.deep.agent.api.IRegistration;
 import java.util.Collection;
 import java.util.Map;
 
+/**
+ * This type describes a tracepoint that has been attached via code, using
+ * {@link com.intergral.deep.agent.api.IDeep#registerTracepoint(String, int)}.
+ */
 public interface ITracepoint {
 
+  /**
+   * Get the tracepoint path.
+   *
+   * @return the tracepoint path
+   */
   String path();
 
+  /**
+   * Get the tracepoint line number.
+   *
+   * @return the line number
+   */
   int line();
 
+  /**
+   * Get the args for the tracepoint.
+   *
+   * @return the args on the tracepoint
+   */
   Map<String, String> args();
 
+  /**
+   * Get the tracepoint watches.
+   *
+   * @return the configured watches
+   */
   Collection<String> watches();
 
+  /**
+   * The generated ID for the tracepoint.
+   *
+   * @return the tracepoint id
+   */
   String id();
 
+  /**
+   * Defines the tracepoint registration.
+   */
   interface ITracepointRegistration extends IRegistration<ITracepoint> {
 
   }

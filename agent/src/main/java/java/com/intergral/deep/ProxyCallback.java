@@ -33,7 +33,7 @@ import java.util.Set;
 public class ProxyCallback {
 
   /**
-   * The main entry point for CF ASM injected breakpoints
+   * The main entry point for CF ASM injected breakpoints.
    *
    * @param bpIds    the bp ids to trigger
    * @param filename the filename of the breakpoint hit
@@ -49,7 +49,7 @@ public class ProxyCallback {
 
 
   /**
-   * The main entry point for non CF ASM injected breakpoints
+   * The main entry point for non CF ASM injected breakpoints.
    *
    * @param bpIds    the bp ids to trigger
    * @param filename the filename of the breakpoint hit

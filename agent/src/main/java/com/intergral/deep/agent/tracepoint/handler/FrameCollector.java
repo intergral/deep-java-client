@@ -48,22 +48,22 @@ import java.util.stream.Collectors;
 public class FrameCollector extends VariableProcessor {
 
   /**
-   * The current settings use my deep
+   * The current settings use my deep.
    */
   protected final Settings settings;
 
   /**
-   * The evaluator that should be used by this callback
+   * The evaluator that should be used by this callback.
    */
   protected final IEvaluator evaluator;
 
   /**
-   * The variables that have been captured by the callback
+   * The variables that have been captured by the callback.
    */
   protected final Map<String, Object> variables;
 
   /**
-   * The stack trace elements captured by this callback
+   * The stack trace elements captured by this callback.
    */
   private final StackTraceElement[] stack;
 
@@ -78,7 +78,7 @@ public class FrameCollector extends VariableProcessor {
   private final List<String> jspPackages;
 
   /**
-   * Create a frame collector to collect the frame data
+   * Create a frame collector to collect the frame data.
    *
    * @param settings  the current settings being used by deep
    * @param evaluator the evaluator to use for this callback
@@ -334,7 +334,7 @@ public class FrameCollector extends VariableProcessor {
   }
 
   /**
-   * Get the method name from the stack frame
+   * Get the method name from the stack frame.
    *
    * @param stackTraceElement the stack frame to process
    * @param variables         the variables for the frame

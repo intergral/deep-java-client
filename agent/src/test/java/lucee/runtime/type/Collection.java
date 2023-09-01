@@ -19,7 +19,8 @@ package lucee.runtime.type;
 
 @SuppressWarnings("ALL")
 public class Collection {
-public static class Key {
 
-}
+  public static class Key {
+
+  }
 }

@@ -21,11 +21,24 @@ import com.intergral.deep.agent.api.DeepRuntimeException;
 import com.intergral.deep.agent.api.settings.ISettings;
 import java.lang.reflect.Constructor;
 
+/**
+ * A simple util to get create plugins. A plugin can have a default constructor or one that accepts the {@link ISettings} class. So this
+ * type helps us find and call the appropriate constructor.
+ */
 public final class ReflectionUtils {
 
   private ReflectionUtils() {
   }
 
+  /**
+   * Call the constructor.
+   *
+   * @param constructor the constructor
+   * @param settings    the settings object
+   * @param reflection  the reflection service to use
+   * @param <T>         the type of the new object
+   * @return the new object
+   */
   public static <T> T callConstructor(final Constructor<?> constructor, final ISettings settings, final IReflection reflection) {
     if (constructor.getParameterTypes().length == 0) {
       return reflection.callConstructor(constructor);
@@ -33,20 +46,34 @@ public final class ReflectionUtils {
     return reflection.callConstructor(constructor, settings);
   }
 
-  public static Constructor<?> findConstructor(final Class<?> aClass, final IReflection reflection) {
+  /**
+   * Find the constructor to use.
+   * <p>
+   * Will look for the constructor that we can use in the order:
+   * <ul>
+   *   <li>constructor(ISettings.class)</li>
+   *   <li>constructor()</li>
+   * </ul>
+   *
+   * @param clazz      the class to look on
+   * @param reflection the reflection service to use
+   * @return the constructor that was found
+   * @throws DeepRuntimeException if we could not find a constructor
+   */
+  public static Constructor<?> findConstructor(final Class<?> clazz, final IReflection reflection) {
 
-    final Constructor<?> constructor = reflection.findConstructor(aClass, ISettings.class);
+    final Constructor<?> constructor = reflection.findConstructor(clazz, ISettings.class);
     if (constructor != null) {
       return constructor;
     }
 
-    final Constructor<?> defaultConstructor = reflection.findConstructor(aClass);
+    final Constructor<?> defaultConstructor = reflection.findConstructor(clazz);
     if (defaultConstructor != null) {
       return defaultConstructor;
     }
-    final String simpleName = aClass.getSimpleName();
+    final String simpleName = clazz.getSimpleName();
     throw new DeepRuntimeException(
-        String.format("Cannot create auth provider of type: %s. Class is missing constructor %s(%s) or %s().", aClass.getName(),
+        String.format("Cannot create auth provider of type: %s. Class is missing constructor %s(%s) or %s().", clazz.getName(),
             simpleName, ISettings.class.getName(), simpleName));
 
   }

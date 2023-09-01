@@ -59,7 +59,7 @@ class UtilsTest {
 
   @Test
   void valueOf() {
-    class badtostring {
+    class BadToString {
 
       @Override
       public String toString() {
@@ -67,12 +67,13 @@ class UtilsTest {
       }
 
     }
+
     assertEquals("some value", Utils.valueOf("some value"));
     assertEquals("1", Utils.valueOf("1"));
     assertEquals("null", Utils.valueOf(null));
-    final String valueOf = Utils.valueOf(new badtostring());
+    final String valueOf = Utils.valueOf(new BadToString());
     assertNotNull(valueOf);
-    assertTrue(valueOf.startsWith(badtostring.class.getName()));
+    assertTrue(valueOf.startsWith(BadToString.class.getName()));
     assertTrue(valueOf.endsWith("toString() failed"));
 
   }

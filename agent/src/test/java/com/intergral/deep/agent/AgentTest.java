@@ -17,9 +17,9 @@
 
 package com.intergral.deep.agent;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -27,23 +27,15 @@ class AgentTest {
 
 
   @Test
-  void parseArgs()
-  {
-    final Map<String, String> stringStringMap = Agent.parseArgs( "me=you" );
-    assertEquals( stringStringMap, new HashMap<String, String>()
-    {{
-      put( "me", "you" );
-    }} );
+  void parseArgs() {
+    final Map<String, String> stringStringMap = Agent.parseArgs("me=you");
+    assertEquals(stringStringMap, Collections.singletonMap("me", "you"));
   }
 
 
   @Test
-  void parseArgsWithTags()
-  {
-    final Map<String, String> stringStringMap = Agent.parseArgs( "tags=testKey=testVal;testkey2=testval2" );
-    assertEquals( stringStringMap, new HashMap<String, String>()
-    {{
-      put( "tags", "testKey=testVal;testkey2=testval2" );
-    }} );
+  void parseArgsWithTags() {
+    final Map<String, String> stringStringMap = Agent.parseArgs("tags=testKey=testVal;testkey2=testval2");
+    assertEquals(stringStringMap, Collections.singletonMap("tags", "testKey=testVal;testkey2=testval2"));
   }
 }

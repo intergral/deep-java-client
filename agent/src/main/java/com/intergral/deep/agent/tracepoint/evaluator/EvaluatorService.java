@@ -22,6 +22,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * General wrapper around non CF evaluators.
+ */
 public final class EvaluatorService {
 
   private EvaluatorService() {
@@ -31,6 +34,11 @@ public final class EvaluatorService {
   private static final Exception NO_EVALUATOR_EXCEPTION = new RuntimeException(
       "No evaluator available.");
 
+  /**
+   * Create an evaluator.
+   *
+   * @return the new evaluator.
+   */
   public static IEvaluator createEvaluator() {
     final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
     final IEvaluator iEvaluator = NashornReflectEvaluator.loadEvaluator(contextClassLoader);

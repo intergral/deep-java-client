@@ -27,6 +27,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Describes the captured data.
+ */
 public class EventSnapshot {
 
   private final String id;
@@ -40,6 +43,15 @@ public class EventSnapshot {
   private Resource attributes;
   private boolean open;
 
+  /**
+   * Create a new EventSnapshot.
+   *
+   * @param tracepoint the tracepoint that triggered this snapshot
+   * @param nanoTs     the time in nanoseconds
+   * @param resource   the resource of the agent
+   * @param frames     the captured frames
+   * @param variables  the captured variables
+   */
   public EventSnapshot(final TracePointConfig tracepoint,
       final long nanoTs,
       final Resource resource,
@@ -57,6 +69,12 @@ public class EventSnapshot {
     this.open = true;
   }
 
+  /**
+   * Add the result of a watch statement.
+   *
+   * @param result    the watch result
+   * @param variables the variable result
+   */
   public void addWatchResult(final WatchResult result, final Map<String, Variable> variables) {
     if (this.open) {
       this.watches.add(result);
@@ -64,6 +82,11 @@ public class EventSnapshot {
     }
   }
 
+  /**
+   * Merge additional attributes into this snapshot.
+   *
+   * @param attributes the additional attributes
+   */
   public void mergeAttributes(final Resource attributes) {
     if (this.open) {
       this.attributes = this.attributes.merge(attributes);
@@ -106,6 +129,9 @@ public class EventSnapshot {
     return attributes;
   }
 
+  /**
+   * Close the snapshot to prevent further changes.
+   */
   public void close() {
     this.open = false;
     final long currentTimeNano = Utils.currentTimeNanos()[1];

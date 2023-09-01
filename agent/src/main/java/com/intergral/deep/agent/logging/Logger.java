@@ -26,11 +26,19 @@ import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Logger utility methods.
+ */
 public final class Logger {
 
   private Logger() {
   }
 
+  /**
+   * Create and configure the java.util.logger for use with deep.
+   *
+   * @param settings the settings for deep
+   */
   public static void configureLogging(final Settings settings) {
     final java.util.logging.Logger logger = java.util.logging.Logger.getLogger("com.intergral");
     logger.setUseParentHandlers(false);

@@ -15,7 +15,7 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep;
+package com.intergral.deep.test.target;
 
 public class Person {
 

@@ -5,6 +5,9 @@
 
 package com.intergral.deep.agent.api.resource;
 
+/**
+ * A collection of known keys that are used in the attributes.
+ */
 public interface ResourceAttributes {
 
   /**

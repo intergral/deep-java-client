@@ -43,6 +43,9 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This service handles the grpc channel and attaching the metadata to the outbound services.
+ */
 public class GrpcService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GrpcService.class);
@@ -54,6 +57,9 @@ public class GrpcService {
     this.settings = settings;
   }
 
+  /**
+   * Start the grpc service and connect the channel.
+   */
   public void start() {
     try {
       setupChannel();
@@ -116,6 +122,11 @@ public class GrpcService {
     return channel;
   }
 
+  /**
+   * Get the grpc service for polling configs.
+   *
+   * @return the service to use
+   */
   public PollConfigGrpc.PollConfigBlockingStub pollService() {
     final PollConfigGrpc.PollConfigBlockingStub blockingStub = PollConfigGrpc.newBlockingStub(
         getChannel());
@@ -126,6 +137,11 @@ public class GrpcService {
         metadata));
   }
 
+  /**
+   * Get the grpc service for sending snapshots.
+   *
+   * @return the service to use
+   */
   public SnapshotServiceGrpc.SnapshotServiceStub snapshotService() {
     final SnapshotServiceGrpc.SnapshotServiceStub snapshotServiceStub = SnapshotServiceGrpc.newStub(
         getChannel());

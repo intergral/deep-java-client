@@ -35,6 +35,13 @@ public class JSPClassScanner implements IClassScanner {
   private final List<String> jspPackages;
 
 
+  /**
+   * Create a new JSP scanner.
+   *
+   * @param tracepoints the tracepoints
+   * @param jspSuffix the jsp suffix
+   * @param jspPackages the jsp packages
+   */
   public JSPClassScanner(final Map<String, TracePointConfig> tracepoints,
       final String jspSuffix,
       final List<String> jspPackages) {

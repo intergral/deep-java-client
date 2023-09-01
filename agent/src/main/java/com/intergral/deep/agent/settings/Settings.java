@@ -39,18 +39,27 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
+/**
+ * A service that handles the general config of the deep agent.
+ */
 public class Settings implements ISettings {
 
   private static final AtomicBoolean IS_ACTIVE = new AtomicBoolean(true);
   private final Properties properties;
+  private final Collection<IPlugin> customPlugins = new ArrayList<>();
   private Resource resource;
   private Collection<IPlugin> plugins = Collections.emptyList();
-  private final Collection<IPlugin> customPlugins = new ArrayList<>();
 
   private Settings(Properties properties) {
     this.properties = properties;
   }
 
+  /**
+   * Build a new settings service from the input arguments from the agent.
+   *
+   * @param agentArgs the agent input arguments
+   * @return the new settings service
+   */
   public static Settings build(final Map<String, String> agentArgs) {
     final String settingFile = readProperty("deep.settings", agentArgs);
     final InputStream propertiesStream;
@@ -120,6 +129,14 @@ public class Settings implements ISettings {
     return System.getProperty("deep." + key);
   }
 
+  /**
+   * Coerce a value into a given type.
+   *
+   * @param str  the value to coerce
+   * @param type the type to change to
+   * @param <T>  the type to return as
+   * @return the value as the given type, or {@code null}
+   */
   @SuppressWarnings("unchecked")
   public static <T> T coerc(final String str, final Class<T> type) {
     if (str == null) {
@@ -186,9 +203,10 @@ public class Settings implements ISettings {
     return Arrays.asList(split);
   }
 
+  @Override
   public <T> T getSettingAs(String key, Class<T> clazz) {
     // special handling for enabled key
-    if(key.equals(ISettings.KEY_ENABLED)){
+    if (key.equals(ISettings.KEY_ENABLED)) {
       return coerc(String.valueOf(isActive()), clazz);
     }
     final String property = this.properties.getProperty(key);
@@ -218,6 +236,12 @@ public class Settings implements ISettings {
     return settingAs;
   }
 
+  /**
+   * Get the deep service host name.
+   *
+   * @return the service host name
+   * @throws InvalidConfigException if the value cannot be obtained
+   */
   public String getServiceHost() {
     final String serviceUrl = getSettingAs(ISettings.KEY_SERVICE_URL, String.class);
     if (serviceUrl != null && serviceUrl.contains("://")) {
@@ -233,6 +257,12 @@ public class Settings implements ISettings {
     throw new InvalidConfigException(ISettings.KEY_SERVICE_URL, serviceUrl);
   }
 
+  /**
+   * Get the deep service port number.
+   *
+   * @return the service port number
+   * @throws InvalidConfigException if the value cannot be obtained
+   */
   public int getServicePort() {
     final String serviceUrl = getSettingAs(ISettings.KEY_SERVICE_URL, String.class);
     if (serviceUrl != null && serviceUrl.contains("://")) {
@@ -253,10 +283,21 @@ public class Settings implements ISettings {
     return this.resource;
   }
 
+  /**
+   * Get the resource value for this agent.
+   *
+   * @param resource the resource that describes this agent
+   */
   public void setResource(Resource resource) {
     this.resource = resource;
   }
 
+  /**
+   * Get the value as a list.
+   *
+   * @param key the key for the setting
+   * @return the value as a list
+   */
   public List<String> getAsList(final String key) {
     final List settingAs = getSettingAs(key, List.class);
     if (settingAs == null) {
@@ -265,27 +306,49 @@ public class Settings implements ISettings {
     return settingAs;
   }
 
+  /**
+   * Get all configured plugins.
+   *
+   * @return the full list on plugins
+   */
   public Collection<IPlugin> getPlugins() {
     final ArrayList<IPlugin> actualPlugins = new ArrayList<>(this.plugins);
     actualPlugins.addAll(this.customPlugins);
     return actualPlugins;
   }
 
+  /**
+   * Set configured plugins.
+   *
+   * @param plugins the plugins to use
+   */
   public void setPlugins(Collection<IPlugin> plugins) {
     this.plugins = plugins;
   }
 
+  /**
+   * Add a custom plugin.
+   *
+   * @param plugin the plugin to add
+   * @see com.intergral.deep.agent.api.IDeep#registerPlugin(IPlugin)
+   */
   public void addPlugin(final IPlugin plugin) {
-    final Optional<IPlugin> first = this.customPlugins.stream().filter(iPlugin -> iPlugin.name().equals(plugin.name())).findFirst();
+    final Optional<IPlugin> first = this.customPlugins.stream().filter(current -> current.name().equals(plugin.name())).findFirst();
     if (first.isPresent()) {
       throw new IllegalStateException(String.format("Cannot add duplicate named (%s) plugin", plugin.name()));
     }
     this.customPlugins.add(plugin);
   }
 
+  /**
+   * Remove a plugin that was added via {@link #addPlugin(IPlugin)}.
+   *
+   * @param plugin the plugin to remove
+   */
   public void removePlugin(final IPlugin plugin) {
-    this.customPlugins.removeIf(iPlugin -> iPlugin.name().equals(plugin.name()));
+    this.customPlugins.removeIf(current -> current.name().equals(plugin.name()));
   }
+
 
   @Override
   public IPlugin getPlugin(final String name) {
@@ -298,14 +361,29 @@ public class Settings implements ISettings {
     return null;
   }
 
+  /**
+   * Is deep currently active.
+   *
+   * @return {@code true} if deep is active, else {@code false}
+   */
   public boolean isActive() {
     return IS_ACTIVE.get();
   }
 
+  /**
+   * Allows enabling or disabled deep.
+   * <p>
+   * A disabled deep will remove installed tracepoints and stop polling. It will not remove itself.
+   *
+   * @param state the new state
+   */
   public void setActive(boolean state) {
     IS_ACTIVE.set(state);
   }
 
+  /**
+   * Used to indicate an invalid config value.
+   */
   public static class InvalidConfigException extends RuntimeException {
 
     public InvalidConfigException(String key, String value) {

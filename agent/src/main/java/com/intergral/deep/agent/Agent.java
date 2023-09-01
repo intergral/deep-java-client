@@ -27,13 +27,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.jar.JarFile;
 
+/**
+ * This is the main entry point for the Deep agent.
+ */
 public final class Agent {
 
   private Agent() {
   }
 
   /**
-   * This is called when the agent is dynamically attached to the VM
+   * This is called when the agent is dynamically attached to the VM.
    *
    * @param arg  the agent args
    * @param inst a system instrumentation
@@ -46,7 +49,7 @@ public final class Agent {
 
 
   /**
-   * This is called when the agent is attached from the CLI
+   * This is called when the agent is attached from the CLI.
    *
    * @param arg  the agent args
    * @param inst a system instrumentation
@@ -58,7 +61,7 @@ public final class Agent {
   }
 
   /**
-   * A common start for NV
+   * A common start for NV.
    *
    * @param args the NV args
    * @param inst a system instrumentation
