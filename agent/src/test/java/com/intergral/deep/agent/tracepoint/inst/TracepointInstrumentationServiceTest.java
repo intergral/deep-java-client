@@ -104,7 +104,7 @@ class TracepointInstrumentationServiceTest {
     Mockito.when(instrumentation.getAllLoadedClasses()).thenReturn(new Class[]{Person.class});
     Mockito.when(instrumentation.isModifiableClass(Person.class)).thenReturn(true);
     tracepointInstrumentationService.processBreakpoints(
-        Collections.singletonList(new MockTracepointConfig("/com/intergral/deep/Person.java")));
+        Collections.singletonList(new MockTracepointConfig("/com/intergral/deep/test/target/Person.java")));
 
     final ArgumentCaptor<Class> argumentCaptor = ArgumentCaptor.forClass(Class.class);
 
@@ -119,7 +119,7 @@ class TracepointInstrumentationServiceTest {
     Mockito.when(instrumentation.getAllLoadedClasses()).thenReturn(new Class[]{Person.class});
     Mockito.when(instrumentation.isModifiableClass(Person.class)).thenReturn(true);
     tracepointInstrumentationService.processBreakpoints(
-        Collections.singletonList(new MockTracepointConfig("/com/intergral/deep/Person.java")));
+        Collections.singletonList(new MockTracepointConfig("/com/intergral/deep/test/target/Person.java")));
 
     final ArgumentCaptor<Class> argumentCaptor = ArgumentCaptor.forClass(Class.class);
 

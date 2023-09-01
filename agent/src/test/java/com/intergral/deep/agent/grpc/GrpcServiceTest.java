@@ -36,6 +36,8 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptors;
 import io.grpc.stub.StreamObserver;
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,6 +58,7 @@ class GrpcServiceTest {
   private final AtomicReference<Snapshot> snapshotRequest = new AtomicReference<>();
 
   private final AtomicReference<String> header = new AtomicReference<>();
+  private int port;
 
   @BeforeAll
   static void beforeAll() {
@@ -88,14 +91,20 @@ class GrpcServiceTest {
       responseObserver.onCompleted();
     });
 
-    server = ServerBuilder.forPort(9999).addService(ServerInterceptors.intercept(testPollService.bindService(), testInterceptor))
+    // find a free port
+    try (ServerSocket socket = new ServerSocket(0)) {
+      port = socket.getLocalPort();
+    }
+
+    server = ServerBuilder.forPort(port)
+        .addService(ServerInterceptors.intercept(testPollService.bindService(), testInterceptor))
         .addService(ServerInterceptors.intercept(testSnapshotService.bindService(), testInterceptor)).build();
 
     server.start();
   }
 
   @AfterEach
-  void tearDown() {
+  void tearDown() throws IOException {
     this.server.shutdownNow();
   }
 
@@ -103,7 +112,7 @@ class GrpcServiceTest {
   void serverCanConnect_poll() throws InterruptedException {
 
     final HashMap<String, String> map = new HashMap<>();
-    map.put(ISettings.KEY_SERVICE_URL, "localhost:9999");
+    map.put(ISettings.KEY_SERVICE_URL, "localhost:" + port);
     map.put(ISettings.KEY_SERVICE_SECURE, "false");
     map.put(ISettings.KEY_AUTH_PROVIDER, MockAuthProvider.class.getName());
 
@@ -125,7 +134,7 @@ class GrpcServiceTest {
   void serverCanConnect_snapshot() throws InterruptedException {
 
     final HashMap<String, String> map = new HashMap<>();
-    map.put(ISettings.KEY_SERVICE_URL, "localhost:9999");
+    map.put(ISettings.KEY_SERVICE_URL, "localhost:" + port);
     map.put(ISettings.KEY_SERVICE_SECURE, "false");
     map.put(ISettings.KEY_AUTH_PROVIDER, MockAuthProvider.class.getName());
 
