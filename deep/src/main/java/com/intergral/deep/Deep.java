@@ -45,10 +45,19 @@ public class Deep {
 
 
   /**
-   * This is a shortcut for {@code Deep.config().start()}
+   * This is a shortcut for {@code Deep.config().start()}.
    */
   public static void start() {
     Deep.config().start();
+  }
+
+  /**
+   * This allows deep to be started with the parsed config builder.
+   *
+   * @param builder the config to use
+   */
+  public void start(final DeepConfigBuilder builder) {
+    builder.start();
   }
 
   /**
@@ -76,7 +85,7 @@ public class Deep {
   }
 
   /**
-   * This allows deep to be started with the parsed config
+   * This allows deep to be started with the parsed config.
    *
    * @param config as a string
    */
@@ -84,14 +93,6 @@ public class Deep {
     getInstance().startDeep(config, jarPath);
   }
 
-  /**
-   * This allows deep to be started with the parsed config builder
-   *
-   * @param builder the config to use
-   */
-  public void start(final DeepConfigBuilder builder) {
-    builder.start();
-  }
 
   private void startDeep(final String config, final String jarPath) {
     try {
@@ -112,7 +113,7 @@ public class Deep {
 
 
   /**
-   * Get the process id for the current process
+   * Get the process id for the current process.
    *
    * @return the process id
    */
@@ -123,7 +124,7 @@ public class Deep {
 
 
   /**
-   * Load the loader for NerdVision
+   * Load the loader for NerdVision.
    *
    * @return the loader to use
    * @throws Throwable if we cannot load the loader
@@ -218,8 +219,8 @@ public class Deep {
    * <p>
    * This uses T as the type {@link com.intergral.deep.agent.api.reflection.IReflection} is not loaded so this class cannot use it.
    *
-   * @return the {@link com.intergral.deep.agent.api.reflection.IReflection} service
    * @param <T> this should be {@link com.intergral.deep.agent.api.reflection.IReflection}
+   * @return the {@link com.intergral.deep.agent.api.reflection.IReflection} service
    */
   public <T> T reflection() {
     loadAPI();

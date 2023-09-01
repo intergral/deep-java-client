@@ -24,6 +24,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import net.bytebuddy.agent.ByteBuddyAgent;
 
+/**
+ * Custom loader to attach deep to the running process.
+ */
 public class DeepLoader implements IDeepLoader {
 
   @Override
@@ -54,7 +57,7 @@ public class DeepLoader implements IDeepLoader {
 
 
   /**
-   * Load the agent jar to a file
+   * Load the agent jar to a file.
    *
    * @return the {@link File} object for the agent
    */
@@ -75,7 +78,7 @@ public class DeepLoader implements IDeepLoader {
 
 
   /**
-   * Log the agent file as a stream
+   * Log the agent file as a stream.
    *
    * @return the stream to use, or {@code null}
    */
@@ -85,7 +88,7 @@ public class DeepLoader implements IDeepLoader {
 
 
   /**
-   * Extract a stream to a temp file and return the absolute file path
+   * Extract a stream to a temp file and return the absolute file path.
    *
    * @param inputStream the stream to extract
    * @return the absolute file path to the extracted library

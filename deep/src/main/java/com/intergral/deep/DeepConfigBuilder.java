@@ -20,13 +20,16 @@ package com.intergral.deep;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Builder to create deep config.
+ */
 public class DeepConfigBuilder {
 
   private final Map<String, Object> config = new HashMap<>();
   private String jarPath;
 
   /**
-   * Start Deep using this config
+   * Start Deep using this config.
    */
   public void start() {
     Deep.getInstance().startWithConfig(this.build(), this.jarPath);
@@ -96,7 +99,8 @@ public class DeepConfigBuilder {
   }
 
   /**
-   * Converts this object into a string that can be used by the attachment process
+   * Converts this object into a string that can be used by the attachment process.
+   *
    * @return a string for this config
    */
   private String build() {
@@ -104,7 +108,7 @@ public class DeepConfigBuilder {
   }
 
   /**
-   * Convert the config to a string
+   * Convert the config to a string.
    *
    * @param config the config to parse
    * @return the config as a string

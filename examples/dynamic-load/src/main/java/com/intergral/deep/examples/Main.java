@@ -18,8 +18,8 @@
 package com.intergral.deep.examples;
 
 
-import com.intergral.deep.DEEPAPI;
 import com.intergral.deep.Deep;
+import com.intergral.deep.DeepAPI;
 import com.intergral.deep.agent.api.IDeep;
 import com.intergral.deep.agent.api.reflection.IReflection;
 import com.intergral.deep.agent.api.resource.Resource;
@@ -39,6 +39,12 @@ import java.util.Collections;
  */
 public class Main {
 
+  /**
+   * Main entry for example.
+   *
+   * @param args the startup arguments
+   * @throws Throwable if we error
+   */
   public static void main(String[] args) throws Throwable {
     // this is only needed in this example as we are using a local built module
     // if using the dependency from maven you do not need to set the path
@@ -61,20 +67,21 @@ public class Main {
     System.out.println(instance.<IDeep>api().getVersion());
     System.out.println(instance.<IReflection>reflection());
 
-    System.out.println(DEEPAPI.api().getVersion());
-    System.out.println(DEEPAPI.reflection());
+    System.out.println(DeepAPI.api().getVersion());
+    System.out.println(DeepAPI.reflection());
 
     // Use the API to register a plugin
     // This plugin will attach the attribute 'example' to the created snapshot
     // you should also see the log line 'custom plugin' when you run this example
-    DEEPAPI.api().registerPlugin((settings, snapshot) -> {
+    DeepAPI.api().registerPlugin((settings, snapshot) -> {
       System.out.println("custom plugin");
       return Resource.create(Collections.singletonMap("example", "dynamic_load"));
     });
 
     // USe the API to create a tracepoint that will fire forever
-    DEEPAPI.api()
-        .registerTracepoint("com/intergral/deep/examples/SimpleTest", 46, Collections.singletonMap("fire_count", "-1"), Collections.emptyList());
+    DeepAPI.api()
+        .registerTracepoint("com/intergral/deep/examples/SimpleTest", 46,
+            Collections.singletonMap("fire_count", "-1"), Collections.emptyList());
 
     final SimpleTest ts = new SimpleTest("This is a test", 2);
     for (; ; ) {

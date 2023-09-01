@@ -24,10 +24,10 @@ import com.intergral.deep.agent.api.reflection.IReflection;
  * This type provides helper methods to get the api and other exposed APIs from deep. This type MUST not be used until after the agent is
  * loaded or there will be Exceptions thrown.
  */
-public class DEEPAPI {
+public class DeepAPI {
 
   /**
-   * Get the reflection API
+   * Get the reflection API.
    *
    * @return a {@link IReflection} instance for the java version we are running
    */
@@ -36,7 +36,7 @@ public class DEEPAPI {
   }
 
   /**
-   * Get the Deep api
+   * Get the Deep api.
    *
    * @return a {@link IDeep} instance
    */
