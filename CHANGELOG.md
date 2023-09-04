@@ -1,4 +1,4 @@
-# 1.1.0 (xx/xx/2023)
+# 1.0.6 (04/09/2023)
 
 - **[CHANGE]**: include bytebuddy in deep build [#12](https://github.com/intergral/deep/pull/12) [@Umaaz](https://github.com/Umaaz)
 - **[CHANGE]**: add issue and PR templates [#14](https://github.com/intergral/deep/pull/14) [@Umaaz](https://github.com/Umaaz)
