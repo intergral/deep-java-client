@@ -46,6 +46,7 @@ import com.intergral.deep.tests.grpc.TestPollService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -64,6 +65,7 @@ class LongPollServiceTest {
   private PollRequest request;
   private PollResponse response;
   private Throwable responseError;
+  private int port;
 
   @BeforeEach
   void setUp() throws IOException {
@@ -77,12 +79,17 @@ class LongPollServiceTest {
       responseObserver.onCompleted();
     });
 
-    server = ServerBuilder.forPort(9999).addService(testPollService.bindService()).build();
+    // find a free port
+    try (ServerSocket socket = new ServerSocket(0)) {
+      port = socket.getLocalPort();
+    }
+
+    server = ServerBuilder.forPort(port).addService(testPollService.bindService()).build();
 
     server.start();
 
     final HashMap<String, String> agentArgs = new HashMap<>();
-    agentArgs.put(ISettings.KEY_SERVICE_URL, "localhost:9999");
+    agentArgs.put(ISettings.KEY_SERVICE_URL, "localhost:" + port);
     agentArgs.put(ISettings.KEY_SERVICE_SECURE, "false");
     final Settings settings = Settings.build(agentArgs);
     settings.setResource(Resource.create(Collections.singletonMap("test", "resource")));
