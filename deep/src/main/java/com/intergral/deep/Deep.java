@@ -18,11 +18,10 @@
 package com.intergral.deep;
 
 import com.intergral.deep.agent.api.IDeep;
-import com.intergral.deep.agent.api.hook.IDeepHook;
+import com.intergral.deep.api.DeepAPILoader;
 import com.intergral.deep.api.IDeepLoader;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 
 /**
  * This is the main entry point to deep when using the API. All calls to deep should precede with a call to this class.
@@ -37,11 +36,10 @@ import java.lang.reflect.Method;
  * Deep.getInstance().&lt;IDeep&gt;api()
  * </code>
  */
+@SuppressWarnings("unused")
 public class Deep {
 
   private static Deep DEEP_INSTANCE = null;
-  private Object deepService = null;
-  private Object reflection = null;
 
 
   /**
@@ -98,7 +96,7 @@ public class Deep {
     try {
       loadAgent(config, jarPath);
 
-      awaitAPI();
+      DeepAPILoader.awaitAPI();
     } catch (Throwable t) {
       t.printStackTrace();
     }
@@ -146,56 +144,6 @@ public class Deep {
   }
 
   /**
-   * When we start Deep via the config, (ie not as a javaagent) we need to await the start. This should not take very long.
-   * <p>
-   * Essentially when we tell Bytebuddy to load the agent, this is sometimes done as an async external process. Which we cannot await. We
-   * need to, however, get an instance of the deep api hooked back after deep has connected. So we just keep trying.
-   * <p>
-   * This should not ever fail, as the agent will either load, or we will get an exception from the load. Once it is loaded however it can
-   * take some time to initialise depending on the size of the environment.
-   */
-  private void awaitAPI() {
-    if (this.deepService != null) {
-      // api already loaded
-      return;
-    }
-    while (this.deepService == null) {
-      try {
-        // this will throw a Deep not started error, if deep has not started.
-        loadAPI();
-      } catch (Exception ignored) {
-        try {
-          //noinspection BusyWait
-          Thread.sleep(100);
-        } catch (InterruptedException e) {
-          throw new RuntimeException(e);
-        }
-      }
-    }
-  }
-
-
-  private void loadAPI() {
-    if (this.deepService != null) {
-      // api already loaded
-      return;
-    }
-
-    try {
-      // we need to use the system class loader here, as when we run in OSGi or other complex environments. The class loader we have at
-      // this point might be isolated and wont be able to load the agent class.
-      final Class<?> aClass = ClassLoader.getSystemClassLoader().loadClass("com.intergral.deep.agent.AgentImpl");
-      final Method registerBreakpointService = aClass.getDeclaredMethod("loadDeepAPI");
-      final Object invoke = registerBreakpointService.invoke(null);
-      if (invoke != null) {
-        setProxyService(invoke);
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  /**
    * Get an instance of the API to allow calling NerdVision directly
    * <p>
    * This uses T as the type {@link IDeep} is not loaded so this class cannot use it.
@@ -205,14 +153,8 @@ public class Deep {
    * @throws IllegalStateException if NerdVision has not been started yet.
    */
   public <T> T api() {
-    loadAPI();
-    if (this.deepService == null) {
-      throw new IllegalStateException("Must start Deep first!");
-    }
-    //noinspection unchecked
-    return (T) deepService;
+    return DeepAPILoader.api();
   }
-
 
   /**
    * Get an instance of the Reflection api used in deep.
@@ -223,17 +165,6 @@ public class Deep {
    * @return the {@link com.intergral.deep.agent.api.reflection.IReflection} service
    */
   public <T> T reflection() {
-    loadAPI();
-    if (this.reflection == null) {
-      throw new IllegalStateException("Must start Deep first!");
-    }
-    //noinspection unchecked
-    return (T) reflection;
-  }
-
-  private void setProxyService(Object service) {
-    final IDeepHook hook = (IDeepHook) service;
-    this.deepService = hook.deepService();
-    this.reflection = hook.reflectionService();
+    return DeepAPILoader.reflection();
   }
 }
