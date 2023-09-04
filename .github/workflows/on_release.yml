@@ -32,3 +32,40 @@ jobs:
         run: mvn versions:set -DnewVersion=${VERSION} -B -U
       - name: Build and Release
         run: mvn -s .ci-settings.xml clean deploy -DskipTests -P release-ossrh -B -U -pl agent,deep --also-make
+
+      - name: Upload release binary
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
+          asset_path: ./agent/target/deep-${VERSION}.jar
+          asset_name: Deep Agent
+          asset_content_type: application/octet-stream
+
+  JavaSite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Package project
+        run: mvn clean package -DskipTests -U -B -P cf-it-tests,examples
+
+      - name: Build site
+        run: mvn -U -B site:site site:stage -P docs,cf-it-tests,examples
+
+      - name: Zip Site
+        run: tar -czf site.tar.gz target/staging
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Maven Site
+          path: site.tar.gz
