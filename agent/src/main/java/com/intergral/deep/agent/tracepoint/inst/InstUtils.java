@@ -99,7 +99,8 @@ public final class InstUtils {
   /**
    * Get the short version of the class name.
    * <p>
-   * Sometimes {@link Class#getSimpleName()} doesn't return a name. So we need one that always returns a name.
+   * Sometimes {@link Class#getSimpleName()} doesn't return a name. So we need one that always returns a name. Also, it
+   * seems to cause class loading sometimes.
    *
    * @param className the class name
    * @return the name of the class without the package
