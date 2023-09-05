@@ -49,7 +49,7 @@ class ResourceDetectorTest {
   @Test
   void loadResourceFromConfig() {
     final HashMap<String, String> agentArgs = new HashMap<>();
-    agentArgs.put(ResourceDetector.ATTRIBUTE_PROPERTY, "key=value,other=thing");
+    agentArgs.put(EnvironmentResourceProvider.ATTRIBUTE_PROPERTY, "key=value,other=thing");
     final Settings settings = Settings.build(agentArgs);
     final Resource resource = ResourceDetector.configureResource(settings, getClass().getClassLoader());
 

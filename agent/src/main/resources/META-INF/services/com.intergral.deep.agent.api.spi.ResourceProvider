@@ -16,3 +16,4 @@
 #
 
 com.intergral.deep.agent.resource.JavaResourceDetector
+com.intergral.deep.agent.resource.EnvironmentResourceProvider
