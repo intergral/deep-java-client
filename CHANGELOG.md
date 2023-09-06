@@ -6,6 +6,7 @@
 - **[CHANGE]**: add issue and PR templates [#14](https://github.com/intergral/deep/pull/14) [@Umaaz](https://github.com/Umaaz)
 - **[CHANGE]**: change docs to use latest release maven site [#14](https://github.com/intergral/deep/pull/14) [@Umaaz](https://github.com/Umaaz)
 - **[ENHANCEMENT]**: add unit tests for agent [#10](https://github.com/intergral/deep/pull/10) [@Umaaz](https://github.com/Umaaz)
+- **[ENHANCEMENT]**: Allow plugins to act as resource providers [#23](https://github.com/intergral/deep/pull/23) [@Umaaz](https://github.com/Umaaz)
 - **[BUGFIX]**: fix doc generation [#13](https://github.com/intergral/deep/pull/13) [@Umaaz](https://github.com/Umaaz)
 - **[BUGFIX]**: fix issue where getShortName would cause class loading [#24](https://github.com/intergral/deep/pull/24) [@Umaaz](https://github.com/Umaaz)
 - 
