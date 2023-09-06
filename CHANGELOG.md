@@ -1,4 +1,7 @@
-# 1.1.0 (xx/xx/2023)
+# 1.1.1 (xx/xx/2023)
+
+
+# 1.1.0 (06/09/2023)
 
 - **[CHANGE]**: Make agent start method public [#27](https://github.com/intergral/deep/pull/27) [@Umaaz](https://github.com/Umaaz)
 - **[CHANGE]**: move api loader to api module [#16](https://github.com/intergral/deep/pull/16) [@Umaaz](https://github.com/Umaaz)
@@ -10,7 +13,7 @@
 - **[ENHANCEMENT]**: Allow plugins to act as resource providers [#23](https://github.com/intergral/deep/pull/23) [@Umaaz](https://github.com/Umaaz)
 - **[BUGFIX]**: fix doc generation [#13](https://github.com/intergral/deep/pull/13) [@Umaaz](https://github.com/Umaaz)
 - **[BUGFIX]**: fix issue where getShortName would cause class loading [#24](https://github.com/intergral/deep/pull/24) [@Umaaz](https://github.com/Umaaz)
-- 
+
 # 1.0.5 (03/08/2023)
 
 - **[ENHANCEMENT]**: allow plugins to act as auth providers [#9](https://github.com/intergral/deep/pull/9) [@Umaaz](https://github.com/Umaaz) 
