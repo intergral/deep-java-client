@@ -18,8 +18,8 @@
 package com.intergral.deep.examples;
 
 
-import com.intergral.deep.DeepAPI;
 import com.intergral.deep.agent.api.resource.Resource;
+import com.intergral.deep.api.DeepAPI;
 import java.util.Collections;
 
 /**

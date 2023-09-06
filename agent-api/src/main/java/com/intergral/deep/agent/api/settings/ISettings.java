@@ -19,6 +19,7 @@ package com.intergral.deep.agent.api.settings;
 
 import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.resource.Resource;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -57,6 +58,7 @@ public interface ISettings {
    * By default, tomcat take index.jsp and make it into index_jsp.class, but this suffix can be configured.
    */
   String JSP_SUFFIX = "jsp.suffix";
+
   /**
    * It is possible to put compiled JSP classes into specified packages, some versions put this in a {@code jsp} package, some use
    * {@code org.apache.jsp} (newer).
@@ -75,6 +77,26 @@ public interface ISettings {
 
   /**
    * Get a setting from the config as a given type.
+   * <p>
+   * When reading a config value, deep will scan the config file, system properties and environment variables. We will read the
+   * values in order:
+   * <ul>
+   *  <li>Environment Variables</li>
+   *  <li>System Property</li>
+   *  <li>Config Value</li>
+   * </ul>
+   *
+   * So a value read from environment variables will override values given as system properties.
+   * <p>
+   * When we read a value we will scope the keys to suit the place from which we are reading. This means that if we
+   * are looking for 'service.name' we will use the following keys:
+   * <ul>
+   *   <li>DEEP_SERVICE_NAME - When looking in Environment variables we uppercase and use underscores</li>
+   *   <li>deep.service.name - When looking in System Properties we lowercase and use dots</li>
+   *   <li>service.name - When looking in config file we use the normalised value</li>
+   * </ul>
+   *
+   * The key provided should be the normalized key.
    *
    * @param key   the key for the setting
    * @param clazz the type to return as
@@ -90,6 +112,14 @@ public interface ISettings {
    * @return the value as a map
    */
   Map<String, String> getMap(String key);
+
+  /**
+   * Get the property as a list.
+   *
+   * @param key for the setting
+   * @return the value as a list
+   */
+  List<String> getAsList(String key);
 
   /**
    * Returns the resource that describes this client.

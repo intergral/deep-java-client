@@ -37,3 +37,10 @@ install:
 .PHONY: coverage
 coverage:
 	mvn clean verify -U -B -P coverage -pl '!it-tests/java-tests,!it-tests'
+
+.PHONY: precommit
+precommit:
+	$(MAKE) lint
+	$(MAKE) pmd
+	$(MAKE) coverage
+	$(MAKE) docs
