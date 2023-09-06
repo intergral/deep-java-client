@@ -64,8 +64,11 @@ jobs:
       - name: Zip Site
         run: tar -czf site.tar.gz target/staging
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
+      - uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         with:
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
+          asset_content_type: application/octet-stream
           name: Maven Site
-          path: site.tar.gz
+          asset_path: site.tar.gz
