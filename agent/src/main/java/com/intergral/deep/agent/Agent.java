@@ -66,7 +66,7 @@ public final class Agent {
    * @param args the NV args
    * @param inst a system instrumentation
    */
-  private static void startNv(final Map<String, String> args, final Instrumentation inst) {
+  public static void startNv(final Map<String, String> args, final Instrumentation inst) {
     try {
       final JarFile jarfile;
       // this is here, so we can set the path during testing.

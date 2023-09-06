@@ -1,5 +1,6 @@
 # 1.1.0 (xx/xx/2023)
 
+- **[CHANGE]**: Make agent start method public [#27](https://github.com/intergral/deep/pull/27) [@Umaaz](https://github.com/Umaaz)
 - **[CHANGE]**: move api loader to api module [#16](https://github.com/intergral/deep/pull/16) [@Umaaz](https://github.com/Umaaz)
 - **[CHANGE]**: include bytebuddy in deep build [#12](https://github.com/intergral/deep/pull/12) [@Umaaz](https://github.com/Umaaz)
 - **[CHANGE]**: add issue and PR templates [#14](https://github.com/intergral/deep/pull/14) [@Umaaz](https://github.com/Umaaz)
