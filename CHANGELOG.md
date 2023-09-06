@@ -1,5 +1,6 @@
 # 1.1.0 (xx/xx/2023)
 
+- **[BUGFIX]**: fix issue where getShortName would cause class loading [#24](https://github.com/intergral/deep/pull/24) [@Umaaz](https://github.com/Umaaz)
 - **[CHANGE]**: include bytebuddy in deep build [#12](https://github.com/intergral/deep/pull/12) [@Umaaz](https://github.com/Umaaz)
 - **[CHANGE]**: add issue and PR templates [#14](https://github.com/intergral/deep/pull/14) [@Umaaz](https://github.com/Umaaz)
 - **[CHANGE]**: change docs to use latest release maven site [#14](https://github.com/intergral/deep/pull/14) [@Umaaz](https://github.com/Umaaz)
