@@ -36,7 +36,7 @@ public class SetClassScanner implements IClassScanner {
   @Override
   public boolean scanClass(final Class<?> allLoadedClass) {
     return this.classNames.contains(InstUtils.internalClass(allLoadedClass))
-        || this.classNames.contains(allLoadedClass.getSimpleName())
+        || this.classNames.contains(InstUtils.shortClassName(allLoadedClass.getName()))
         || allLoadedClass.getName().contains("$")
         && this.classNames.contains(InstUtils.internalClassStripInner(allLoadedClass));
   }
