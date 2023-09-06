@@ -24,6 +24,7 @@ import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.plugin.IPlugin.IPluginRegistration;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
+import com.intergral.deep.agent.api.spi.ResourceProvider;
 import com.intergral.deep.agent.api.tracepoint.ITracepoint;
 import com.intergral.deep.agent.api.tracepoint.ITracepoint.ITracepointRegistration;
 import com.intergral.deep.agent.grpc.GrpcService;
@@ -40,17 +41,19 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is the agent that is provided via the API, and is what holds all deep together.
  */
 public class DeepAgent implements IDeep {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(DeepAgent.class);
   private final Settings settings;
   private final GrpcService grpcService;
   private final LongPollService pollService;
   private final TracepointConfigService tracepointConfig;
-  private final PushService pushService;
 
   /**
    * Create a new deep agent.
@@ -64,7 +67,7 @@ public class DeepAgent implements IDeep {
     this.grpcService = new GrpcService(settings);
     this.pollService = new LongPollService(settings, this.grpcService);
     this.tracepointConfig = new TracepointConfigService(tracepointInstrumentationService);
-    this.pushService = new PushService(settings, grpcService);
+    final PushService pushService = new PushService(settings, grpcService);
 
     Callback.init(settings, tracepointConfig, pushService);
   }
@@ -73,9 +76,8 @@ public class DeepAgent implements IDeep {
    * Start deep.
    */
   public void start() {
-    final Resource resource = ResourceDetector.configureResource(settings,
-        DeepAgent.class.getClassLoader());
     final List<IPlugin> iLoadedPlugins = PluginLoader.loadPlugins(settings, ReflectionUtils.getReflection());
+    final Resource resource = ResourceDetector.configureResource(settings, DeepAgent.class.getClassLoader());
     this.settings.setPlugins(iLoadedPlugins);
     this.settings.setResource(Resource.DEFAULT.merge(resource));
     this.grpcService.start();
@@ -90,6 +92,15 @@ public class DeepAgent implements IDeep {
   @Override
   public IPluginRegistration registerPlugin(final IPlugin plugin) {
     this.settings.addPlugin(plugin);
+    // if plugin provides resource definitions then merge them into the resource
+    if (plugin instanceof ResourceProvider) {
+      try {
+        final Resource resource = ((ResourceProvider) plugin).createResource(this.settings);
+        this.settings.setResource(this.settings.getResource().merge(resource));
+      } catch (Throwable t) {
+        LOGGER.error("Cannot create resource from plugin: {}", plugin.name(), t);
+      }
+    }
     final boolean isAuthProvider;
     if (plugin instanceof IAuthProvider) {
       final String settingAs = this.settings.getSettingAs(ISettings.KEY_AUTH_PROVIDER, String.class);
@@ -106,6 +117,11 @@ public class DeepAgent implements IDeep {
       @Override
       public void unregister() {
         settings.removePlugin(plugin);
+        // if plugin provides resource definitions then we need to recalculate the resource
+        if (plugin instanceof ResourceProvider) {
+          final Resource resource = ResourceDetector.configureResource(settings, DeepAgent.class.getClassLoader());
+          DeepAgent.this.settings.setResource(Resource.DEFAULT.merge(resource));
+        }
       }
 
       @Override

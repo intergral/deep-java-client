@@ -15,7 +15,7 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep;
+package com.intergral.deep.api;
 
 import com.intergral.deep.agent.api.IDeep;
 import com.intergral.deep.agent.api.reflection.IReflection;
@@ -32,7 +32,7 @@ public class DeepAPI {
    * @return a {@link IReflection} instance for the java version we are running
    */
   public static IReflection reflection() {
-    return Deep.getInstance().reflection();
+    return DeepAPILoader.reflection();
   }
 
   /**
@@ -41,6 +41,6 @@ public class DeepAPI {
    * @return a {@link IDeep} instance
    */
   public static IDeep api() {
-    return Deep.getInstance().api();
+    return DeepAPILoader.api();
   }
 }

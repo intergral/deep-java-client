@@ -19,11 +19,11 @@ package com.intergral.deep.examples;
 
 
 import com.intergral.deep.Deep;
-import com.intergral.deep.DeepAPI;
 import com.intergral.deep.agent.api.IDeep;
 import com.intergral.deep.agent.api.reflection.IReflection;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
+import com.intergral.deep.api.DeepAPI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
