@@ -221,250 +221,237 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <configuration>
-          <createDependencyReducedPom>false</createDependencyReducedPom>
-          <transformers>
-            <transformer
-              implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-              <manifestEntries>
-                <Premain-Class>com.intergral.deep.agent.Agent</Premain-Class>
-                <Agent-Class>com.intergral.deep.agent.Agent</Agent-Class>
-                <X-Compile-Source-JDK>${maven.compiler.source}</X-Compile-Source-JDK>
-                <X-Compile-Target-JDK>${maven.compiler.target}</X-Compile-Target-JDK>
-
-                <Can-Retransform-Classes>true</Can-Retransform-Classes>
-                <!-- Git specific -->
-                <Git-Branch>${git.branch}</Git-Branch>
-                <Git-Commit-Id>${git.commit.id}</Git-Commit-Id>
-                <Git-Commit-Time>${git.commit.time}</Git-Commit-Time>
-                <Git-Dirty>${git.dirty}</Git-Dirty>
-                <Git-Tags>${git.tags}</Git-Tags>
-                <Git-Remote-Origin-Url>${git.remote.origin.url}</Git-Remote-Origin-Url>
-                <!-- Add build time -->
-                <Build-Time>${maven.build.timestamp}</Build-Time>
-                <!-- Version components -->
-                <Version-Major>${parsedVersion.majorVersion}</Version-Major>
-                <Version-Minor>${parsedVersion.minorVersion}</Version-Minor>
-                <Version-Micro>${parsedVersion.incrementalVersion}</Version-Micro>
-                <Version>${project.version}</Version>
-                <!-- Add info -->
-                <Implementation-Build>${git.commit.id}</Implementation-Build>
-                <Implementation-Branch>${git.branch}</Implementation-Branch>
-                <!-- Add Build Info -->
-                <X-CI-Project-Name>${env.CI_PROJECT_NAME}</X-CI-Project-Name>
-                <X-CI-Pipeline-Id>${env.CI_PIPELINE_ID}</X-CI-Pipeline-Id>
-                <X-CI-Pipeline-Iid>${env.CI_PIPELINE_IID}</X-CI-Pipeline-Iid>
-                <X-CI-Pipeline-Source>${env.CI_PIPELINE_SOURCE}</X-CI-Pipeline-Source>
-                <X-CI-Pipeline-Url>${env.CI_PIPELINE_URL}</X-CI-Pipeline-Url>
-
-                <Specification-Title>${project.artifactId}</Specification-Title>
-                <Specification-Version>${project.version}</Specification-Version>
-                <Implementation-Title>${project.name}</Implementation-Title>
-                <Implementation-Version>${project.version}</Implementation-Version>
-                <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
-              </manifestEntries>
-            </transformer>
-            <!--These shade the tcnative libs with the relocation.native.prefix-->
-            <transformer
-              implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
-              <resource>
-                META-INF/native/lib${relocation.native.prefix}_netty_tcnative_linux_x86_64.so
-              </resource>
-              <file>
-                ${project.build.directory}/unpack/META-INF/native/libnetty_tcnative_linux_x86_64.so
-              </file>
-            </transformer>
-            <transformer
-              implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
-              <resource>
-                META-INF/native/lib${relocation.native.prefix}_netty_tcnative_osx_x86_64.jnilib
-              </resource>
-              <file>
-                ${project.build.directory}/unpack/META-INF/native/libnetty_tcnative_osx_x86_64.jnilib
-              </file>
-            </transformer>
-            <transformer
-              implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
-              <resource>
-                META-INF/native/${relocation.native.prefix}_netty_tcnative_windows_x86_64.dll
-              </resource>
-              <file>
-                ${project.build.directory}/unpack/META-INF/native/netty_tcnative_windows_x86_64.dll
-              </file>
-            </transformer>
-          </transformers>
-          <filters>
-            <!-- Excluded all signatures from other jars -->
-            <filter>
-              <artifact>*:*</artifact>
-              <excludes>
-                <exclude>META-INF/*.SF</exclude>
-                <exclude>META-INF/*.DSA</exclude>
-                <exclude>META-INF/*.RSA</exclude>
-                <exclude>META-INF/native-image/**/*.*</exclude>
-                <exclude>META-INF/proguard/**/*.*</exclude>
-<!--                <exclude>META-INF/services/**/*.*</exclude>-->
-                <exclude>META-INF/native/**/*.*</exclude>
-                <exclude>META-INF/dgminfo</exclude>
-                <exclude>META-INF/*.properties</exclude>
-                <exclude>**/LICENSE.txt</exclude>
-                <exclude>**/*.xsd</exclude>
-                <exclude>**/*-style.xml</exclude>
-                <exclude>**/license.header</exclude>
-                <exclude>**/library.properties</exclude>
-                <exclude>**/LICENSE</exclude>
-                <exclude>**/NOTICE</exclude>
-                <exclude>module-info.class</exclude>
-                <exclude>**/*.proto</exclude>
-                <exclude>android/**/*.*</exclude>
-                <exclude>javax/**/*.*</exclude>
-                <exclude>org/codehaus/mojo/**/*.*</exclude>
-                <!--                                <exclude>org/codehaus/groovy/**/*.*</exclude>-->
-                <exclude>org/checkerframework/**/*.*</exclude>
-                <exclude>io/opencensus/**/*.*</exclude>
-                <exclude>com/google/gson/**/*.*</exclude>
-                <exclude>com/google/api/**/*.*</exclude>
-                <exclude>com/google/cloud/**/*.*</exclude>
-                <exclude>com/google/errorprone/**/*.*</exclude>
-                <exclude>com/google/j2objc/**/*.*</exclude>
-                <exclude>com/google/logging/**/*.*</exclude>
-                <exclude>com/google/longrunning/**/*.*</exclude>
-                <exclude>com/google/rpc/**/*.*</exclude>
-                <exclude>com/google/type/**/*.*</exclude>
-
-                <exclude>com/google/thirdparty/**/*.*</exclude>
-                <exclude>com/google/common/xml/**/*.*</exclude>
-                <exclude>com/google/common/html/**/*.*</exclude>
-                <!--                                <exclude>com/google/common/eventbus/**/*.*</exclude>-->
-                <!--                                <exclude>com/google/common/math/**/*.*</exclude>-->
-                <exclude>com/google/common/reflect/**/*.*</exclude>
-                <exclude>com/google/common/graph/**/*.*</exclude>
-                <!--                                <exclude>com/google/common/cache/**/*.*</exclude>-->
-                <!--                                <exclude>com/google/common/util/**/*.*</exclude>-->
-                <!--                                <exclude>com/google/common/collect/**/*.*</exclude>-->
-                <exclude>groovy/grape/**/*.*</exclude>
-                <!--                                <exclude>antlr/**/*.*</exclude>-->
-                <exclude>*.html</exclude>
-              </excludes>
-            </filter>
-          </filters>
-          <relocations>
-            <relocation>
-              <pattern>org.json</pattern>
-              <shadedPattern>${relocation.package}.org.json</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>okio</pattern>
-              <shadedPattern>${relocation.package}.okio</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>okhttp3</pattern>
-              <shadedPattern>${relocation.package}.okhttp3</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>io.grpc</pattern>
-              <shadedPattern>${relocation.package}.io.grpc</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>io.netty</pattern>
-              <shadedPattern>${relocation.package}.io.netty</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>org.objectweb.asm</pattern>
-              <shadedPattern>${relocation.package}.org.objectweb.asm</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>com.google</pattern>
-              <shadedPattern>${relocation.package}.com.google</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>org.slf4j</pattern>
-              <shadedPattern>${relocation.package}.org.slf4j</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>org.apache</pattern>
-              <shadedPattern>${relocation.package}.org.apache</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>io.perfmark</pattern>
-              <shadedPattern>${relocation.package}.io.perfmark</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>bsh</pattern>
-              <shadedPattern>${relocation.package}.bsh</shadedPattern>
-            </relocation>
-          </relocations>
-        </configuration>
         <executions>
+          <!-- This execution creates a lite jar that contains the com.intergral dependencies, but not the relocated ones -->
           <execution>
+            <id>lite-jar</id>
             <phase>package</phase>
             <goals>
               <goal>shade</goal>
             </goals>
+            <configuration>
+              <outputFile>target/${project.artifactId}-${project.version}-lite.jar</outputFile>
+              <transformers>
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <manifestEntries>
+                    <Premain-Class>com.intergral.deep.agent.Agent</Premain-Class>
+                    <Agent-Class>com.intergral.deep.agent.Agent</Agent-Class>
+                    <X-Compile-Source-JDK>${maven.compiler.source}</X-Compile-Source-JDK>
+                    <X-Compile-Target-JDK>${maven.compiler.target}</X-Compile-Target-JDK>
+
+                    <Can-Retransform-Classes>true</Can-Retransform-Classes>
+                    <!-- Git specific -->
+                    <Git-Branch>${git.branch}</Git-Branch>
+                    <Git-Commit-Id>${git.commit.id}</Git-Commit-Id>
+                    <Git-Commit-Time>${git.commit.time}</Git-Commit-Time>
+                    <Git-Dirty>${git.dirty}</Git-Dirty>
+                    <Git-Tags>${git.tags}</Git-Tags>
+                    <Git-Remote-Origin-Url>${git.remote.origin.url}</Git-Remote-Origin-Url>
+                    <!-- Add build time -->
+                    <Build-Time>${maven.build.timestamp}</Build-Time>
+                    <!-- Version components -->
+                    <Version-Major>${parsedVersion.majorVersion}</Version-Major>
+                    <Version-Minor>${parsedVersion.minorVersion}</Version-Minor>
+                    <Version-Micro>${parsedVersion.incrementalVersion}</Version-Micro>
+                    <Version>${project.version}</Version>
+                    <!-- Add info -->
+                    <Implementation-Build>${git.commit.id}</Implementation-Build>
+                    <Implementation-Branch>${git.branch}</Implementation-Branch>
+                    <!-- Add Build Info -->
+                    <X-CI-Project-Name>${env.CI_PROJECT_NAME}</X-CI-Project-Name>
+                    <X-CI-Pipeline-Id>${env.CI_PIPELINE_ID}</X-CI-Pipeline-Id>
+                    <X-CI-Pipeline-Iid>${env.CI_PIPELINE_IID}</X-CI-Pipeline-Iid>
+                    <X-CI-Pipeline-Source>${env.CI_PIPELINE_SOURCE}</X-CI-Pipeline-Source>
+                    <X-CI-Pipeline-Url>${env.CI_PIPELINE_URL}</X-CI-Pipeline-Url>
+
+                    <Specification-Title>${project.artifactId}</Specification-Title>
+                    <Specification-Version>${project.version}</Specification-Version>
+                    <Implementation-Title>${project.name}</Implementation-Title>
+                    <Implementation-Version>${project.version}</Implementation-Version>
+                    <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+                  </manifestEntries>
+                </transformer>
+              </transformers>
+              <artifactSet>
+                <includes>
+                  <include>com.intergral*:*</include>
+                </includes>
+              </artifactSet>
+            </configuration>
           </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <descriptors>
-            <descriptor>assembly.xml</descriptor>
-          </descriptors>
-          <archive>
-            <manifest>
-              <addClasspath>false</addClasspath>
-              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-            </manifest>
-            <manifestEntries>
-              <Premain-Class>com.intergral.deep.agent.Agent</Premain-Class>
-              <Agent-Class>com.intergral.deep.agent.Agent</Agent-Class>
-              <X-Compile-Source-JDK>${maven.compiler.source}</X-Compile-Source-JDK>
-              <X-Compile-Target-JDK>${maven.compiler.target}</X-Compile-Target-JDK>
-
-              <Can-Retransform-Classes>true</Can-Retransform-Classes>
-              <!-- Git specific -->
-              <Git-Branch>${git.branch}</Git-Branch>
-              <Git-Commit-Id>${git.commit.id}</Git-Commit-Id>
-              <Git-Commit-Time>${git.commit.time}</Git-Commit-Time>
-              <Git-Dirty>${git.dirty}</Git-Dirty>
-              <Git-Tags>${git.tags}</Git-Tags>
-              <Git-Remote-Origin-Url>${git.remote.origin.url}</Git-Remote-Origin-Url>
-              <!-- Add build time -->
-              <Build-Time>${maven.build.timestamp}</Build-Time>
-              <!-- Version components -->
-              <Version-Major>${parsedVersion.majorVersion}</Version-Major>
-              <Version-Minor>${parsedVersion.minorVersion}</Version-Minor>
-              <Version-Micro>${parsedVersion.incrementalVersion}</Version-Micro>
-              <Version>${project.version}</Version>
-              <!-- Add info -->
-              <Implementation-Build>${git.commit.id}</Implementation-Build>
-              <Implementation-Branch>${git.branch}</Implementation-Branch>
-              <!-- Add Build Info -->
-              <X-CI-Project-Name>${env.CI_PROJECT_NAME}</X-CI-Project-Name>
-              <X-CI-Pipeline-Id>${env.CI_PIPELINE_ID}</X-CI-Pipeline-Id>
-              <X-CI-Pipeline-Iid>${env.CI_PIPELINE_IID}</X-CI-Pipeline-Iid>
-              <X-CI-Pipeline-Source>${env.CI_PIPELINE_SOURCE}</X-CI-Pipeline-Source>
-              <X-CI-Pipeline-Url>${env.CI_PIPELINE_URL}</X-CI-Pipeline-Url>
-
-              <Specification-Title>${project.artifactId}</Specification-Title>
-              <Specification-Version>${project.version}</Specification-Version>
-              <Implementation-Title>${project.name}</Implementation-Title>
-              <Implementation-Version>${project.version}</Implementation-Version>
-              <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
-            </manifestEntries>
-          </archive>
-          <finalName>deep-${project.version}</finalName>
-          <appendAssemblyId>false</appendAssemblyId>
-        </configuration>
-        <executions>
+          <!-- This execution creates an uber jar that contains the all dependencies -->
           <execution>
-            <id>assembly</id>
+            <id>uber-jar</id>
             <phase>package</phase>
             <goals>
-              <goal>single</goal>
+              <goal>shade</goal>
             </goals>
+            <configuration>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
+              <transformers>
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <manifestEntries>
+                    <Premain-Class>com.intergral.deep.agent.Agent</Premain-Class>
+                    <Agent-Class>com.intergral.deep.agent.Agent</Agent-Class>
+                    <X-Compile-Source-JDK>${maven.compiler.source}</X-Compile-Source-JDK>
+                    <X-Compile-Target-JDK>${maven.compiler.target}</X-Compile-Target-JDK>
+
+                    <Can-Retransform-Classes>true</Can-Retransform-Classes>
+                    <!-- Git specific -->
+                    <Git-Branch>${git.branch}</Git-Branch>
+                    <Git-Commit-Id>${git.commit.id}</Git-Commit-Id>
+                    <Git-Commit-Time>${git.commit.time}</Git-Commit-Time>
+                    <Git-Dirty>${git.dirty}</Git-Dirty>
+                    <Git-Tags>${git.tags}</Git-Tags>
+                    <Git-Remote-Origin-Url>${git.remote.origin.url}</Git-Remote-Origin-Url>
+                    <!-- Add build time -->
+                    <Build-Time>${maven.build.timestamp}</Build-Time>
+                    <!-- Version components -->
+                    <Version-Major>${parsedVersion.majorVersion}</Version-Major>
+                    <Version-Minor>${parsedVersion.minorVersion}</Version-Minor>
+                    <Version-Micro>${parsedVersion.incrementalVersion}</Version-Micro>
+                    <Version>${project.version}</Version>
+                    <!-- Add info -->
+                    <Implementation-Build>${git.commit.id}</Implementation-Build>
+                    <Implementation-Branch>${git.branch}</Implementation-Branch>
+                    <!-- Add Build Info -->
+                    <X-CI-Project-Name>${env.CI_PROJECT_NAME}</X-CI-Project-Name>
+                    <X-CI-Pipeline-Id>${env.CI_PIPELINE_ID}</X-CI-Pipeline-Id>
+                    <X-CI-Pipeline-Iid>${env.CI_PIPELINE_IID}</X-CI-Pipeline-Iid>
+                    <X-CI-Pipeline-Source>${env.CI_PIPELINE_SOURCE}</X-CI-Pipeline-Source>
+                    <X-CI-Pipeline-Url>${env.CI_PIPELINE_URL}</X-CI-Pipeline-Url>
+
+                    <Specification-Title>${project.artifactId}</Specification-Title>
+                    <Specification-Version>${project.version}</Specification-Version>
+                    <Implementation-Title>${project.name}</Implementation-Title>
+                    <Implementation-Version>${project.version}</Implementation-Version>
+                    <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+                  </manifestEntries>
+                </transformer>
+                <!--These shade the tcnative libs with the relocation.native.prefix-->
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
+                  <resource>
+                    META-INF/native/lib${relocation.native.prefix}_netty_tcnative_linux_x86_64.so
+                  </resource>
+                  <file>
+                    ${project.build.directory}/unpack/META-INF/native/libnetty_tcnative_linux_x86_64.so
+                  </file>
+                </transformer>
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
+                  <resource>
+                    META-INF/native/lib${relocation.native.prefix}_netty_tcnative_osx_x86_64.jnilib
+                  </resource>
+                  <file>
+                    ${project.build.directory}/unpack/META-INF/native/libnetty_tcnative_osx_x86_64.jnilib
+                  </file>
+                </transformer>
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
+                  <resource>
+                    META-INF/native/${relocation.native.prefix}_netty_tcnative_windows_x86_64.dll
+                  </resource>
+                  <file>
+                    ${project.build.directory}/unpack/META-INF/native/netty_tcnative_windows_x86_64.dll
+                  </file>
+                </transformer>
+              </transformers>
+              <filters>
+                <!-- Excluded all signatures from other jars -->
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                    <exclude>META-INF/native-image/**/*.*</exclude>
+                    <exclude>META-INF/proguard/**/*.*</exclude>
+                    <exclude>META-INF/native/**/*.*</exclude>
+                    <exclude>META-INF/dgminfo</exclude>
+                    <exclude>META-INF/*.properties</exclude>
+                    <exclude>**/LICENSE.txt</exclude>
+                    <exclude>**/*.xsd</exclude>
+                    <exclude>**/*-style.xml</exclude>
+                    <exclude>**/license.header</exclude>
+                    <exclude>**/library.properties</exclude>
+                    <exclude>**/LICENSE</exclude>
+                    <exclude>**/NOTICE</exclude>
+                    <exclude>module-info.class</exclude>
+                    <exclude>**/*.proto</exclude>
+                    <exclude>android/**/*.*</exclude>
+                    <exclude>javax/**/*.*</exclude>
+                    <exclude>org/codehaus/mojo/**/*.*</exclude>
+                    <exclude>org/checkerframework/**/*.*</exclude>
+                    <exclude>io/opencensus/**/*.*</exclude>
+                    <exclude>com/google/gson/**/*.*</exclude>
+                    <exclude>com/google/api/**/*.*</exclude>
+                    <exclude>com/google/cloud/**/*.*</exclude>
+                    <exclude>com/google/errorprone/**/*.*</exclude>
+                    <exclude>com/google/j2objc/**/*.*</exclude>
+                    <exclude>com/google/logging/**/*.*</exclude>
+                    <exclude>com/google/longrunning/**/*.*</exclude>
+                    <exclude>com/google/rpc/**/*.*</exclude>
+                    <exclude>com/google/type/**/*.*</exclude>
+                    <exclude>com/google/thirdparty/**/*.*</exclude>
+                    <exclude>com/google/common/xml/**/*.*</exclude>
+                    <exclude>com/google/common/html/**/*.*</exclude>
+                    <exclude>com/google/common/reflect/**/*.*</exclude>
+                    <exclude>com/google/common/graph/**/*.*</exclude>
+                    <exclude>groovy/grape/**/*.*</exclude>
+                    <exclude>*.html</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+              <relocations>
+                <relocation>
+                  <pattern>org.json</pattern>
+                  <shadedPattern>${relocation.package}.org.json</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>okio</pattern>
+                  <shadedPattern>${relocation.package}.okio</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>okhttp3</pattern>
+                  <shadedPattern>${relocation.package}.okhttp3</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>io.grpc</pattern>
+                  <shadedPattern>${relocation.package}.io.grpc</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>io.netty</pattern>
+                  <shadedPattern>${relocation.package}.io.netty</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.objectweb.asm</pattern>
+                  <shadedPattern>${relocation.package}.org.objectweb.asm</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>com.google</pattern>
+                  <shadedPattern>${relocation.package}.com.google</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.slf4j</pattern>
+                  <shadedPattern>${relocation.package}.org.slf4j</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.apache</pattern>
+                  <shadedPattern>${relocation.package}.org.apache</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>io.perfmark</pattern>
+                  <shadedPattern>${relocation.package}.io.perfmark</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>bsh</pattern>
+                  <shadedPattern>${relocation.package}.bsh</shadedPattern>
+                </relocation>
+              </relocations>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -524,6 +511,29 @@
             <version>1.2</version>
           </dependency>
         </dependencies>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>1.5</version>
+        <executions>
+          <execution>
+            <id>attach-artifacts</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <configuration>
+              <artifacts>
+                <artifact>
+                  <file>target/agent-${project.version}-lite.jar</file>
+                  <type>jar</type>
+                  <classifier>lite</classifier>
+                </artifact>
+              </artifacts>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
