@@ -82,7 +82,6 @@
         <module>plugins</module>
         <module>test-utils</module>
         <module>it-tests</module>
-      <module>plugins/otel-plugin</module>
     </modules>
 
     <properties>
