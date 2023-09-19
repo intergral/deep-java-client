@@ -17,10 +17,12 @@
 
 package com.intergral.deep.agent.tracepoint.handler;
 
+import com.intergral.deep.agent.Reflection;
 import com.intergral.deep.agent.Utils;
 import com.intergral.deep.agent.api.plugin.EvaluationException;
 import com.intergral.deep.agent.api.plugin.IEvaluator;
 import com.intergral.deep.agent.api.plugin.ISnapshotContext;
+import com.intergral.deep.agent.api.reflection.IReflection;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.types.TracePointConfig;
@@ -160,6 +162,14 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
     } catch (Throwable t) {
       throw new EvaluationException(expression, t);
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public IReflection reflectionService() {
+    return Reflection.getInstance();
   }
 
   /**

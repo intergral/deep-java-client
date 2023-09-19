@@ -17,9 +17,10 @@
 
 package com.intergral.deep.agent.tracepoint.cf;
 
-import com.intergral.deep.agent.ReflectionUtils;
+import com.intergral.deep.agent.Reflection;
 import com.intergral.deep.agent.Utils;
 import com.intergral.deep.agent.api.plugin.IEvaluator;
+import com.intergral.deep.agent.api.reflection.IReflection;
 import com.intergral.deep.agent.types.TracePointConfig;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -56,9 +57,10 @@ public final class CFUtils {
       return null;
     }
 
-    Method evaluate = ReflectionUtils.findMethod(page.getClass(), "Evaluate", String.class);
+    final IReflection reflection = Reflection.getInstance();
+    Method evaluate = reflection.findMethod(page.getClass(), "Evaluate", String.class);
     if (evaluate == null) {
-      evaluate = ReflectionUtils.findMethod(page.getClass(), "Evaluate", Object.class);
+      evaluate = reflection.findMethod(page.getClass(), "Evaluate", Object.class);
       if (evaluate == null) {
         return null;
       }
@@ -73,7 +75,7 @@ public final class CFUtils {
       return null;
     }
 
-    final Method evaluate = ReflectionUtils.findMethod(param0.getClass(), "evaluate", String.class);
+    final Method evaluate = Reflection.getInstance().findMethod(param0.getClass(), "evaluate", String.class);
     if (evaluate == null) {
       return null;
     }
@@ -98,7 +100,7 @@ public final class CFUtils {
         return null;
       }
       // explicitly set to Object as otherwise the call to String.valueOf can become the char[] version.
-      return String.valueOf(ReflectionUtils.<Object>getFieldValue(aThis, "key"));
+      return String.valueOf(Reflection.getInstance().<Object>getFieldValue(aThis, "key"));
     } else if (className.startsWith("cf") && className.contains("$func")) {
       return className.substring(className.indexOf("$func") + 5);
     } else {
@@ -151,7 +153,7 @@ public final class CFUtils {
     if (page == null) {
       return null;
     }
-    return ReflectionUtils.getFieldValue(page, "pageContext");
+    return Reflection.getInstance().getFieldValue(page, "pageContext");
   }
 
 

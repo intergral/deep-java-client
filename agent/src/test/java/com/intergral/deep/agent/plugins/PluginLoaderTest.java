@@ -19,7 +19,7 @@ package com.intergral.deep.agent.plugins;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.intergral.deep.agent.ReflectionUtils;
+import com.intergral.deep.agent.Reflection;
 import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.plugin.ISnapshotContext;
 import com.intergral.deep.agent.api.resource.Resource;
@@ -35,7 +35,7 @@ class PluginLoaderTest {
 
   @Test
   void canLoadNoPlugins() {
-    final List<IPlugin> iPlugins = PluginLoader.loadPlugins(Settings.build(Collections.emptyMap()), ReflectionUtils.getReflection());
+    final List<IPlugin> iPlugins = PluginLoader.loadPlugins(Settings.build(Collections.emptyMap()), Reflection.getInstance());
     assertEquals(1, iPlugins.size());
     assertEquals(iPlugins.get(0).name(), JavaPlugin.class.getName());
   }
@@ -44,7 +44,7 @@ class PluginLoaderTest {
   void canLoadBadPlugin() {
     final HashMap<String, String> agentArgs = new HashMap<>();
     agentArgs.put(ISettings.PLUGINS, BadPlugin.class.getName());
-    final List<IPlugin> iPlugins = PluginLoader.loadPlugins(Settings.build(agentArgs), ReflectionUtils.getReflection());
+    final List<IPlugin> iPlugins = PluginLoader.loadPlugins(Settings.build(agentArgs), Reflection.getInstance());
     assertEquals(0, iPlugins.size());
   }
 
@@ -52,7 +52,7 @@ class PluginLoaderTest {
   void canLoadGoodPlugin() {
     final HashMap<String, String> agentArgs = new HashMap<>();
     agentArgs.put(ISettings.PLUGINS, GoodPlugin.class.getName());
-    final List<IPlugin> iPlugins = PluginLoader.loadPlugins(Settings.build(agentArgs), ReflectionUtils.getReflection());
+    final List<IPlugin> iPlugins = PluginLoader.loadPlugins(Settings.build(agentArgs), Reflection.getInstance());
     assertEquals(1, iPlugins.size());
     assertEquals(iPlugins.get(0).name(), GoodPlugin.class.getName());
   }

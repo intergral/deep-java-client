@@ -17,7 +17,7 @@
 
 package com.intergral.deep.agent.grpc;
 
-import com.intergral.deep.agent.ReflectionUtils;
+import com.intergral.deep.agent.Reflection;
 import com.intergral.deep.agent.api.auth.AuthProvider;
 import com.intergral.deep.agent.api.auth.IAuthProvider;
 import com.intergral.deep.agent.api.settings.ISettings;
@@ -152,7 +152,7 @@ public class GrpcService {
   }
 
   private Metadata buildMetaData() {
-    final IAuthProvider provider = AuthProvider.provider(this.settings, ReflectionUtils.getReflection());
+    final IAuthProvider provider = AuthProvider.provider(this.settings, Reflection.getInstance());
     final Map<String, String> headers = provider.provide();
 
     final Metadata metadata = new Metadata();
