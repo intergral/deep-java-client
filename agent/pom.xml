@@ -37,6 +37,7 @@
   <properties>
     <relocation.package>com.intergral.deep.relocated</relocation.package>
     <relocation.native.prefix>com_intergral_deep_relocated</relocation.native.prefix>
+    <lite.jar.output.file>target/${project.artifactId}-${project.version}-lite.jar</lite.jar.output.file>
   </properties>
 
   <dependencies>
@@ -230,7 +231,7 @@
               <goal>shade</goal>
             </goals>
             <configuration>
-              <outputFile>target/${project.artifactId}-${project.version}-lite.jar</outputFile>
+              <outputFile>${lite.jar.output.file}</outputFile>
               <transformers>
                 <transformer
                   implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
@@ -526,7 +527,7 @@
             <configuration>
               <artifacts>
                 <artifact>
-                  <file>target/agent-${project.version}-lite.jar</file>
+                  <file>${lite.jar.output.file}</file>
                   <type>jar</type>
                   <classifier>lite</classifier>
                 </artifact>
