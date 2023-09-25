@@ -68,6 +68,9 @@ public class GrpcService {
     }
   }
 
+  /**
+   * Shutdown the grpc channel.
+   */
   public void shutdown() {
     if (this.channel == null) {
       return;
