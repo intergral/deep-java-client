@@ -17,9 +17,10 @@
 
 package com.intergral.deep.agent.tracepoint.cf;
 
-import com.intergral.deep.agent.ReflectionUtils;
+import com.intergral.deep.agent.Reflection;
 import com.intergral.deep.agent.Utils;
 import com.intergral.deep.agent.api.plugin.IEvaluator;
+import com.intergral.deep.agent.api.reflection.IReflection;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.tracepoint.handler.FrameProcessor;
 import com.intergral.deep.agent.types.TracePointConfig;
@@ -87,6 +88,7 @@ public class CFFrameProcessor extends FrameProcessor {
     final Object localScope = variables.get("__localScope");
 
     if (CFUtils.isScope(localScope)) {
+      //noinspection unchecked,rawtypes
       final Map<Object, Object> lclMap = (Map) localScope;
       for (Map.Entry<Object, Object> entry : lclMap.entrySet()) {
         final Object name = entry.getKey();
@@ -102,14 +104,15 @@ public class CFFrameProcessor extends FrameProcessor {
     }
 
     // handle var scope
-    final Object varScope = ReflectionUtils.getFieldValue(pageContext, "SymTab_varScope");
+    final IReflection reflection = Reflection.getInstance();
+    final Object varScope = reflection.getFieldValue(pageContext, "SymTab_varScope");
 
     if (CFUtils.isScope(varScope)) {
       cfVars.put("VARIABLES", varScope);
     }
 
     // find the other build in scopes
-    final Map<Object, Object> scopes = ReflectionUtils.getFieldValue(pageContext,
+    final Map<Object, Object> scopes = reflection.getFieldValue(pageContext,
         "SymTab_builtinCFScopes");
     if (scopes == null) {
       return cfVars;
@@ -146,13 +149,14 @@ public class CFFrameProcessor extends FrameProcessor {
 
     final Map<String, Object> scopes = new HashMap<>();
     // process the scopes from lucee
-    scopes.put("variables", ReflectionUtils.getFieldValue(param0, "variables"));
-    scopes.put("argument", ReflectionUtils.getFieldValue(param0, "argument"));
-    scopes.put("local", getAndCheckLocal("local", param0));
+    final IReflection reflection = Reflection.getInstance();
+    scopes.put("variables", reflection.getFieldValue(param0, "variables"));
+    scopes.put("argument", reflection.getFieldValue(param0, "argument"));
+    scopes.put("local", getAndCheckLocal(param0));
     scopes.put("cookie", getAndCheckScope("cookie", param0));
-    scopes.put("server", ReflectionUtils.getFieldValue(param0, "server"));
+    scopes.put("server", reflection.getFieldValue(param0, "server"));
     scopes.put("session", getAndCheckScope("session", param0));
-    scopes.put("application", ReflectionUtils.getFieldValue(param0, "application"));
+    scopes.put("application", reflection.getFieldValue(param0, "application"));
     scopes.put("cgi", getAndCheckScope("cgiR", param0));
     scopes.put("request", getAndCheckScope("request", param0));
     scopes.put("form", getAndCheckScope("_form", param0));
@@ -165,15 +169,13 @@ public class CFFrameProcessor extends FrameProcessor {
 
 
   /**
-   * This method will get anc check that the field is a local scope as some parts can have no local
-   * scope.
+   * This method will get and check that the field is a local scope as some parts can have no local scope.
    *
-   * @param local  the name of the field to look for
    * @param param0 the object to look at
    * @return {@code null} if the field is not a valid local scope
    */
-  private Object getAndCheckLocal(final String local, final Object param0) {
-    final Object o = ReflectionUtils.getFieldValue(param0, local);
+  private Object getAndCheckLocal(final Object param0) {
+    final Object o = Reflection.getInstance().getFieldValue(param0, "local");
     if (o == null || o.getClass().getName()
         .equals("lucee.runtime.type.scope.LocalNotSupportedScope")) {
       return null;
@@ -192,9 +194,10 @@ public class CFFrameProcessor extends FrameProcessor {
    *     discovered.
    */
   private Object getAndCheckScope(final String name, final Object target) {
-    final Object local = ReflectionUtils.getFieldValue(target, name);
+    final IReflection reflection = Reflection.getInstance();
+    final Object local = reflection.getFieldValue(target, name);
     if (local != null) {
-      final Object isInitalized = ReflectionUtils.callMethod(local, "isInitalized");
+      final Object isInitalized = reflection.callMethod(local, "isInitalized");
       if (isInitalized == null) {
         return null;
       }

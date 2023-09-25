@@ -17,6 +17,8 @@
 
 package com.intergral.deep.agent.api.plugin;
 
+import com.intergral.deep.agent.api.reflection.IReflection;
+
 /**
  * This is the context passed to plugins. This allows for the data of a context to be exposed to the plugin in a controlled manor.
  */
@@ -30,4 +32,11 @@ public interface ISnapshotContext {
    * @throws EvaluationException if there were any issues evaluating the expression
    */
   String evaluateExpression(String expression) throws EvaluationException;
+
+  /**
+   * Get the current reflection service.
+   *
+   * @return the active reflection service.
+   */
+  IReflection reflectionService();
 }

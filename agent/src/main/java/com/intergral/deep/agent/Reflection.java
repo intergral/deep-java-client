@@ -19,54 +19,34 @@ package com.intergral.deep.agent;
 
 import com.intergral.deep.agent.api.reflection.IReflection;
 import com.intergral.deep.reflect.ReflectionImpl;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Iterator;
-import java.util.Set;
 
 /**
  * A collection of utils that simplify the use of reflection.
  */
-public final class ReflectionUtils {
+public final class Reflection {
 
-  private ReflectionUtils() {
+  private Reflection() {
   }
 
   private static final IReflection reflection;
 
   static {
+    // we need to change the reflection service we use based on version of java
     if (Utils.getJavaVersion() >= 9) {
+      // if we are version 9 or more. Then use the version 9 reflection
       reflection = new com.intergral.deep.reflect.Java9ReflectionImpl();
     } else {
+      // else use the java 8 version
       reflection = new ReflectionImpl();
     }
   }
 
-  public static IReflection getReflection() {
+  /**
+   * Get the active version of reflection to use.
+   *
+   * @return the reflection service.
+   */
+  public static IReflection getInstance() {
     return reflection;
-  }
-
-  public static <T> T callMethod(Object target, String methodName, Object... args) {
-    return getReflection().callMethod(target, methodName, args);
-  }
-
-  public static Method findMethod(Class<?> clazz, String methodName, Class<?>... argTypes) {
-    return getReflection().findMethod(clazz, methodName, argTypes);
-  }
-
-  public static <T> T getFieldValue(Object target, String fieldName) {
-    return getReflection().getFieldValue(target, fieldName);
-  }
-
-  public static Iterator<Field> getFieldIterator(final Class<?> clazz) {
-    return getReflection().getFieldIterator(clazz);
-  }
-
-  public static <T> T callField(final Object target, final Field field) {
-    return getReflection().callField(target, field);
-  }
-
-  public static Set<String> getModifiers(final Field field) {
-    return getReflection().getModifiers(field);
   }
 }

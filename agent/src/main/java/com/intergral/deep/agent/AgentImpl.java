@@ -91,7 +91,7 @@ public class AgentImpl {
 
       @Override
       public IReflection reflectionService() {
-        return ReflectionUtils.getReflection();
+        return Reflection.getInstance();
       }
     };
   }

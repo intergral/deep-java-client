@@ -42,9 +42,9 @@ import org.mockito.Mockito;
 
 class FrameProcessorTest {
 
-  private Settings settings = Mockito.mock(Settings.class);
-  private IEvaluator evaluator = EvaluatorService.createEvaluator();
-  private Collection<TracePointConfig> tracepoints = new ArrayList<>();
+  private final Settings settings = Mockito.mock(Settings.class);
+  private final IEvaluator evaluator = EvaluatorService.createEvaluator();
+  private final Collection<TracePointConfig> tracepoints = new ArrayList<>();
   private FrameProcessor frameProcessor;
 
   @BeforeEach
@@ -171,5 +171,10 @@ class FrameProcessorTest {
   @Test
   void willEvaluate() throws EvaluationException {
     assertEquals("100", frameProcessor.evaluateExpression("this.i"));
+  }
+
+  @Test
+  void reflection() {
+    assertNotNull(frameProcessor.reflectionService());
   }
 }

@@ -17,8 +17,9 @@
 
 package com.intergral.deep.agent.tracepoint.handler;
 
-import com.intergral.deep.agent.ReflectionUtils;
+import com.intergral.deep.agent.Reflection;
 import com.intergral.deep.agent.Utils;
+import com.intergral.deep.agent.api.reflection.IReflection;
 import com.intergral.deep.agent.api.utils.ArrayObjectIterator;
 import com.intergral.deep.agent.api.utils.CompoundIterator;
 import com.intergral.deep.agent.tracepoint.handler.bfs.Node;
@@ -342,6 +343,7 @@ public abstract class VariableProcessor {
     return depth + 1 < this.frameConfig.maxDepth();
   }
 
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   protected boolean checkVarCount() {
     return varCache.size() <= this.frameConfig.maxVariables();
   }
@@ -496,6 +498,8 @@ public abstract class VariableProcessor {
       final String name = getFieldName(next);
       seenNames.add(next.getName());
       return new INamedItem() {
+        private final IReflection reflection = Reflection.getInstance();
+
         @Override
         public String name() {
           return name;
@@ -503,7 +507,7 @@ public abstract class VariableProcessor {
 
         @Override
         public Object item() {
-          return ReflectionUtils.callField(target, next);
+          return reflection.callField(target, next);
         }
 
         @Override
@@ -517,7 +521,7 @@ public abstract class VariableProcessor {
 
         @Override
         public Set<String> modifiers() {
-          return ReflectionUtils.getModifiers(next);
+          return reflection.getModifiers(next);
         }
       };
     }
@@ -540,20 +544,22 @@ public abstract class VariableProcessor {
   }
 
   /**
-   * A simple iterator that used {@link ReflectionUtils} to create iterators for the {@link Field} that exist on an object. This allows us
+   * A simple iterator that used {@link Reflection} to create iterators for the {@link Field} that exist on an object. This allows us
    * to feed the fields into the {@link NamedFieldIterator}.
    */
   private static class FieldIterator implements Iterator<Field> {
 
+    @SuppressWarnings("FieldCanBeLocal")
     private final Class<?> clazz;
     private final Iterator<Field> iterator;
 
     public FieldIterator(final Class<?> clazz) {
       this.clazz = clazz;
+      final IReflection reflection = Reflection.getInstance();
       if (this.clazz.getSuperclass() == null || this.clazz.getSuperclass() == Object.class) {
-        this.iterator = ReflectionUtils.getFieldIterator(clazz);
+        this.iterator = reflection.getFieldIterator(clazz);
       } else {
-        this.iterator = new CompoundIterator<>(ReflectionUtils.getFieldIterator(clazz),
+        this.iterator = new CompoundIterator<>(reflection.getFieldIterator(clazz),
             new FieldIterator(this.clazz.getSuperclass()));
       }
     }
