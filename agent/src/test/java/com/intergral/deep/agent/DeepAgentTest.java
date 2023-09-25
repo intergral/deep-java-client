@@ -27,11 +27,13 @@ import com.intergral.deep.agent.api.DeepVersion;
 import com.intergral.deep.agent.api.plugin.IPlugin.IPluginRegistration;
 import com.intergral.deep.agent.api.tracepoint.ITracepoint;
 import com.intergral.deep.agent.api.tracepoint.ITracepoint.ITracepointRegistration;
+import com.intergral.deep.agent.grpc.GrpcService;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.tracepoint.handler.Callback;
 import com.intergral.deep.agent.tracepoint.inst.TracepointInstrumentationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
@@ -45,9 +47,14 @@ class DeepAgentTest {
   void setUp() {
 
     Mockito.when(settings.getSettingAs("poll.timer", Integer.class)).thenReturn(1010);
-    try (MockedStatic<Callback> callback = Mockito.mockStatic(Callback.class, "init")) {
-      deepAgent = new DeepAgent(settings, tracepointInstrumentationService);
-      callback.verify(() -> Callback.init(Mockito.any(), Mockito.any(), Mockito.any()), times(1));
+    Mockito.when(settings.getServiceHost()).thenReturn("localhost");
+    Mockito.when(settings.getServicePort()).thenReturn(-1);
+
+    try (final MockedConstruction<GrpcService> ignored = Mockito.mockConstruction(GrpcService.class, (mock, context) -> Mockito.doNothing().when(mock).start())) {
+      try (MockedStatic<Callback> callback = Mockito.mockStatic(Callback.class, "init")) {
+        deepAgent = new DeepAgent(settings, tracepointInstrumentationService);
+        callback.verify(() -> Callback.init(Mockito.any(), Mockito.any(), Mockito.any()), times(1));
+      }
     }
   }
 
