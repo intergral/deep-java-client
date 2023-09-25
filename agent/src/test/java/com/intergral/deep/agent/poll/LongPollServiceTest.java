@@ -50,6 +50,7 @@ import java.net.ServerSocket;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,7 +63,7 @@ class LongPollServiceTest {
   private Server server;
   private LongPollService longPollService;
 
-  private PollRequest request;
+  private final AtomicReference<PollRequest>  request = new AtomicReference<>(null);
   private PollResponse response;
   private Throwable responseError;
   private int port;
@@ -71,7 +72,7 @@ class LongPollServiceTest {
   @BeforeEach
   void setUp() throws IOException {
     final TestPollService testPollService = new TestPollService((req, responseObserver) -> {
-      request = req;
+      request.set(req);
       if (responseError != null) {
         responseObserver.onError(responseError);
       } else {
@@ -152,15 +153,15 @@ class LongPollServiceTest {
 
     longPollService.run(100);
 
-    assertEquals("", request.getCurrentHash());
-    assertEquals(100, request.getTsNanos());
+    assertEquals("", request.get().getCurrentHash());
+    assertEquals(100, request.get().getTsNanos());
 
     response = PollResponse.newBuilder().setResponseType(ResponseType.UPDATE).setCurrentHash("321").build();
 
     longPollService.run(101);
 
-    assertEquals("123", request.getCurrentHash());
-    assertEquals(101, request.getTsNanos());
+    assertEquals("123", request.get().getCurrentHash());
+    assertEquals(101, request.get().getTsNanos());
     verify(instrumentationService, times(2)).processBreakpoints(Mockito.anyCollection());
   }
 
@@ -208,8 +209,8 @@ class LongPollServiceTest {
 
     longPollService.run(100);
 
-    assertNotNull(request.getResource());
-    assertEquals("test", request.getResource().getAttributes(0).getKey());
-    assertEquals("resource", request.getResource().getAttributes(0).getValue().getStringValue());
+    assertNotNull(request.get().getResource());
+    assertEquals("test", request.get().getResource().getAttributes(0).getKey());
+    assertEquals("resource", request.get().getResource().getAttributes(0).getValue().getStringValue());
   }
 }
