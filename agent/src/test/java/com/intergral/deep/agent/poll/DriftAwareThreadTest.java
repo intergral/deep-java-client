@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.concurrent.CountDownLatch;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 class DriftAwareThreadTest {
 
@@ -65,6 +66,12 @@ class DriftAwareThreadTest {
     assertTrue((lwrap.now + 10000) >= currentTimeMillis);
   }
 
+  @Test
+  void errorLogs() {
+    final DriftAwareThread spy = Mockito.spy(task);
+    spy.error("test error", new RuntimeException("test exception"));
+    Mockito.verify(spy, Mockito.times(1)).getName();
+  }
 
   @Test
   public void testCheckForEarlyWakeUp() throws Exception {
