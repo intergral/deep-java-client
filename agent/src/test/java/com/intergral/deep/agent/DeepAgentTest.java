@@ -52,7 +52,6 @@ class DeepAgentTest {
     Mockito.when(settings.getSettingAs(Mockito.anyString(), Mockito.eq(String.class))).thenReturn("");
     Mockito.when(settings.getSettingAs(Mockito.anyString(), Mockito.eq(Boolean.class))).thenReturn(false);
     Mockito.when(settings.getServiceHost()).thenReturn("localhost");
-    Mockito.when(settings.getServicePort()).thenReturn(-1);
 
     try (MockedStatic<Callback> callback = Mockito.mockStatic(Callback.class, "init")) {
       deepAgent = new DeepAgent(settings, tracepointInstrumentationService);
@@ -68,6 +67,7 @@ class DeepAgentTest {
     try (ServerSocket socket = new ServerSocket(0)) {
       port = socket.getLocalPort();
     }
+    Mockito.when(settings.getServicePort()).thenReturn(port);
 
     final Server server = ServerBuilder.forPort(port).build();
 
