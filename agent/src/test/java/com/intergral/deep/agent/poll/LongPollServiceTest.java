@@ -66,6 +66,7 @@ class LongPollServiceTest {
   private PollResponse response;
   private Throwable responseError;
   private int port;
+  private GrpcService grpcService;
 
   @BeforeEach
   void setUp() throws IOException {
@@ -93,13 +94,16 @@ class LongPollServiceTest {
     agentArgs.put(ISettings.KEY_SERVICE_SECURE, "false");
     final Settings settings = Settings.build(agentArgs);
     settings.setResource(Resource.create(Collections.singletonMap("test", "resource")));
-    final GrpcService grpcService = new GrpcService(settings);
+    grpcService = new GrpcService(settings);
     longPollService = new LongPollService(settings, grpcService);
   }
 
   @AfterEach
-  void tearDown() {
+  void tearDown() throws Exception {
     server.shutdownNow();
+    server.awaitTermination();
+
+    grpcService.shutdown();
   }
 
   @Test
