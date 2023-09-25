@@ -30,6 +30,10 @@ import com.intergral.deep.agent.api.tracepoint.ITracepoint.ITracepointRegistrati
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.tracepoint.handler.Callback;
 import com.intergral.deep.agent.tracepoint.inst.TracepointInstrumentationService;
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import java.io.IOException;
+import java.net.ServerSocket;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -45,6 +49,10 @@ class DeepAgentTest {
   void setUp() {
 
     Mockito.when(settings.getSettingAs("poll.timer", Integer.class)).thenReturn(1010);
+    Mockito.when(settings.getSettingAs(Mockito.anyString(), Mockito.eq(String.class))).thenReturn("");
+    Mockito.when(settings.getSettingAs(Mockito.anyString(), Mockito.eq(Boolean.class))).thenReturn(false);
+    Mockito.when(settings.getServiceHost()).thenReturn("localhost");
+
     try (MockedStatic<Callback> callback = Mockito.mockStatic(Callback.class, "init")) {
       deepAgent = new DeepAgent(settings, tracepointInstrumentationService);
       callback.verify(() -> Callback.init(Mockito.any(), Mockito.any(), Mockito.any()), times(1));
@@ -52,10 +60,27 @@ class DeepAgentTest {
   }
 
   @Test
-  void start_shouldSetPluginsAndResource() {
+  void start_shouldSetPluginsAndResource() throws IOException {
+
+    // find a free port
+    int port;
+    try (ServerSocket socket = new ServerSocket(0)) {
+      port = socket.getLocalPort();
+    }
+    Mockito.when(settings.getServicePort()).thenReturn(port);
+
+    final Server server = ServerBuilder.forPort(port).build();
+
+    server.start();
+
     deepAgent.start();
+
+    server.shutdownNow();
+    deepAgent.shutdown();
+
     Mockito.verify(settings).setPlugins(Mockito.anyCollection());
     Mockito.verify(settings).setResource(Mockito.any());
+
   }
 
   @Test

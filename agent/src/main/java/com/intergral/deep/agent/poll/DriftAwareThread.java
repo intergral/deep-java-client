@@ -144,11 +144,11 @@ public class DriftAwareThread extends Thread {
   }
 
   private void trace(final String msg) {
-    LOGGER.trace(msg);
+    LOGGER.trace(this.getName() + " - " + msg);
   }
 
 
-  private void error(final String msg, final Throwable throwable) {
+  void error(final String msg, final Throwable throwable) {
     LOGGER.error(this.getName() + " - " + msg, throwable);
   }
 
