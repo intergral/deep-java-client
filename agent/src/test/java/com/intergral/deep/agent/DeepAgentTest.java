@@ -50,7 +50,8 @@ class DeepAgentTest {
     Mockito.when(settings.getServiceHost()).thenReturn("localhost");
     Mockito.when(settings.getServicePort()).thenReturn(-1);
 
-    try (final MockedConstruction<GrpcService> ignored = Mockito.mockConstruction(GrpcService.class, (mock, context) -> Mockito.doNothing().when(mock).start())) {
+    try (final MockedConstruction<GrpcService> ignored = Mockito.mockConstruction(GrpcService.class,
+        (mock, context) -> Mockito.doNothing().when(mock).start())) {
       try (MockedStatic<Callback> callback = Mockito.mockStatic(Callback.class, "init")) {
         deepAgent = new DeepAgent(settings, tracepointInstrumentationService);
         callback.verify(() -> Callback.init(Mockito.any(), Mockito.any(), Mockito.any()), times(1));
