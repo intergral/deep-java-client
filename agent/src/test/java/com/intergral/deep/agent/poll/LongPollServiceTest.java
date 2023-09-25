@@ -94,6 +94,7 @@ class LongPollServiceTest {
     agentArgs.put(ISettings.KEY_SERVICE_URL, "localhost:" + port);
     agentArgs.put(ISettings.KEY_SERVICE_SECURE, "false");
     final Settings settings = Settings.build(agentArgs);
+    settings.setActive(true);
     settings.setResource(Resource.create(Collections.singletonMap("test", "resource")));
     grpcService = new GrpcService(settings);
     longPollService = new LongPollService(settings, grpcService);
