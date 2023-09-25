@@ -198,4 +198,8 @@ public class DeepAgent implements IDeep {
       this.tracepointConfig.configUpdate(0, null, Collections.emptyList());
     }
   }
+
+  public void shutdown() {
+    this.grpcService.shutdown();
+  }
 }

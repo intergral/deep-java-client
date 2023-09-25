@@ -76,6 +76,7 @@ class DeepAgentTest {
     deepAgent.start();
 
     server.shutdownNow();
+    deepAgent.shutdown();
 
     Mockito.verify(settings).setPlugins(Mockito.anyCollection());
     Mockito.verify(settings).setResource(Mockito.any());
