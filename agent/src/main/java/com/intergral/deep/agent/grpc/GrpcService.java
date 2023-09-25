@@ -64,7 +64,21 @@ public class GrpcService {
     try {
       setupChannel();
     } catch (Exception e) {
-      LOGGER.debug("Error setting up GRPC channel", e);
+      LOGGER.error("Error setting up GRPC channel", e);
+    }
+  }
+
+  /**
+   * Shutdown the grpc channel.
+   */
+  public void shutdown() {
+    if (this.channel == null) {
+      return;
+    }
+    try {
+      this.channel.shutdown().awaitTermination(10, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      LOGGER.debug("Could not shutdown cleanly.", e);
     }
   }
 
