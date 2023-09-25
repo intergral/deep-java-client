@@ -27,13 +27,15 @@ import com.intergral.deep.agent.api.DeepVersion;
 import com.intergral.deep.agent.api.plugin.IPlugin.IPluginRegistration;
 import com.intergral.deep.agent.api.tracepoint.ITracepoint;
 import com.intergral.deep.agent.api.tracepoint.ITracepoint.ITracepointRegistration;
-import com.intergral.deep.agent.grpc.GrpcService;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.tracepoint.handler.Callback;
 import com.intergral.deep.agent.tracepoint.inst.TracepointInstrumentationService;
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import java.io.IOException;
+import java.net.ServerSocket;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
@@ -47,23 +49,37 @@ class DeepAgentTest {
   void setUp() {
 
     Mockito.when(settings.getSettingAs("poll.timer", Integer.class)).thenReturn(1010);
+    Mockito.when(settings.getSettingAs(Mockito.anyString(), Mockito.eq(String.class))).thenReturn("");
+    Mockito.when(settings.getSettingAs(Mockito.anyString(), Mockito.eq(Boolean.class))).thenReturn(false);
     Mockito.when(settings.getServiceHost()).thenReturn("localhost");
     Mockito.when(settings.getServicePort()).thenReturn(-1);
 
-    try (final MockedConstruction<GrpcService> ignored = Mockito.mockConstruction(GrpcService.class,
-        (mock, context) -> Mockito.doNothing().when(mock).start())) {
-      try (MockedStatic<Callback> callback = Mockito.mockStatic(Callback.class, "init")) {
-        deepAgent = new DeepAgent(settings, tracepointInstrumentationService);
-        callback.verify(() -> Callback.init(Mockito.any(), Mockito.any(), Mockito.any()), times(1));
-      }
+    try (MockedStatic<Callback> callback = Mockito.mockStatic(Callback.class, "init")) {
+      deepAgent = new DeepAgent(settings, tracepointInstrumentationService);
+      callback.verify(() -> Callback.init(Mockito.any(), Mockito.any(), Mockito.any()), times(1));
     }
   }
 
   @Test
-  void start_shouldSetPluginsAndResource() {
+  void start_shouldSetPluginsAndResource() throws IOException {
+
+    // find a free port
+    int port;
+    try (ServerSocket socket = new ServerSocket(0)) {
+      port = socket.getLocalPort();
+    }
+
+    final Server server = ServerBuilder.forPort(port).build();
+
+    server.start();
+
     deepAgent.start();
+
+    server.shutdownNow();
+
     Mockito.verify(settings).setPlugins(Mockito.anyCollection());
     Mockito.verify(settings).setResource(Mockito.any());
+
   }
 
   @Test
