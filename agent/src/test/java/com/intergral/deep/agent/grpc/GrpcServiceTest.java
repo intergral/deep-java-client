@@ -121,8 +121,6 @@ class GrpcServiceTest {
 
     grpcService = new GrpcService(Settings.build(map));
 
-    new Thread(grpcService::start).start();
-
     final PollResponse pollResponse = grpcService.pollService().poll(PollRequest.newBuilder().setTsNanos(101010L).build());
     assertEquals(202020L, pollResponse.getTsNanos());
     pollLatch.await(5, TimeUnit.SECONDS);
@@ -143,7 +141,6 @@ class GrpcServiceTest {
 
     grpcService = new GrpcService(Settings.build(map));
 
-    new Thread(grpcService::start).start();
     final CountDownLatch responseLatch = new CountDownLatch(1);
     final AtomicReference<SnapshotResponse> responseAtomicReference = new AtomicReference<>();
     grpcService.snapshotService().send(Snapshot.newBuilder().build(),
