@@ -36,16 +36,15 @@ import com.intergral.deep.test.target.ConditionTarget;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import jdk.internal.reflect.Reflection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 class FrameProcessorTest {
 
-  private Settings settings = Mockito.mock(Settings.class);
-  private IEvaluator evaluator = EvaluatorService.createEvaluator();
-  private Collection<TracePointConfig> tracepoints = new ArrayList<>();
+  private final Settings settings = Mockito.mock(Settings.class);
+  private final IEvaluator evaluator = EvaluatorService.createEvaluator();
+  private final Collection<TracePointConfig> tracepoints = new ArrayList<>();
   private FrameProcessor frameProcessor;
 
   @BeforeEach
