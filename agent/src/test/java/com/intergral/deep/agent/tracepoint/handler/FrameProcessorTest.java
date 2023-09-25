@@ -36,6 +36,7 @@ import com.intergral.deep.test.target.ConditionTarget;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import jdk.internal.reflect.Reflection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -171,5 +172,10 @@ class FrameProcessorTest {
   @Test
   void willEvaluate() throws EvaluationException {
     assertEquals("100", frameProcessor.evaluateExpression("this.i"));
+  }
+
+  @Test
+  void reflection() {
+    assertNotNull(frameProcessor.reflectionService());
   }
 }
