@@ -36,7 +36,6 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptors;
 import io.grpc.stub.StreamObserver;
-import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Collections;
 import java.util.HashMap;
@@ -51,6 +50,7 @@ import org.junit.jupiter.api.Test;
 
 class GrpcServiceTest {
 
+  private GrpcService grpcService;
   private Server server;
   private CountDownLatch pollLatch;
   private final AtomicReference<PollRequest> pollRequest = new AtomicReference<>();
@@ -104,8 +104,11 @@ class GrpcServiceTest {
   }
 
   @AfterEach
-  void tearDown() throws IOException {
+  void tearDown() throws Exception {
+    this.grpcService.shutdown();
+
     this.server.shutdownNow();
+    this.server.awaitTermination();
   }
 
   @Test
@@ -116,9 +119,7 @@ class GrpcServiceTest {
     map.put(ISettings.KEY_SERVICE_SECURE, "false");
     map.put(ISettings.KEY_AUTH_PROVIDER, MockAuthProvider.class.getName());
 
-    final GrpcService grpcService = new GrpcService(Settings.build(map));
-
-    new Thread(grpcService::start).start();
+    grpcService = new GrpcService(Settings.build(map));
 
     final PollResponse pollResponse = grpcService.pollService().poll(PollRequest.newBuilder().setTsNanos(101010L).build());
     assertEquals(202020L, pollResponse.getTsNanos());
@@ -138,9 +139,8 @@ class GrpcServiceTest {
     map.put(ISettings.KEY_SERVICE_SECURE, "false");
     map.put(ISettings.KEY_AUTH_PROVIDER, MockAuthProvider.class.getName());
 
-    final GrpcService grpcService = new GrpcService(Settings.build(map));
+    grpcService = new GrpcService(Settings.build(map));
 
-    new Thread(grpcService::start).start();
     final CountDownLatch responseLatch = new CountDownLatch(1);
     final AtomicReference<SnapshotResponse> responseAtomicReference = new AtomicReference<>();
     grpcService.snapshotService().send(Snapshot.newBuilder().build(),
