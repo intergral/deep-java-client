@@ -86,6 +86,7 @@
 
     <properties>
         <grpc.version>1.57.0</grpc.version>
+        <netty.version>4.1.98.Final</netty.version>
         <tcnative.version>2.0.51.Final</tcnative.version>
         <asm.version>8.0.1</asm.version>
 
@@ -460,6 +461,22 @@
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-netty</artifactId>
                 <version>${grpc.version}</version>
+            </dependency>
+            <!-- override transitive netty dependencies within grpc-netty -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-codec-http2</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-handler-proxy</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-transport-native-unix-common</artifactId>
+                <version>${netty.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
