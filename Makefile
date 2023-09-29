@@ -21,7 +21,7 @@ package:
 	mvn package -U -B -pl agent --also-make -DskipTests $(MVN_ARGS)
 
 .PHONY: cf-tests
-cf-tests:
+cf-tests: package
 	mvn verify -U -B -P cf-it-tests -pl it-tests/cf-tests --also-make $(MVN_ARGS)
 # This file just contains shortcuts for dev, as there are a lot of options for different builds
 

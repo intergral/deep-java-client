@@ -14,7 +14,5 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
           cache: 'maven'
-      - name: Build agent
-        run: make package-agent
       - name: Run CF Tests
         run: make cf-tests
