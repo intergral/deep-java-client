@@ -141,7 +141,7 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
         }
 
         final String logMsg = tracepoint.getArg(TracePointConfig.LOG_MSG, String.class, null);
-        if(logMsg != null){
+        if (logMsg != null) {
           final ILogProcessResult result = this.processLogMsg(tracepoint, logMsg);
           snapshot.setLogMsg(result.processedLog());
           for (WatchResult watchResult : result.result()) {

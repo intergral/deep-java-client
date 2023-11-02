@@ -23,7 +23,7 @@ package com.intergral.deep.agent.api.logger;
 public interface ITracepointLogger {
 
   /**
-   * Log the result of a tracepoint injected log message
+   * Log the result of a tracepoint injected log message.
    *
    * @param logMsg       the processed log message
    * @param tracepointId the tracepoint id that triggered the log

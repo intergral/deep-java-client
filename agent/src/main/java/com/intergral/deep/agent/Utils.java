@@ -169,6 +169,12 @@ public final class Utils {
     };
   }
 
+  /**
+   * Convert a throwable into a loggable string.
+   *
+   * @param t the throwable to convert
+   * @return the string to log
+   */
   public static String throwableToString(final Throwable t) {
     if (t instanceof InvocationTargetException) {
       return throwableToString(t.getCause());

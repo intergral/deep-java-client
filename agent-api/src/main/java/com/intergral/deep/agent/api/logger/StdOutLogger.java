@@ -18,7 +18,7 @@
 package com.intergral.deep.agent.api.logger;
 
 /**
- * Log the tracepoint logs to {@link System#out}
+ * Log the tracepoint logs to {@link System#out}.
  */
 public class StdOutLogger implements ITracepointLogger {
 

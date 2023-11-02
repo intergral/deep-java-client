@@ -17,6 +17,9 @@
 
 package com.intergral.deep.agent.api.utils.string;
 
+/**
+ * Utility type for creating {@link StringMatcher}.
+ */
 public class StringMatcherFactory {
 
 
@@ -33,8 +36,7 @@ public class StringMatcherFactory {
   /**
    * Creates a matcher from a string.
    *
-   * @param str
-   *            the string to match, null or empty matches nothing
+   * @param str the string to match, null or empty matches nothing
    * @return a new Matcher for the given String
    */
   public StringMatcher stringMatcher(final String str) {
@@ -47,8 +49,7 @@ public class StringMatcherFactory {
   /**
    * Constructor that creates a matcher from a character.
    *
-   * @param ch
-   *            the character to match, must not be null
+   * @param ch the character to match, must not be null
    * @return a new Matcher for the given char
    */
   public StringMatcher charMatcher(final char ch) {

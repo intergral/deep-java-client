@@ -384,7 +384,7 @@ public class Settings implements ISettings {
   }
 
   /**
-   * Log the tracepoint log via the configured logger
+   * Log the tracepoint log via the configured logger.
    *
    * @param logMsg       the log message
    * @param tracepointId the tracepoint id
@@ -395,7 +395,7 @@ public class Settings implements ISettings {
   }
 
   /**
-   * Get the current tracepoint logger
+   * Get the current tracepoint logger.
    *
    * @return the tracepoint logger
    */
@@ -404,7 +404,7 @@ public class Settings implements ISettings {
   }
 
   /**
-   * Set the tracepoint logger to a new logger
+   * Set the tracepoint logger to a new logger.
    *
    * @param tracepointLogger the new logger
    */

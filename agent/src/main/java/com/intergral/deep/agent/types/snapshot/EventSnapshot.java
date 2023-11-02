@@ -82,7 +82,7 @@ public class EventSnapshot {
   }
 
   /**
-   * Add a set of variables to the var lookup
+   * Add a set of variables to the var lookup.
    *
    * @param variables the variables to merge in
    */

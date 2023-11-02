@@ -33,6 +33,7 @@
   <suppress id="license-agpl" files=".*resource/SpiUtil.*"/>
   <suppress id="license-agpl" files=".*api/spi.*"/>
   <suppress id="license-agpl" files=".*agent/IDUtils.*"/>
+  <suppress id="license-agpl" files=".*utils/string/.*"/>
   <!-- properties files do not match java comments  -->
   <suppress id="license-agpl" files=".*.properties"/>
   <!-- these files are used as targets for tracepoints and we want to ensure they do not change, so we ignore them  -->
@@ -52,4 +53,6 @@
   <!-- No need to doc source map atm -->
   <suppress checks="MissingJavadocType" files=".*/jsp/sourcemap/.*"/>
   <suppress checks="MissingJavadocMethod" files=".*/jsp/sourcemap/.*"/>
+  <!-- Type is copied from external source.-->
+  <suppress checks="OverloadMethodsDeclarationOrder" files=".*utils/string/TextStringBuilder.java"/>
 </suppressions>

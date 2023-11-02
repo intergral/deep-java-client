@@ -14,6 +14,7 @@
  * See the license for the specific language governing permissions and
  * limitations under the license.
  */
+
 package com.intergral.deep.agent.api.utils.string.lookup;
 
 /**
@@ -31,29 +32,29 @@ package com.intergral.deep.agent.api.utils.string.lookup;
  */
 public interface StringLookup {
 
-    /**
-     * Looks up a String key to a String value.
-     * <p>
-     * The internal implementation may use any mechanism to return the value. The simplest implementation is to use a Map. However, virtually
-     * any implementation is possible.
-     * </p>
-     * <p>
-     * For example, it would be possible to implement a lookup that used the key as a primary key, and looked up the value on demand from the
-     * database Or, a numeric based implementation could be created that treats the key as an integer, increments the value and return the
-     * result as a string - converting 1 to 2, 15 to 16 etc.
-     * </p>
-     * <p>
-     * This method always returns a String, regardless of the underlying data, by converting it as necessary. For example:
-     * </p>
-     *
-     * <pre>
-     * Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();
-     * map.put("number", new Integer(2));
-     * assertEquals("2", StrLookup.mapLookup(map).lookup("number"));
-     * </pre>
-     *
-     * @param key the key to look up, may be null
-     * @return the matching value, null if no match
-     */
-    String lookup(String key);
+  /**
+   * Looks up a String key to a String value.
+   * <p>
+   * The internal implementation may use any mechanism to return the value. The simplest implementation is to use a Map. However, virtually
+   * any implementation is possible.
+   * </p>
+   * <p>
+   * For example, it would be possible to implement a lookup that used the key as a primary key, and looked up the value on demand from the
+   * database Or, a numeric based implementation could be created that treats the key as an integer, increments the value and return the
+   * result as a string - converting 1 to 2, 15 to 16 etc.
+   * </p>
+   * <p>
+   * This method always returns a String, regardless of the underlying data, by converting it as necessary. For example:
+   * </p>
+   *
+   * <pre>
+   * Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();
+   * map.put("number", new Integer(2));
+   * assertEquals("2", StrLookup.mapLookup(map).lookup("number"));
+   * </pre>
+   *
+   * @param key the key to look up, may be null
+   * @return the matching value, null if no match
+   */
+  String lookup(String key);
 }

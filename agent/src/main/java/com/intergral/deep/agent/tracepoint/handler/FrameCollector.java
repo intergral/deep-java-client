@@ -475,7 +475,7 @@ public class FrameCollector extends VariableProcessor {
   }
 
   /**
-   * The result of processing the tracepoint log message
+   * The result of processing the tracepoint log message.
    */
   protected interface ILogProcessResult {
 
