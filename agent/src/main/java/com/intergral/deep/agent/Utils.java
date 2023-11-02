@@ -17,7 +17,6 @@
 
 package com.intergral.deep.agent;
 
-import com.intergral.deep.agent.tracepoint.inst.InstUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.util.HashMap;

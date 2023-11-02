@@ -441,16 +441,7 @@ public class FrameCollector extends VariableProcessor {
 
     final ArrayList<WatchResult> watchResults = new ArrayList<>();
     final HashMap<String, Variable> variables = new HashMap<>();
-    final StringSubstitutor stringSubstitutor = new StringSubstitutor(key -> {
-      final IExpressionResult iExpressionResult = FrameCollector.this.evaluateWatchExpression(key);
-      watchResults.add(iExpressionResult.result());
-      variables.putAll(iExpressionResult.variables());
-      return iExpressionResult.logString();
-    });
-    stringSubstitutor.setDisableSubstitutionInValues(true);
-    stringSubstitutor.setEnableSubstitutionInVariables(false);
-
-    final String processedLog = stringSubstitutor.replace(logMsg);
+    final String processedLog = processSubstitution(logMsg, watchResults, variables);
 
     return new ILogProcessResult() {
       @Override
@@ -468,6 +459,20 @@ public class FrameCollector extends VariableProcessor {
         return variables;
       }
     };
+  }
+
+  private String processSubstitution(final String logMsg, final ArrayList<WatchResult> watchResults,
+      final HashMap<String, Variable> variables) {
+    final StringSubstitutor stringSubstitutor = new StringSubstitutor(key -> {
+      final IExpressionResult iExpressionResult = evaluateWatchExpression(key);
+      watchResults.add(iExpressionResult.result());
+      variables.putAll(iExpressionResult.variables());
+      return iExpressionResult.logString();
+    });
+    stringSubstitutor.setDisableSubstitutionInValues(true);
+    stringSubstitutor.setEnableSubstitutionInVariables(false);
+
+    return stringSubstitutor.replace(logMsg);
   }
 
   protected void logTracepoint(final String logMsg, final String tracepointId, final String snapshotId) {
