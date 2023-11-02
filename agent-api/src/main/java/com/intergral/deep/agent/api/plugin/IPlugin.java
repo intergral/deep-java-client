@@ -80,5 +80,19 @@ public interface IPlugin {
      *     to use this provider, else {@code false}
      */
     boolean isAuthProvider();
+
+    /**
+     * Indicates if this plugin is being used to decorate the resource data.
+     *
+     * @return {@code true} if this plugin was used to decorate the resource data, else {@code false}.
+     */
+    boolean isResourceProvider();
+
+    /**
+     * Indicates if this plugin is being used to log tracepoints.
+     *
+     * @return {@code true} if this plugin is being used to log the tracepoint logs, else {@code false}.
+     */
+    boolean isTracepointLogger();
   }
 }

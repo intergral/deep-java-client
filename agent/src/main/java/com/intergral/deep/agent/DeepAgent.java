@@ -20,6 +20,7 @@ package com.intergral.deep.agent;
 import com.intergral.deep.agent.api.DeepVersion;
 import com.intergral.deep.agent.api.IDeep;
 import com.intergral.deep.agent.api.auth.IAuthProvider;
+import com.intergral.deep.agent.api.logger.ITracepointLogger;
 import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.plugin.IPlugin.IPluginRegistration;
 import com.intergral.deep.agent.api.resource.Resource;
@@ -92,15 +93,19 @@ public class DeepAgent implements IDeep {
   @Override
   public IPluginRegistration registerPlugin(final IPlugin plugin) {
     this.settings.addPlugin(plugin);
+
+    boolean isResourceProvider = false;
     // if plugin provides resource definitions then merge them into the resource
     if (plugin instanceof ResourceProvider) {
       try {
         final Resource resource = ((ResourceProvider) plugin).createResource(this.settings);
         this.settings.setResource(this.settings.getResource().merge(resource));
+        isResourceProvider = true;
       } catch (Throwable t) {
         LOGGER.error("Cannot create resource from plugin: {}", plugin.name(), t);
       }
     }
+
     final boolean isAuthProvider;
     if (plugin instanceof IAuthProvider) {
       final String settingAs = this.settings.getSettingAs(ISettings.KEY_AUTH_PROVIDER, String.class);
@@ -108,7 +113,25 @@ public class DeepAgent implements IDeep {
     } else {
       isAuthProvider = false;
     }
+
+    if (plugin instanceof ITracepointLogger) {
+      this.settings.setTracepointLogger((ITracepointLogger) plugin);
+    }
+
+    final boolean finalIsResourceProvider = isResourceProvider;
     return new IPluginRegistration() {
+
+      @Override
+      public boolean isResourceProvider() {
+        return finalIsResourceProvider;
+      }
+
+      @Override
+      public boolean isTracepointLogger() {
+        //noinspection ObjectEquality,EqualsBetweenInconvertibleTypes
+        return DeepAgent.this.settings.getTracepointLogger() == plugin;
+      }
+
       @Override
       public boolean isAuthProvider() {
         return isAuthProvider;

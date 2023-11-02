@@ -42,6 +42,7 @@ public class EventSnapshot {
   private final Resource resource;
   private Resource attributes;
   private boolean open;
+  private String logMsg;
 
   /**
    * Create a new EventSnapshot.
@@ -72,12 +73,21 @@ public class EventSnapshot {
   /**
    * Add the result of a watch statement.
    *
-   * @param result    the watch result
-   * @param variables the variable result
+   * @param result the watch result
    */
-  public void addWatchResult(final WatchResult result, final Map<String, Variable> variables) {
+  public void addWatchResult(final WatchResult result) {
     if (this.open) {
       this.watches.add(result);
+    }
+  }
+
+  /**
+   * Add a set of variables to the var lookup
+   *
+   * @param variables the variables to merge in
+   */
+  public void mergeVariables(final Map<String, Variable> variables) {
+    if (this.open) {
       this.varLookup.putAll(variables);
     }
   }
@@ -91,6 +101,19 @@ public class EventSnapshot {
     if (this.open) {
       this.attributes = this.attributes.merge(attributes);
     }
+  }
+
+  /**
+   * Set the processed log message.
+   *
+   * @param logMsg the processed log message
+   */
+  public void setLogMsg(final String logMsg) {
+    this.logMsg = logMsg;
+  }
+
+  public String getLogMsg() {
+    return logMsg;
   }
 
   public String getID() {

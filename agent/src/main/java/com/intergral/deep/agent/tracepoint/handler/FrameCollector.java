@@ -21,6 +21,7 @@ import com.intergral.deep.agent.Utils;
 import com.intergral.deep.agent.api.plugin.IEvaluator;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
+import com.intergral.deep.agent.api.utils.string.StringSubstitutor;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.tracepoint.handler.bfs.Node;
 import com.intergral.deep.agent.tracepoint.inst.InstUtils;
@@ -373,6 +374,11 @@ public class FrameCollector extends VariableProcessor {
         public Map<String, Variable> variables() {
           return watchLookup;
         }
+
+        @Override
+        public String logString() {
+          return Utils.valueOf(result);
+        }
       };
     } catch (Throwable t) {
       return new IExpressionResult() {
@@ -385,6 +391,11 @@ public class FrameCollector extends VariableProcessor {
         @Override
         public Map<String, Variable> variables() {
           return Collections.emptyMap();
+        }
+
+        @Override
+        public String logString() {
+          return t.getMessage();
         }
       };
     }
@@ -426,6 +437,57 @@ public class FrameCollector extends VariableProcessor {
     return Resource.create(attributes);
   }
 
+  protected ILogProcessResult processLogMsg(final TracePointConfig tracepoint, final String logMsg) {
+
+    final ArrayList<WatchResult> watchResults = new ArrayList<>();
+    final HashMap<String, Variable> variables = new HashMap<>();
+    final StringSubstitutor stringSubstitutor = new StringSubstitutor(key -> {
+      final IExpressionResult iExpressionResult = FrameCollector.this.evaluateWatchExpression(key);
+      watchResults.add(iExpressionResult.result());
+      variables.putAll(iExpressionResult.variables());
+      return iExpressionResult.logString();
+    });
+
+    final String processedLog = stringSubstitutor.replace(logMsg);
+
+    return new ILogProcessResult() {
+      @Override
+      public String processedLog() {
+        return "[deep] " + processedLog;
+      }
+
+      @Override
+      public Collection<WatchResult> result() {
+        return watchResults;
+      }
+
+      @Override
+      public Map<String, Variable> variables() {
+        return variables;
+      }
+    };
+  }
+
+  protected void logTracepoint(final String logMsg, final String tracepointId, final String snapshotId) {
+    this.settings.logTracepoint(logMsg, tracepointId, snapshotId);
+  }
+
+  /**
+   * The result of processing the tracepoint log message
+   */
+  protected interface ILogProcessResult {
+
+    String processedLog();
+
+    default Collection<WatchResult> result() {
+      return Collections.emptyList();
+    }
+
+    default Map<String, Variable> variables() {
+      return Collections.emptyMap();
+    }
+  }
+
   /**
    * The result of processing the frames.
    *
@@ -448,6 +510,8 @@ public class FrameCollector extends VariableProcessor {
     WatchResult result();
 
     Map<String, Variable> variables();
+
+    String logString();
   }
 
   /**

@@ -60,6 +60,7 @@ public final class PushUtils {
         .addAllAttributes(convertAttributes(snapshot.getAttributes()))
         .setDurationNanos(snapshot.getDurationNanos())
         .addAllResource(convertAttributes(snapshot.getResource()))
+        .setLogMsg(snapshot.getLogMsg())
         .build();
   }
 

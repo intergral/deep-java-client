@@ -23,6 +23,7 @@ import com.intergral.deep.agent.api.plugin.IEvaluator;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.tracepoint.handler.FrameCollector.IExpressionResult;
+import com.intergral.deep.agent.tracepoint.handler.FrameCollector.ILogProcessResult;
 import com.intergral.deep.agent.types.snapshot.Variable;
 import com.intergral.deep.test.MockTracepointConfig;
 import com.intergral.deep.test.target.ConditionTarget;
@@ -33,8 +34,8 @@ import org.mockito.Mockito;
 
 class FrameCollectorTest {
 
-  private Settings settings = Mockito.mock(Settings.class);
-  private IEvaluator evaluator = Mockito.mock(IEvaluator.class);
+  private final Settings settings = Mockito.mock(Settings.class);
+  private final IEvaluator evaluator = Mockito.mock(IEvaluator.class);
   private FrameCollector frameCollector;
 
   @BeforeEach
@@ -62,5 +63,28 @@ class FrameCollectorTest {
     assertEquals("some expression", someExpression.result().expression());
     assertEquals(0, someExpression.variables().size());
     assertEquals("java.lang.RuntimeException: Test exception", someExpression.result().error());
+  }
+
+  @Test
+  void testLogMessage() {
+    final ILogProcessResult someLogMessage = frameCollector.processLogMsg(new MockTracepointConfig(), "some log message");
+
+    assertEquals("[deep] some log message", someLogMessage.processedLog());
+  }
+
+  @Test
+  void testLogMessage_null() throws Throwable {
+    Mockito.when(evaluator.evaluateExpression(Mockito.eq("name"), Mockito.anyMap())).thenReturn(null);
+    final ILogProcessResult someLogMessage = frameCollector.processLogMsg(new MockTracepointConfig(), "some log message: {name}");
+
+    assertEquals("[deep] some log message: null", someLogMessage.processedLog());
+  }
+
+  @Test
+  void testLogMessage_response() throws Throwable {
+    Mockito.when(evaluator.evaluateExpression(Mockito.eq("name"), Mockito.anyMap())).thenReturn("bob");
+    final ILogProcessResult someLogMessage = frameCollector.processLogMsg(new MockTracepointConfig(), "some log message: {name}");
+
+    assertEquals("[deep] some log message: bob", someLogMessage.processedLog());
   }
 }
