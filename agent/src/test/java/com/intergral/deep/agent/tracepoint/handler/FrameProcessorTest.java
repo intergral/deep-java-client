@@ -177,4 +177,60 @@ class FrameProcessorTest {
   void reflection() {
     assertNotNull(frameProcessor.reflectionService());
   }
+
+  @Test
+  void willCollectLogMessage() {
+    final MockTracepointConfig tracepointConfig = new MockTracepointConfig().withArg("log_msg", "some log message");
+    tracepoints.add(tracepointConfig);
+    assertTrue(frameProcessor.canCollect());
+    frameProcessor.configureSelf();
+
+    final Collection<EventSnapshot> collect = frameProcessor.collect();
+    assertEquals(1, collect.size());
+    final EventSnapshot next = collect.iterator().next();
+    final String logMsg = next.getLogMsg();
+    assertEquals("[deep] some log message", logMsg);
+  }
+
+  @Test
+  void willCollectLogMessage_with_watch() {
+    final MockTracepointConfig tracepointConfig = new MockTracepointConfig().withArg("log_msg", "some log message: {name}");
+    tracepoints.add(tracepointConfig);
+    assertTrue(frameProcessor.canCollect());
+    frameProcessor.configureSelf();
+
+    final Collection<EventSnapshot> collect = frameProcessor.collect();
+    assertEquals(1, collect.size());
+    final EventSnapshot next = collect.iterator().next();
+    final String logMsg = next.getLogMsg();
+    assertEquals("[deep] some log message: ReferenceError: \"name\" is not defined", logMsg);
+  }
+
+  @Test
+  void willCollectLogMessage_with_watch_this() {
+    final MockTracepointConfig tracepointConfig = new MockTracepointConfig().withArg("log_msg", "some log message: {this}");
+    tracepoints.add(tracepointConfig);
+    assertTrue(frameProcessor.canCollect());
+    frameProcessor.configureSelf();
+
+    final Collection<EventSnapshot> collect = frameProcessor.collect();
+    assertEquals(1, collect.size());
+    final EventSnapshot next = collect.iterator().next();
+    final String logMsg = next.getLogMsg();
+    assertEquals("[deep] some log message: ConditionTarget{i=100}", logMsg);
+  }
+
+  @Test
+  void willCollectLogMessage_with_watch_this_i() {
+    final MockTracepointConfig tracepointConfig = new MockTracepointConfig().withArg("log_msg", "some log message: {this.i}");
+    tracepoints.add(tracepointConfig);
+    assertTrue(frameProcessor.canCollect());
+    frameProcessor.configureSelf();
+
+    final Collection<EventSnapshot> collect = frameProcessor.collect();
+    assertEquals(1, collect.size());
+    final EventSnapshot next = collect.iterator().next();
+    final String logMsg = next.getLogMsg();
+    assertEquals("[deep] some log message: 100", logMsg);
+  }
 }

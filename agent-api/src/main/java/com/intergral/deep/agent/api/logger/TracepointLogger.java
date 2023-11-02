@@ -15,16 +15,21 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.test.target;
+package com.intergral.deep.agent.api.logger;
 
-public class ConditionTarget {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-  public int i = 100;
+/**
+ * This is the default tracepoint logger that will log to the default Deep logger.
+ */
+public class TracepointLogger implements ITracepointLogger {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(TracepointLogger.class);
 
   @Override
-  public String toString() {
-    return "ConditionTarget{" +
-        "i=" + i +
-        '}';
+  public void logTracepoint(final String logMsg, final String tracepointId, final String snapshotId) {
+    final String format = String.format("%s snapshot=%s tracepoint=%s", logMsg, tracepointId, snapshotId);
+    LOGGER.info(format);
   }
 }

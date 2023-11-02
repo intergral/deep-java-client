@@ -89,6 +89,8 @@ class DeepAgentTest {
 
     assertNotNull(iPluginRegistration.get());
     assertFalse(iPluginRegistration.isAuthProvider());
+    assertFalse(iPluginRegistration.isTracepointLogger());
+    assertFalse(iPluginRegistration.isResourceProvider());
 
     Mockito.verify(settings, times(1)).addPlugin(Mockito.any());
 

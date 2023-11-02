@@ -71,6 +71,11 @@ public class TracePointConfig {
    */
   private static final String STACK_TYPE = "stack_type";
 
+  /**
+   * The log message to interpolate at position of tracepoint.
+   */
+  public static final String LOG_MSG = "log_msg";
+
   private final String id;
   private final String path;
   private final int lineNo;

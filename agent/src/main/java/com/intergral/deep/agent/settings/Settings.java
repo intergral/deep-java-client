@@ -17,6 +17,8 @@
 
 package com.intergral.deep.agent.settings;
 
+import com.intergral.deep.agent.api.logger.ITracepointLogger;
+import com.intergral.deep.agent.api.logger.TracepointLogger;
 import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
@@ -43,12 +45,12 @@ import java.util.regex.Pattern;
  * A service that handles the general config of the deep agent.
  */
 public class Settings implements ISettings {
-
   private static final AtomicBoolean IS_ACTIVE = new AtomicBoolean(true);
   private final Properties properties;
   private final Collection<IPlugin> customPlugins = new ArrayList<>();
   private Resource resource;
   private Collection<IPlugin> plugins = Collections.emptyList();
+  private ITracepointLogger tracepointLogger = new TracepointLogger();
 
   private Settings(Properties properties) {
     this.properties = properties;
@@ -379,6 +381,38 @@ public class Settings implements ISettings {
    */
   public void setActive(boolean state) {
     IS_ACTIVE.set(state);
+  }
+
+  /**
+   * Log the tracepoint log via the configured logger.
+   *
+   * @param logMsg       the log message
+   * @param tracepointId the tracepoint id
+   * @param snapshotId   the snapshot id
+   */
+  public void logTracepoint(final String logMsg, final String tracepointId, final String snapshotId) {
+    this.tracepointLogger.logTracepoint(logMsg, tracepointId, snapshotId);
+  }
+
+  /**
+   * Get the current tracepoint logger.
+   *
+   * @return the tracepoint logger
+   */
+  public ITracepointLogger getTracepointLogger() {
+    return tracepointLogger;
+  }
+
+  /**
+   * Set the tracepoint logger to a new logger.
+   *
+   * @param tracepointLogger the new logger
+   */
+  public void setTracepointLogger(final ITracepointLogger tracepointLogger) {
+    if (tracepointLogger == null) {
+      return;
+    }
+    this.tracepointLogger = tracepointLogger;
   }
 
   /**

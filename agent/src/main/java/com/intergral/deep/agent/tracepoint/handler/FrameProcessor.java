@@ -27,6 +27,7 @@ import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.types.TracePointConfig;
 import com.intergral.deep.agent.types.snapshot.EventSnapshot;
+import com.intergral.deep.agent.types.snapshot.WatchResult;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -135,7 +136,19 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
 
         for (String watch : tracepoint.getWatches()) {
           final FrameCollector.IExpressionResult result = super.evaluateWatchExpression(watch);
-          snapshot.addWatchResult(result.result(), result.variables());
+          snapshot.addWatchResult(result.result());
+          snapshot.mergeVariables(result.variables());
+        }
+
+        final String logMsg = tracepoint.getArg(TracePointConfig.LOG_MSG, String.class, null);
+        if (logMsg != null) {
+          final ILogProcessResult result = this.processLogMsg(tracepoint, logMsg);
+          snapshot.setLogMsg(result.processedLog());
+          for (WatchResult watchResult : result.result()) {
+            snapshot.addWatchResult(watchResult);
+          }
+          snapshot.mergeVariables(result.variables());
+          this.logTracepoint(result.processedLog(), tracepoint.getId(), snapshot.getID());
         }
 
         final Resource attributes = super.processAttributes(tracepoint);

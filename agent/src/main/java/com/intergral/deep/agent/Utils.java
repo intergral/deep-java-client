@@ -17,6 +17,7 @@
 
 package com.intergral.deep.agent;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -165,6 +166,23 @@ public final class Utils {
         return false;
       }
     };
+  }
+
+  /**
+   * Convert a throwable into a loggable string.
+   *
+   * @param t the throwable to convert
+   * @return the string to log
+   */
+  public static String throwableToString(final Throwable t) {
+    if (t instanceof InvocationTargetException) {
+      return throwableToString(t.getCause());
+    }
+    final String message = t.getMessage();
+    if (message != null) {
+      return message;
+    }
+    return t.getClass().getName();
   }
 
 

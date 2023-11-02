@@ -15,16 +15,16 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.test.target;
+package com.intergral.deep.agent.api.logger;
 
-public class ConditionTarget {
-
-  public int i = 100;
+/**
+ * Log the tracepoint logs to {@link System#out}.
+ */
+public class StdOutLogger implements ITracepointLogger {
 
   @Override
-  public String toString() {
-    return "ConditionTarget{" +
-        "i=" + i +
-        '}';
+  public void logTracepoint(final String logMsg, final String tracepointId, final String snapshotId) {
+    final String format = String.format("%s snapshot=%s tracepoint=%s", logMsg, tracepointId, snapshotId);
+    System.out.println(format);
   }
 }

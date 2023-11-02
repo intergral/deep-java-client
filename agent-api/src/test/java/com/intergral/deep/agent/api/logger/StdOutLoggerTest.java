@@ -15,16 +15,17 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.test.target;
+package com.intergral.deep.agent.api.logger;
 
-public class ConditionTarget {
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-  public int i = 100;
+import org.junit.jupiter.api.Test;
 
-  @Override
-  public String toString() {
-    return "ConditionTarget{" +
-        "i=" + i +
-        '}';
+class StdOutLoggerTest {
+
+  @Test
+  void logTracepoint() {
+    final StdOutLogger tracepointLogger = new StdOutLogger();
+    assertDoesNotThrow(() -> tracepointLogger.logTracepoint("logMsg", "tp_id", "snap_id"));
   }
 }

@@ -15,16 +15,19 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.test.target;
+package com.intergral.deep.agent.api.logger;
 
-public class ConditionTarget {
+/**
+ * Tracepoint logger is used to log the result of an injected log message.
+ */
+public interface ITracepointLogger {
 
-  public int i = 100;
-
-  @Override
-  public String toString() {
-    return "ConditionTarget{" +
-        "i=" + i +
-        '}';
-  }
+  /**
+   * Log the result of a tracepoint injected log message.
+   *
+   * @param logMsg       the processed log message
+   * @param tracepointId the tracepoint id that triggered the log
+   * @param snapshotId   the snapshot id of the generated snapshot from the log
+   */
+  void logTracepoint(final String logMsg, final String tracepointId, final String snapshotId);
 }

@@ -50,7 +50,7 @@ public final class PushUtils {
    * @return the converted snapshot
    */
   public static Snapshot convertToGrpc(final EventSnapshot snapshot) {
-    return Snapshot.newBuilder()
+    final Snapshot.Builder builder = Snapshot.newBuilder()
         .setID(ByteString.copyFromUtf8(snapshot.getID()))
         .setTracepoint(convertTracepoint(snapshot.getTracepoint()))
         .putAllVarLookup(convertVarLookup(snapshot.getVarLookup()))
@@ -59,8 +59,14 @@ public final class PushUtils {
         .addAllWatches(convertWatches(snapshot.getWatches()))
         .addAllAttributes(convertAttributes(snapshot.getAttributes()))
         .setDurationNanos(snapshot.getDurationNanos())
-        .addAllResource(convertAttributes(snapshot.getResource()))
-        .build();
+        .addAllResource(convertAttributes(snapshot.getResource()));
+
+    final String logMsg = snapshot.getLogMsg();
+    if (logMsg != null) {
+      builder.setLogMsg(logMsg);
+    }
+
+    return builder.build();
   }
 
   private static Iterable<? extends KeyValue> convertAttributes(final Resource attributes) {
