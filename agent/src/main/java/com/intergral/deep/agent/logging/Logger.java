@@ -18,6 +18,7 @@
 package com.intergral.deep.agent.logging;
 
 import com.intergral.deep.agent.AgentImpl;
+import com.intergral.deep.agent.api.logger.TracepointLogger;
 import com.intergral.deep.agent.settings.Settings;
 import java.io.IOException;
 import java.util.logging.ConsoleHandler;
@@ -62,5 +63,11 @@ public final class Logger {
     handler.setLevel(loggingLevel);
     logger.setLevel(loggingLevel);
     LoggerFactory.getLogger(AgentImpl.class);
+
+    final java.util.logging.Logger tpLogger = java.util.logging.Logger.getLogger(TracepointLogger.class.getName());
+    tpLogger.setLevel(Level.INFO);
+    final ConsoleHandler tpHandler = new ConsoleHandler();
+    tpHandler.setFormatter(new SimpleFormatter());
+    tpLogger.addHandler(tpHandler);
   }
 }
