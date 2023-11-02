@@ -87,4 +87,10 @@ class FrameCollectorTest {
 
     assertEquals("[deep] some log message: bob", someLogMessage.processedLog());
   }
+
+  @Test
+  void testLogTracepoint() {
+    frameCollector.logTracepoint("logmsg", "tp_id", "snap_id");
+    Mockito.verify(settings, Mockito.times(1)).logTracepoint("logmsg", "tp_id", "snap_id");
+  }
 }

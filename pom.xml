@@ -387,6 +387,8 @@
                                         <exclude>**/*InsnPrinter.*</exclude>
                                         <!--Testing the Agent is pretty pointless-->
                                         <exclude>**/com/intergral/deep/agent/Agent.*</exclude>
+                                        <!-- These classes are imported from apache.commons -->
+                                        <exclude>**/com/intergral/deep/agent/api/utils/string/**</exclude>
                                     </excludes>
                                 </configuration>
                             </execution>
@@ -430,6 +432,8 @@
                                         <exclude>**/*InsnPrinter.*</exclude>
                                         <!--Testing the Agent is pretty pointless-->
                                         <exclude>**/com/intergral/deep/agent/Agent.*</exclude>
+                                        <!-- These classes are imported from apache.commons -->
+                                        <exclude>**/com/intergral/deep/agent/api/utils/string/**</exclude>
                                     </excludes>
                                 </configuration>
                             </execution>

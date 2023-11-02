@@ -409,6 +409,9 @@ public class Settings implements ISettings {
    * @param tracepointLogger the new logger
    */
   public void setTracepointLogger(final ITracepointLogger tracepointLogger) {
+    if (tracepointLogger == null) {
+      return;
+    }
     this.tracepointLogger = tracepointLogger;
   }
 

@@ -17,6 +17,8 @@
 
 package com.intergral.deep.agent;
 
+import com.intergral.deep.agent.tracepoint.inst.InstUtils;
+import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -165,6 +167,17 @@ public final class Utils {
         return false;
       }
     };
+  }
+
+  public static String throwableToString(final Throwable t) {
+    if (t instanceof InvocationTargetException) {
+      return throwableToString(t.getCause());
+    }
+    final String message = t.getMessage();
+    if (message != null) {
+      return message;
+    }
+    return t.getClass().getName();
   }
 
 

@@ -19,9 +19,11 @@ package com.intergral.deep.agent.tracepoint.evaluator;
 
 import com.intergral.deep.agent.api.plugin.AbstractEvaluator;
 import com.intergral.deep.agent.api.plugin.IEvaluator;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import javax.script.ScriptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +104,14 @@ public class NashornReflectEvaluator extends AbstractEvaluator {
         .getMethod("eval",
             String.class,
             engine.getClass().getClassLoader().loadClass("javax.script.Bindings"));
-    return eval.invoke(engine, parseExpression(expression), bindings);
+    try {
+      return eval.invoke(engine, parseExpression(expression), bindings);
+    } catch (InvocationTargetException ite) {
+      if (ite.getCause() instanceof ScriptException) {
+        throw ite.getCause().getCause();
+      }
+      throw ite.getCause();
+    }
   }
 
   static String parseExpression(final String expression) {

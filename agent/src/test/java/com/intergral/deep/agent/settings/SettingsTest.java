@@ -19,9 +19,11 @@ package com.intergral.deep.agent.settings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.intergral.deep.agent.api.logger.ITracepointLogger;
 import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.plugin.ISnapshotContext;
 import com.intergral.deep.agent.api.resource.Resource;
@@ -36,6 +38,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 
 class SettingsTest {
 
@@ -144,5 +148,29 @@ class SettingsTest {
     assertTrue(settings.isActive());
     settings.setActive(false);
     assertFalse(settings.isActive());
+  }
+
+  @Test
+  void tracepointLogger_not_null() {
+    final Settings settings = Settings.build(new HashMap<>());
+    assertNotNull(settings.getTracepointLogger());
+  }
+
+  @Test
+  void tracepointLogger_set_null() {
+    final Settings settings = Settings.build(new HashMap<>());
+    settings.setTracepointLogger(null);
+    assertNotNull(settings.getTracepointLogger());
+  }
+
+  @Test
+  void tracepointLogger_can_log() {
+    final Settings settings = Settings.build(new HashMap<>());
+    final ITracepointLogger tracepointLogger = Mockito.mock(ITracepointLogger.class);
+    settings.setTracepointLogger(tracepointLogger);
+    assertNotNull(settings.getTracepointLogger());
+
+    settings.logTracepoint("log", "tp_id", "snap_id");
+    Mockito.verify(tracepointLogger, Mockito.times(1)).logTracepoint("log", "tp_id", "snap_id");
   }
 }

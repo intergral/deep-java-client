@@ -395,7 +395,7 @@ public class FrameCollector extends VariableProcessor {
 
         @Override
         public String logString() {
-          return t.getMessage();
+          return Utils.throwableToString(t);
         }
       };
     }
@@ -447,6 +447,8 @@ public class FrameCollector extends VariableProcessor {
       variables.putAll(iExpressionResult.variables());
       return iExpressionResult.logString();
     });
+    stringSubstitutor.setDisableSubstitutionInValues(true);
+    stringSubstitutor.setEnableSubstitutionInVariables(false);
 
     final String processedLog = stringSubstitutor.replace(logMsg);
 
@@ -479,13 +481,9 @@ public class FrameCollector extends VariableProcessor {
 
     String processedLog();
 
-    default Collection<WatchResult> result() {
-      return Collections.emptyList();
-    }
+    Collection<WatchResult> result();
 
-    default Map<String, Variable> variables() {
-      return Collections.emptyMap();
-    }
+    Map<String, Variable> variables();
   }
 
   /**
