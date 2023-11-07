@@ -87,7 +87,7 @@
     <properties>
         <grpc.version>1.58.0</grpc.version>
         <netty.version>4.1.98.Final</netty.version>
-        <tcnative.version>2.0.51.Final</tcnative.version>
+        <tcnative.version>2.0.62.Final</tcnative.version>
         <asm.version>8.0.1</asm.version>
 
         <maven.compiler.source>8</maven.compiler.source>
