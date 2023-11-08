@@ -68,7 +68,7 @@
     <dependency>
       <groupId>com.intergral.deep.plugins</groupId>
       <artifactId>java-plugin</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.1.2</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -232,8 +232,7 @@
             <configuration>
               <outputFile>target/${project.artifactId}-${project.version}-lite.jar</outputFile>
               <transformers>
-                <transformer
-                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <manifestEntries>
                     <Premain-Class>com.intergral.deep.agent.Agent</Premain-Class>
                     <Agent-Class>com.intergral.deep.agent.Agent</Agent-Class>
@@ -290,8 +289,7 @@
             <configuration>
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <transformers>
-                <transformer
-                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <manifestEntries>
                     <Premain-Class>com.intergral.deep.agent.Agent</Premain-Class>
                     <Agent-Class>com.intergral.deep.agent.Agent</Agent-Class>
@@ -331,8 +329,7 @@
                   </manifestEntries>
                 </transformer>
                 <!--These shade the tcnative libs with the relocation.native.prefix-->
-                <transformer
-                  implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
+                <transformer implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
                   <resource>
                     META-INF/native/lib${relocation.native.prefix}_netty_tcnative_linux_x86_64.so
                   </resource>
@@ -340,8 +337,7 @@
                     ${project.build.directory}/unpack/META-INF/native/libnetty_tcnative_linux_x86_64.so
                   </file>
                 </transformer>
-                <transformer
-                  implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
+                <transformer implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
                   <resource>
                     META-INF/native/lib${relocation.native.prefix}_netty_tcnative_osx_x86_64.jnilib
                   </resource>
@@ -349,8 +345,7 @@
                     ${project.build.directory}/unpack/META-INF/native/libnetty_tcnative_osx_x86_64.jnilib
                   </file>
                 </transformer>
-                <transformer
-                  implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
+                <transformer implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
                   <resource>
                     META-INF/native/${relocation.native.prefix}_netty_tcnative_windows_x86_64.dll
                   </resource>
