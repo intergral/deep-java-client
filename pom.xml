@@ -85,7 +85,7 @@
     </modules>
 
     <properties>
-        <grpc.version>1.59.0</grpc.version>
+        <grpc.version>1.60.0</grpc.version>
         <netty.version>4.1.98.Final</netty.version>
         <tcnative.version>2.0.62.Final</tcnative.version>
         <asm.version>8.0.1</asm.version>
