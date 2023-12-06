@@ -20,13 +20,20 @@ package com.intergral.deep.examples;
 
 import com.intergral.deep.Deep;
 import com.intergral.deep.agent.api.IDeep;
+import com.intergral.deep.agent.api.plugin.MetricDefinition;
 import com.intergral.deep.agent.api.reflection.IReflection;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
 import com.intergral.deep.api.DeepAPI;
+import io.prometheus.metrics.core.metrics.Histogram;
+import io.prometheus.metrics.exporter.httpserver.HTTPServer;
+import io.prometheus.metrics.model.snapshots.Unit;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * This example expects the deep agent to be loaded via the javaagent vm option.
@@ -78,11 +85,37 @@ public class Main {
       return Resource.create(Collections.singletonMap("example", "dynamic_load"));
     });
 
+//    final Class<?> aClass = Class.forName("com.intergral.deep.plugin.PrometheusMetricsPlugin");
+//    final Constructor<?> constructor = aClass.getConstructor();
+//    final Object o = constructor.newInstance();
+//
+//    DeepAPI.api().registerPlugin((IPlugin) o);
+
+    Histogram histogram = Histogram.builder()
+        .name("request_latency_seconds")
+        .help("request latency in seconds")
+        .unit(Unit.SECONDS)
+        .labelNames("path", "status")
+        .register();
+
+    HTTPServer server = HTTPServer.builder()
+        .port(9400)
+        .buildAndStart();
+
+    System.out.println("HTTPServer listening on port http://localhost:" + server.getPort() + "/metrics");
+
+    final HashMap<String, String> tags = new HashMap<>();
     // USe the API to create a tracepoint that will fire forever
+    final Map<String, String> fireCount = new HashMap<>();
+    fireCount.put("fire_count", "-1");
+    fireCount.put("log_msg", "This is a log message {this}");
+
     DeepAPI.api()
         .registerTracepoint("com/intergral/deep/examples/SimpleTest", 46,
-            Collections.singletonMap("fire_count", "-1"), Collections.emptyList(), Collections.emptyList());
+            fireCount, Collections.emptyList(),
+            Collections.singletonList(new MetricDefinition("custom_metric", tags, "histogram", "this.cnt", "deep", "help message")));
 
+    Random random = new Random(0);
     final SimpleTest ts = new SimpleTest("This is a test", 2);
     for (; ; ) {
       try {
@@ -90,6 +123,10 @@ public class Main {
       } catch (Exception e) {
         e.printStackTrace();
       }
+
+      double duration = Math.abs(random.nextGaussian() / 10.0 + 0.2);
+      String status = random.nextInt(100) < 20 ? "500" : "200";
+      histogram.labelValues("/", status).observe(duration);
 
       Thread.sleep(1000);
     }

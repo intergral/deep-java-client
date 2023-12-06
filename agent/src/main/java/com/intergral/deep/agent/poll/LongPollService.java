@@ -17,6 +17,7 @@
 
 package com.intergral.deep.agent.poll;
 
+import com.intergral.deep.agent.api.plugin.MetricDefinition;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.grpc.GrpcService;
 import com.intergral.deep.agent.settings.Settings;
@@ -28,6 +29,7 @@ import com.intergral.deep.proto.poll.v1.PollConfigGrpc;
 import com.intergral.deep.proto.poll.v1.PollRequest;
 import com.intergral.deep.proto.poll.v1.PollResponse;
 import com.intergral.deep.proto.poll.v1.ResponseType;
+import com.intergral.deep.proto.tracepoint.v1.Metric;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,6 +40,7 @@ import java.util.stream.Collectors;
  * This service deals with polling the remote service for tracepoint configs.
  */
 public class LongPollService implements ITimerTask {
+
   private final Settings settings;
   private final GrpcService grpcService;
   private final DriftAwareThread thread;
@@ -106,8 +109,33 @@ public class LongPollService implements ITimerTask {
             tracePointConfig.getPath(),
             tracePointConfig.getLineNumber(),
             Collections.unmodifiableMap(new HashMap<>(tracePointConfig.getArgsMap())),
-            Collections.unmodifiableCollection(tracePointConfig.getWatchesList())))
+            Collections.unmodifiableCollection(tracePointConfig.getWatchesList()),
+            Collections.unmodifiableList(covertMetrics(tracePointConfig.getMetricsList()))))
         .collect(Collectors.toList());
+  }
+
+  private List<MetricDefinition> covertMetrics(final List<Metric> metricsList) {
+    if (metricsList == null || metricsList.isEmpty()) {
+      return Collections.emptyList();
+    }
+    return metricsList.stream().map(
+            metric -> new MetricDefinition(metric.getName(), metric.getTagsMap(), metric.getType().toString(), metric.getExpression(),
+                namespaceOrDefault(metric.getNamespace()), helpOrDefault(metric.getHelp(), metric.getExpression())))
+        .collect(Collectors.toList());
+  }
+
+  private String namespaceOrDefault(final String namespace) {
+    if (namespace == null || namespace.trim().isEmpty()) {
+      return "deep_metrics";
+    }
+    return namespace;
+  }
+
+  private String helpOrDefault(final String help, final String expression) {
+    if (help == null || help.trim().isEmpty()) {
+      return "Metric generated from expression: " + expression;
+    }
+    return help;
   }
 
   private com.intergral.deep.proto.resource.v1.Resource buildResource() {

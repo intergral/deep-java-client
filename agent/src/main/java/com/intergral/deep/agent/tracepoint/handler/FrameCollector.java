@@ -379,6 +379,25 @@ public class FrameCollector extends VariableProcessor {
         public String logString() {
           return Utils.valueOf(result);
         }
+
+        @Override
+        public Number numberValue() {
+          if (result instanceof Number) {
+            // todo should we wrap this is new Number() ?
+            return (Number) result;
+          }
+          final String string = Utils.valueOf(result);
+          try {
+            return Double.valueOf(string);
+          } catch (NumberFormatException nfe) {
+            return Double.NaN;
+          }
+        }
+
+        @Override
+        public boolean isError() {
+          return false;
+        }
       };
     } catch (Throwable t) {
       return new IExpressionResult() {
@@ -396,6 +415,16 @@ public class FrameCollector extends VariableProcessor {
         @Override
         public String logString() {
           return Utils.throwableToString(t);
+        }
+
+        @Override
+        public Number numberValue() {
+          return Double.NaN;
+        }
+
+        @Override
+        public boolean isError() {
+          return true;
         }
       };
     }
@@ -515,6 +544,10 @@ public class FrameCollector extends VariableProcessor {
     Map<String, Variable> variables();
 
     String logString();
+
+    Number numberValue();
+
+    boolean isError();
   }
 
   /**

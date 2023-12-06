@@ -19,9 +19,12 @@ package com.intergral.deep.agent.settings;
 
 import com.intergral.deep.agent.api.logger.ITracepointLogger;
 import com.intergral.deep.agent.api.logger.TracepointLogger;
+import com.intergral.deep.agent.api.plugin.IMetricProcessor;
 import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
+import com.intergral.deep.agent.api.spi.MetricProvider;
+import com.intergral.deep.agent.resource.SpiUtil;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -51,6 +54,7 @@ public class Settings implements ISettings {
   private Resource resource;
   private Collection<IPlugin> plugins = Collections.emptyList();
   private ITracepointLogger tracepointLogger = new TracepointLogger();
+  private IMetricProcessor metricProcessor;
 
   private Settings(Properties properties) {
     this.properties = properties;
@@ -413,6 +417,14 @@ public class Settings implements ISettings {
       return;
     }
     this.tracepointLogger = tracepointLogger;
+  }
+
+  public IMetricProcessor getMetricProcessor() {
+    final List<MetricProvider> metricProviders = SpiUtil.loadOrdered(MetricProvider.class, Thread.currentThread().getContextClassLoader());
+    if(metricProviders.isEmpty()){
+      return null;
+    }
+    return metricProviders.get(0);
   }
 
   /**

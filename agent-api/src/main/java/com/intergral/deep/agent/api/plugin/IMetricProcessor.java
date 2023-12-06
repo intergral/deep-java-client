@@ -15,25 +15,17 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.agent.tracepoint.inst.jsp;
+package com.intergral.deep.agent.api.plugin;
 
-import com.intergral.deep.agent.types.TracePointConfig;
+import java.util.Map;
 
-/**
- * This is a simple wrapper of the tracepoint config with the mapped line we need to use.
- */
-public class JSPMappedBreakpoint extends TracePointConfig {
+public interface IMetricProcessor {
 
-  private final int mappedLine;
+  void counter(final String name, final Map<String, String> tags, final String namespace, final String help, final Double value);
 
+  void gauge(final String name, final Map<String, String> tags, final String namespace, final String help, final Double value);
 
-  public JSPMappedBreakpoint(final TracePointConfig tp, final int mappedLine) {
-    super(tp.getId(), tp.getPath(), tp.getLineNo(), tp.getArgs(), tp.getWatches(), tp.getMetricDefinitions());
-    this.mappedLine = mappedLine;
-  }
+  void histogram(final String name, final Map<String, String> tags, final String namespace, final String help, final Double value);
 
-  @Override
-  public int getLineNo() {
-    return this.mappedLine;
-  }
+  void summary(final String name, final Map<String, String> tags, final String namespace, final String help, final Double value);
 }

@@ -23,6 +23,7 @@ import com.intergral.deep.agent.api.auth.IAuthProvider;
 import com.intergral.deep.agent.api.logger.ITracepointLogger;
 import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.plugin.IPlugin.IPluginRegistration;
+import com.intergral.deep.agent.api.plugin.MetricDefinition;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
 import com.intergral.deep.agent.api.spi.ResourceProvider;
@@ -156,13 +157,13 @@ public class DeepAgent implements IDeep {
 
   @Override
   public ITracepointRegistration registerTracepoint(final String path, final int line) {
-    return registerTracepoint(path, line, Collections.emptyMap(), Collections.emptyList());
+    return registerTracepoint(path, line, Collections.emptyMap(), Collections.emptyList(), Collections.emptyList());
   }
 
   @Override
   public ITracepointRegistration registerTracepoint(final String path, final int line, final Map<String, String> args,
-      final Collection<String> watches) {
-    final TracePointConfig tracePointConfig = this.tracepointConfig.addCustom(path, line, args, watches);
+      final Collection<String> watches, final Collection<MetricDefinition> metricDefinitions) {
+    final TracePointConfig tracePointConfig = this.tracepointConfig.addCustom(path, line, args, watches, metricDefinitions);
     return new ITracepointRegistration() {
       @Override
       public void unregister() {

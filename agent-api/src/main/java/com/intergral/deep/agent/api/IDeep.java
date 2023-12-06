@@ -19,6 +19,7 @@ package com.intergral.deep.agent.api;
 
 import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.plugin.IPlugin.IPluginRegistration;
+import com.intergral.deep.agent.api.plugin.MetricDefinition;
 import com.intergral.deep.agent.api.tracepoint.ITracepoint.ITracepointRegistration;
 import java.util.Collection;
 import java.util.Map;
@@ -80,8 +81,9 @@ public interface IDeep {
    * @param line the line number
    * @param args the key value pairs that further define the tracepoint
    * @param watches the list of watch expressions
+   * @param metrics the list of metric expressions
    * @return a {@link ITracepointRegistration} that can be used to remove the tracepoint
    */
   ITracepointRegistration registerTracepoint(final String path, final int line, final Map<String, String> args,
-      final Collection<String> watches);
+      final Collection<String> watches, final Collection<MetricDefinition> metrics);
 }

@@ -15,25 +15,10 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.agent.tracepoint.inst.jsp;
+package com.intergral.deep.agent.api.spi;
 
-import com.intergral.deep.agent.types.TracePointConfig;
+import com.intergral.deep.agent.api.plugin.IMetricProcessor;
 
-/**
- * This is a simple wrapper of the tracepoint config with the mapped line we need to use.
- */
-public class JSPMappedBreakpoint extends TracePointConfig {
+public interface MetricProvider extends IMetricProcessor, Ordered {
 
-  private final int mappedLine;
-
-
-  public JSPMappedBreakpoint(final TracePointConfig tp, final int mappedLine) {
-    super(tp.getId(), tp.getPath(), tp.getLineNo(), tp.getArgs(), tp.getWatches(), tp.getMetricDefinitions());
-    this.mappedLine = mappedLine;
-  }
-
-  @Override
-  public int getLineNo() {
-    return this.mappedLine;
-  }
 }

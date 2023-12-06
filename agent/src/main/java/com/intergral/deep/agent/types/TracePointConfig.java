@@ -17,6 +17,7 @@
 
 package com.intergral.deep.agent.types;
 
+import com.intergral.deep.agent.api.plugin.MetricDefinition;
 import com.intergral.deep.agent.settings.Settings;
 import java.util.Collection;
 import java.util.Map;
@@ -84,25 +85,32 @@ public class TracePointConfig {
   private final TracepointWindow window;
 
   private final TracepointExecutionStats stats = new TracepointExecutionStats();
+  private final Collection<MetricDefinition> metricDefinitions;
 
 
   /**
    * Create a new tracepoint config.
    *
-   * @param id      the id
-   * @param path    the path
-   * @param lineNo  the line number
-   * @param args    the args
-   * @param watches the watches
+   * @param id                the id
+   * @param path              the path
+   * @param lineNo            the line number
+   * @param args              the args
+   * @param watches           the watches
+   * @param metricDefinitions the metrics to evaluate
    */
-  public TracePointConfig(final String id, final String path, final int lineNo,
+  public TracePointConfig(
+      final String id,
+      final String path,
+      final int lineNo,
       final Map<String, String> args,
-      final Collection<String> watches) {
+      final Collection<String> watches,
+      final Collection<MetricDefinition> metricDefinitions) {
     this.id = id;
     this.path = path;
     this.lineNo = lineNo;
     this.args = args;
     this.watches = watches;
+    this.metricDefinitions = metricDefinitions;
     this.window = new TracepointWindow(this.getArg(WINDOW_START, Integer.class, 0),
         this.getArg(WINDOW_END, Integer.class, 0));
   }
@@ -168,6 +176,14 @@ public class TracePointConfig {
    */
   public Collection<String> getWatches() {
     return watches;
+  }
+
+  /**
+   * Get the tracepoint metric definitions
+   * @return the metric definitions
+   */
+  public Collection<MetricDefinition> getMetricDefinitions() {
+    return metricDefinitions;
   }
 
   /**

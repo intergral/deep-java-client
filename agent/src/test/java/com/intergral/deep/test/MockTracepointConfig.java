@@ -28,16 +28,16 @@ import java.util.HashMap;
 public class MockTracepointConfig extends TracePointConfig {
 
   public MockTracepointConfig() {
-    super("tp-id", "path", 123, new HashMap<>(), new ArrayList<>());
+    super("tp-id", "path", 123, new HashMap<>(), new ArrayList<>(), new ArrayList<>());
   }
 
   public MockTracepointConfig(final String path) {
-    super("tp-id", path, 123, new HashMap<>(), new ArrayList<>());
+    super("tp-id", path, 123, new HashMap<>(), new ArrayList<>(), new ArrayList<>());
   }
 
 
   public MockTracepointConfig(final String path, final int line) {
-    super("tp-id", path, line, new HashMap<>(), new ArrayList<>());
+    super("tp-id", path, line, new HashMap<>(), new ArrayList<>(), new ArrayList<>());
   }
 
   public MockTracepointConfig withArg(final String key, final String value) {

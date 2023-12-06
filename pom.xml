@@ -85,6 +85,7 @@
     </modules>
 
     <properties>
+        <deep-proto.version>0.0.1-SNAPSHOT</deep-proto.version>
         <grpc.version>1.59.0</grpc.version>
         <netty.version>4.1.98.Final</netty.version>
         <tcnative.version>2.0.62.Final</tcnative.version>
@@ -452,7 +453,7 @@
             <dependency>
                 <groupId>com.intergral.deep</groupId>
                 <artifactId>deep-proto</artifactId>
-                <version>1.0.2</version>
+                <version>${deep-proto.version}</version>
             </dependency>
 
             <!-- Logging -->

@@ -21,7 +21,9 @@ import com.intergral.deep.agent.Reflection;
 import com.intergral.deep.agent.Utils;
 import com.intergral.deep.agent.api.plugin.EvaluationException;
 import com.intergral.deep.agent.api.plugin.IEvaluator;
+import com.intergral.deep.agent.api.plugin.IMetricProcessor;
 import com.intergral.deep.agent.api.plugin.ISnapshotContext;
+import com.intergral.deep.agent.api.plugin.MetricDefinition;
 import com.intergral.deep.agent.api.reflection.IReflection;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.settings.Settings;
@@ -30,7 +32,9 @@ import com.intergral.deep.agent.types.snapshot.EventSnapshot;
 import com.intergral.deep.agent.types.snapshot.WatchResult;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 /**
@@ -124,7 +128,7 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
   public Collection<EventSnapshot> collect() {
     final Collection<EventSnapshot> snapshots = new ArrayList<>();
 
-    final IFrameResult processedFrame = super.processFrame();
+    final IFrameResult processedFrame = processFrame();
 
     for (final TracePointConfig tracepoint : filteredTracepoints) {
       try {
@@ -135,7 +139,7 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
             processedFrame.variables());
 
         for (String watch : tracepoint.getWatches()) {
-          final FrameCollector.IExpressionResult result = super.evaluateWatchExpression(watch);
+          final FrameCollector.IExpressionResult result = evaluateWatchExpression(watch);
           snapshot.addWatchResult(result.result());
           snapshot.mergeVariables(result.variables());
         }
@@ -151,7 +155,14 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
           this.logTracepoint(result.processedLog(), tracepoint.getId(), snapshot.getID());
         }
 
-        final Resource attributes = super.processAttributes(tracepoint);
+        final Collection<MetricDefinition> metricDefinitions = tracepoint.getMetricDefinitions();
+        if (!metricDefinitions.isEmpty()) {
+          for (MetricDefinition metricDefinition : metricDefinitions) {
+            processMetric(tracepoint, metricDefinition);
+          }
+        }
+
+        final Resource attributes = processAttributes(tracepoint);
         snapshot.mergeAttributes(attributes);
 
         snapshots.add(snapshot);
@@ -162,6 +173,49 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
     }
 
     return snapshots;
+  }
+
+  private void processMetric(final TracePointConfig tracepoint, final MetricDefinition metricDefinition) {
+    final IExpressionResult iExpressionResult = evaluateWatchExpression(metricDefinition.getExpression());
+    final Number number = iExpressionResult.numberValue();
+    if (iExpressionResult.isError() || Double.isNaN(number.doubleValue())) {
+      //todo how do we want to handle metrics that cannot be handled
+      return;
+    }
+
+    final HashMap<String, String> processedTags = new HashMap<>();
+    final Map<String, String> tags = metricDefinition.getTags();
+    for (Entry<String, String> entry : tags.entrySet()) {
+      final IExpressionResult tagResult = evaluateWatchExpression(entry.getValue());
+      // todo check metric tag length
+      processedTags.put(entry.getKey(), Utils.truncate(tagResult.logString(), 200).value());
+    }
+
+    final IMetricProcessor metricProcessor = this.settings.getMetricProcessor();
+
+    try {
+      switch (metricDefinition.getType()) {
+        case "gauge":
+          metricProcessor.gauge(metricDefinition.getName(), processedTags, metricDefinition.getNamespace(), metricDefinition.getHelp(),
+              number.doubleValue());
+          break;
+        case "counter":
+          metricProcessor.counter(metricDefinition.getName(), processedTags, metricDefinition.getNamespace(), metricDefinition.getHelp(),
+              number.doubleValue());
+          break;
+        case "histogram":
+          metricProcessor.histogram(metricDefinition.getName(), processedTags, metricDefinition.getNamespace(), metricDefinition.getHelp(),
+              number.doubleValue());
+          break;
+        case "summary":
+          metricProcessor.summary(metricDefinition.getName(), processedTags, metricDefinition.getNamespace(), metricDefinition.getHelp(),
+              number.doubleValue());
+          break;
+      }
+
+    } catch (Throwable t) {
+      t.printStackTrace();
+    }
   }
 
   /**

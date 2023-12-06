@@ -31,7 +31,7 @@ import java.util.HashSet;
 public class MockEventSnapshot extends EventSnapshot {
 
   public MockEventSnapshot() {
-    super(new TracePointConfig("tp-1", "/some/file/path.py", 123, new HashMap<>(), new ArrayList<>()), 1011L, Resource.DEFAULT,
+    super(new TracePointConfig("tp-1", "/some/file/path.py", 123, new HashMap<>(), new ArrayList<>(), new ArrayList<>()), 1011L, Resource.DEFAULT,
         new ArrayList<>(), new HashMap<>());
   }
 

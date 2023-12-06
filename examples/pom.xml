@@ -37,6 +37,7 @@
   <modules>
     <module>agent-load</module>
     <module>dynamic-load</module>
+    <module>prometheus-metrics-example</module>
   </modules>
 
   <properties>
