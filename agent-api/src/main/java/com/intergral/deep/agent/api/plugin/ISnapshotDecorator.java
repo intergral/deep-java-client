@@ -20,6 +20,9 @@ package com.intergral.deep.agent.api.plugin;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
 
+/**
+ * This type allows a plugin to provide additional attributes to captured snapshots.
+ */
 public interface ISnapshotDecorator {
 
   /**

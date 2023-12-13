@@ -26,12 +26,14 @@ import com.intergral.deep.agent.api.settings.ISettings;
  *
  * <ul>
  *   <li>{@link IConditional} - allow plugin to be conditional</li>
- *   <li>{@link com.intergral.deep.agent.api.plugin.ISnapshotDecorator} - allow plugins to provide additional attributes to captured snapshots</li>
+ *   <li>{@link com.intergral.deep.agent.api.plugin.ISnapshotDecorator} -
+ *   allow plugins to provide additional attributes to captured snapshots</li>
  *   <li>{@link com.intergral.deep.agent.api.auth.IAuthProvider} - allow plugin to provide additional ways to authenticate</li>
  *   <li>{@link ResourceProvider} - allow plugins to provide additional information for the resource definition</li>
  * </ul>
  * <p>
- * Plugins will be instantiated via the default constructor and then the {@link #configure(ISettings, IReflection)} function will be invoked.
+ * Plugins will be instantiated via the default constructor and then the {@link #configure(ISettings, IReflection)}
+ * function will be invoked.
  */
 public interface IDeepPlugin extends Ordered {
 
