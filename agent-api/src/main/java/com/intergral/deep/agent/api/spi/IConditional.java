@@ -17,7 +17,15 @@
 
 package com.intergral.deep.agent.api.spi;
 
+/**
+ * This interface allows an instance of {@link IDeepPlugin} to only be loaded based on a condition.
+ */
 public interface IConditional {
 
+  /**
+   * Should determine if the plugin is active.
+   *
+   * @return {@code true} if and only if the plugins is active, else {@code false}
+   */
   boolean isActive();
 }
