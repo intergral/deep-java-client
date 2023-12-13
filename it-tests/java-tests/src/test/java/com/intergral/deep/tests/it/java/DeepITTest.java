@@ -61,7 +61,7 @@ public class DeepITTest extends ADeepITTest {
       }
     }).start();
 
-    snapshotlatch.await(5, TimeUnit.MINUTES);
+    snapshotLatch.await(5, TimeUnit.MINUTES);
 
     final Snapshot snapshot = snapshotAtomicReference.get();
     assertEquals(snapshot.getVarLookupMap().get("1").getChildren(0).getName(), "name");

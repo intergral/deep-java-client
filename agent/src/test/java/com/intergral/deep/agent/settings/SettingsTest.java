@@ -24,10 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.intergral.deep.agent.api.logger.ITracepointLogger;
-import com.intergral.deep.agent.api.plugin.IPlugin;
-import com.intergral.deep.agent.api.plugin.ISnapshotContext;
-import com.intergral.deep.agent.api.resource.Resource;
-import com.intergral.deep.agent.api.settings.ISettings;
 import com.intergral.deep.agent.settings.Settings.InvalidConfigException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -38,7 +34,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 class SettingsTest {
@@ -116,28 +111,6 @@ class SettingsTest {
       assertThrows(InvalidConfigException.class, settings::getServiceHost);
       assertThrows(InvalidConfigException.class, settings::getServicePort);
     }
-  }
-
-  @Test
-  void plugins() {
-
-    final Settings settings = Settings.build(new HashMap<>());
-
-    final IPlugin plugin = new IPlugin() {
-      @Override
-      public Resource decorate(final ISettings settings, final ISnapshotContext snapshot) {
-        return null;
-      }
-    };
-    settings.addPlugin(plugin);
-    final IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> settings.addPlugin(plugin));
-    assertEquals("Cannot add duplicate named (com.intergral.deep.agent.settings.SettingsTest$1) plugin",
-        illegalStateException.getMessage());
-
-    assertEquals(1, settings.getPlugins().size());
-    settings.removePlugin(plugin);
-
-    assertEquals(0, settings.getPlugins().size());
   }
 
   @Test

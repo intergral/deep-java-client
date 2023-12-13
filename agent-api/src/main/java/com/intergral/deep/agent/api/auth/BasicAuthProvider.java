@@ -17,7 +17,9 @@
 
 package com.intergral.deep.agent.api.auth;
 
+import com.intergral.deep.agent.api.reflection.IReflection;
 import com.intergral.deep.agent.api.settings.ISettings;
+import com.intergral.deep.agent.api.spi.IDeepPlugin;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
@@ -34,12 +36,14 @@ import java.util.Map;
  * <p>
  * These values are then base64 encoded and attached to the outbound requests as the {@code authorization} header.
  */
-public class BasicAuthProvider implements IAuthProvider {
+public class BasicAuthProvider implements IDeepPlugin, IAuthProvider {
 
-  private final ISettings settings;
+  private ISettings settings;
 
-  public BasicAuthProvider(final ISettings settings) {
+  @Override
+  public IDeepPlugin configure(final ISettings settings, final IReflection reflection) {
     this.settings = settings;
+    return this;
   }
 
   @Override

@@ -19,7 +19,7 @@ public final class SpiUtil {
   private SpiUtil() {
   }
 
-  static <T extends Ordered> List<T> loadOrdered(Class<T> spiClass,
+  public static <T extends Ordered> List<T> loadOrdered(Class<T> spiClass,
       ClassLoader serviceClassLoader) {
     return loadOrdered(spiClass, serviceClassLoader, ServiceLoader::load);
   }

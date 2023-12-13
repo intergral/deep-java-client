@@ -21,6 +21,7 @@ import com.intergral.deep.agent.api.DeepRuntimeException;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.resource.ResourceAttributes;
 import com.intergral.deep.agent.api.settings.ISettings;
+import com.intergral.deep.agent.api.spi.IDeepPlugin;
 import com.intergral.deep.agent.api.spi.ResourceProvider;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -42,7 +43,7 @@ import java.util.Map;
  *
  * @see ISettings#getSettingAs(String, Class)
  */
-public class EnvironmentResourceProvider implements ResourceProvider {
+public class EnvironmentResourceProvider implements IDeepPlugin, ResourceProvider {
 
   static final String SERVICE_NAME_PROPERTY = "service.name";
   static final String ATTRIBUTE_PROPERTY = "resource.attributes";

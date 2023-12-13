@@ -17,3 +17,6 @@
 
 com.intergral.deep.agent.resource.JavaResourceDetector
 com.intergral.deep.agent.resource.EnvironmentResourceProvider
+com.intergral.deep.plugin.cf.CFPlugin
+com.intergral.deep.plugin.JavaPlugin
+com.intergral.deep.agent.api.auth.BasicAuthProvider

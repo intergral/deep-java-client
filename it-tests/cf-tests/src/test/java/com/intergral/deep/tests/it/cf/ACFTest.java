@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.intergral.deep.proto.common.v1.KeyValue;
 import com.intergral.deep.proto.poll.v1.PollResponse;
 import com.intergral.deep.proto.poll.v1.ResponseType;
 import com.intergral.deep.proto.tracepoint.v1.Snapshot;
@@ -36,6 +37,7 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -53,21 +55,21 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
 public abstract class ACFTest {
 
   private static final AtomicReference<Snapshot> snapshot = new AtomicReference<>();
-  private static CountDownLatch loglatch;
+  private static CountDownLatch logLatch;
   private static Server server;
-  private static CountDownLatch snapshotlatch;
+  private static CountDownLatch snapshotLatch;
   private final GenericContainer<?> container;
-  private TestPollService pollService;
 
 
   public ACFTest(final String dockerImageName) {
-    loglatch = new CountDownLatch(1);
-    snapshotlatch = new CountDownLatch(1);
+    logLatch = new CountDownLatch(1);
+    snapshotLatch = new CountDownLatch(1);
 
     Path agentTarget = null;
     Path testFilePath = null;
     Path jvmConfigPath = null;
     try {
+      //noinspection DataFlowIssue
       final Path targetPath = Paths.get(ACFTest.class.getResource("/").toURI()).getParent();
       agentTarget = targetPath.getParent()
           .getParent()
@@ -83,6 +85,7 @@ public abstract class ACFTest {
 
     final String testHost = System.getProperty("nv.test.host", "172.17.0.1");
 
+    //noinspection resource
     container = new GenericContainer<>(new ImageFromDockerfile("cftest", true)
         // add the nv jar into the context of the docker file
         .withFileFromPath("deep.jar", new File(property).toPath())
@@ -102,7 +105,7 @@ public abstract class ACFTest {
         .withLogConsumer(outputFrame -> {
           System.out.println(outputFrame.getUtf8String());
           if (outputFrame.getUtf8String().contains("ColdFusion started")) {
-            loglatch.countDown();
+            logLatch.countDown();
           }
         })
         .withExposedPorts(8500)
@@ -124,7 +127,7 @@ public abstract class ACFTest {
   void setUp() throws Exception {
     final CountDownLatch grpcConnectLatch = new CountDownLatch(1);
 
-    pollService = new TestPollService((request, responseObserver) -> {
+    TestPollService pollService = new TestPollService((request, responseObserver) -> {
       responseObserver.onNext(PollResponse.newBuilder()
           .setResponseType(ResponseType.UPDATE)
           .setCurrentHash("1")
@@ -140,7 +143,7 @@ public abstract class ACFTest {
     final TestSnapshotService testSnapshotService = new TestSnapshotService(
         (request, responseObserver) -> {
           snapshot.set(request);
-          snapshotlatch.countDown();
+          snapshotLatch.countDown();
         });
 
     server = ServerBuilder.forPort(9999)
@@ -155,7 +158,7 @@ public abstract class ACFTest {
     System.out.println("GRPC Connected");
 
     // await cf start up
-    assertTrue(loglatch.await(600, TimeUnit.SECONDS));
+    assertTrue(logLatch.await(600, TimeUnit.SECONDS));
     System.out.println("CF Started.");
   }
 
@@ -169,8 +172,9 @@ public abstract class ACFTest {
 
   @Test
   void checkCfTracepoint() throws Exception {
+    //noinspection HttpUrlsUsage
     final String uri =
-        "http://" + container.getContainerIpAddress() + ":" + container.getMappedPort(8500)
+        "http://" + container.getHost() + ":" + container.getMappedPort(8500)
             + "/CTA/tests/testFile.cfm";
     final Request build = new Request.Builder().url(uri).build();
 
@@ -182,16 +186,18 @@ public abstract class ACFTest {
       final Call call = client.newCall(build);
       try (final Response execute = call.execute()) {
         final ResponseBody body = execute.body();
+        //noinspection DataFlowIssue
         final String s = new String(body.bytes());
         System.out.println(s);
         break;
       } catch (Exception e) {
         e.printStackTrace();
       }
+      //noinspection BusyWait
       Thread.sleep(1000);
     }
 
-    assertTrue(snapshotlatch.await(5, TimeUnit.MINUTES));
+    assertTrue(snapshotLatch.await(5, TimeUnit.MINUTES));
 
     final Snapshot snapshot = ACFTest.snapshot.get();
 
@@ -216,6 +222,19 @@ public abstract class ACFTest {
     assertEquals("I", iResult.variableId().getName());
     assertEquals("java.lang.Integer", iResult.variable().getType());
     assertEquals("100", iResult.variable().getValue());
+
+    checkPluignData(snapshot);
+  }
+
+  protected abstract void checkPluignData(final Snapshot snapshot);
+  protected KeyValue findAttribute(final Snapshot snapshot, final String key) {
+    final List<KeyValue> attributesList = snapshot.getAttributesList();
+    for (KeyValue keyValue : attributesList) {
+      if (keyValue.getKey().equals(key)) {
+        return keyValue;
+      }
+    }
+    return null;
   }
 
 }

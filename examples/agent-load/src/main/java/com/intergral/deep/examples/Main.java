@@ -18,7 +18,6 @@
 package com.intergral.deep.examples;
 
 
-import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.api.DeepAPI;
 import java.util.Collections;
 
@@ -46,27 +45,22 @@ public class Main {
     // java.lang.IllegalStateException: Must start Deep first!
     System.out.println(DeepAPI.api().getVersion());
 
-    // Use the API to register a plugin
-    // This plugin will attach the attribute 'example' to the created snapshot
-    // you should also see the log line 'custom plugin' when you run this example
-    DeepAPI.api().registerPlugin((settings, snapshot) -> {
-      System.out.println("custom plugin");
-      return Resource.create(Collections.singletonMap("example", "agent_load"));
-    });
-
     // USe the API to create a tracepoint that will fire forever
     DeepAPI.api()
         .registerTracepoint("com/intergral/deep/examples/SimpleTest", 46, Collections.singletonMap("fire_count", "-1"),
             Collections.emptyList());
 
     final SimpleTest ts = new SimpleTest("This is a test", 2);
+    //noinspection InfiniteLoopStatement
     for (; ; ) {
       try {
         ts.message(ts.newId());
       } catch (Exception e) {
+        //noinspection CallToPrintStackTrace
         e.printStackTrace();
       }
 
+      //noinspection BusyWait
       Thread.sleep(1000);
     }
   }

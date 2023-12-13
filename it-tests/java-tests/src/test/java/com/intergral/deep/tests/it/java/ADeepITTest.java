@@ -35,14 +35,13 @@ import com.intergral.deep.tests.grpc.TestPollService;
 import com.intergral.deep.tests.grpc.TestSnapshotService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
-import io.grpc.stub.StreamObserver;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
-import java.util.Collections;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import net.bytebuddy.agent.ByteBuddyAgent;
 import org.junit.jupiter.api.BeforeAll;
@@ -52,18 +51,16 @@ public abstract class ADeepITTest {
 
   protected static ResettableCountDownLatch grpcConnectLatch;
   protected static Server server;
-  protected static ResettableCountDownLatch snapshotlatch;
+  protected static ResettableCountDownLatch snapshotLatch;
   protected static PollResponse nextResponse;
   protected static Object nerdVision;
 
   protected static AtomicReference<Snapshot> snapshotAtomicReference = new AtomicReference<>();
-  private static TestPollService pollService;
-  private static TestSnapshotService snapshotService;
 
 
   @BeforeAll
   static void beforeAll() throws Exception {
-    snapshotlatch = new ResettableCountDownLatch(1);
+    snapshotLatch = new ResettableCountDownLatch(1);
     grpcConnectLatch = new ResettableCountDownLatch(1);
 
     if (nerdVision != null) {
@@ -71,43 +68,41 @@ public abstract class ADeepITTest {
     }
     // we have to be careful with the class loading when testing the agent in our own tests
     // we build all the message objects here to ensure we load into the correct classloader
+    //noinspection unused
     final PollResponse build = PollResponse.newBuilder()
         .setCurrentHash("")
         .setResponseType(ResponseType.UPDATE)
         .addResponse(TracePointConfig.newBuilder().setPath("").setLineNumber(1).build())
         .build();
+    //noinspection unused
     final PollRequest pollRequest = PollRequest.newBuilder()
         .setResource(Resource.newBuilder().addAttributes(KeyValue.newBuilder()
             .setKey("").setValue(AnyValue.newBuilder().build()).build()).build())
         .build();
     SnapshotResponse.newBuilder().build();
     WatchResult.newBuilder().build();
+    //noinspection unused
     final WatchResult.ResultCase goodResult = WatchResult.ResultCase.GOOD_RESULT;
-    Snapshot.newBuilder()
+    //noinspection unused
+    final Snapshot snapshot = Snapshot.newBuilder()
         .addFrames(StackFrame.newBuilder().addVariables(VariableID.newBuilder().build()).build())
         .putVarLookup("", Variable.newBuilder().build())
         .build();
+    // See comment above
 
-    pollService = new TestPollService(new TestPollService.ICallback() {
-      @Override
-      public void poll(final PollRequest request, final StreamObserver<PollResponse> observer) {
-        if (nextResponse != null) {
-          observer.onNext(nextResponse);
-        }
-        observer.onCompleted();
-        grpcConnectLatch.countDown();
+    TestPollService pollService = new TestPollService((request, observer) -> {
+      if (nextResponse != null) {
+        observer.onNext(nextResponse);
       }
+      observer.onCompleted();
+      grpcConnectLatch.countDown();
     });
 
-    snapshotService = new TestSnapshotService(new TestSnapshotService.ICallback() {
-      @Override
-      public void send(final Snapshot request,
-          final StreamObserver<SnapshotResponse> responseObserver) {
-        System.out.println("send");
-        snapshotAtomicReference.set(request);
-        responseObserver.onCompleted();
-        snapshotlatch.countDown();
-      }
+    TestSnapshotService snapshotService = new TestSnapshotService((request, responseObserver) -> {
+      System.out.println("send");
+      snapshotAtomicReference.set(request);
+      responseObserver.onCompleted();
+      snapshotLatch.countDown();
     });
 
     server = ServerBuilder.forPort(9898)
@@ -116,24 +111,30 @@ public abstract class ADeepITTest {
         .build();
     server.start();
 
-    final String nvPath = System.getProperty("mvn.agentPath",
-        "/home/bdonnell/repo/github/intergral/deep-java-client/deep-java-client/agent/target/agent-1.0-SNAPSHOT.jar");
+    //noinspection DataFlowIssue
+    final Path rootPath = Paths.get(ADeepITTest.class.getResource("/").toURI())
+        .getParent() // test
+        .getParent() // src
+        .getParent() // java-tests
+        .getParent(); // it-tests
+    final Path jarPath = rootPath // root
+        .resolve("agent/target/agent-1.0-SNAPSHOT.jar");
+
+    final String nvPath = System.getProperty("mvn.agentPath", jarPath.toAbsolutePath().toString());
 
     final Map<String, String> config = new HashMap<>();
     config.put("service.url", "localhost:9898");
     config.put("service.secure", "false");
     config.put("logging.level", "FINE");
     config.put("deep.path", nvPath);
-    config.put("transform.path",
-        "/home/bdonnell/repo/github/intergral/deep-java-client/deep-java-client/dispath");
+    config.put("transform.path", rootPath.resolve("dispath").toAbsolutePath().toString());
 
     ByteBuddyAgent.attach(new File(nvPath), getPid(), configAsArgs(config));
 
     final Class<?> aClass = Class.forName("com.intergral.deep.agent.AgentImpl");
     final Method registerBreakpointService = aClass.getDeclaredMethod("loadDeepAPI");
-    final Object invoke = registerBreakpointService.invoke(null);
 
-    nerdVision = invoke;
+    nerdVision = registerBreakpointService.invoke(null);
   }
 
   static String getPid() {
@@ -152,13 +153,9 @@ public abstract class ADeepITTest {
     return stringBuilder.toString();
   }
 
-  public static <T> Set<T> setOf(final T frame) {
-    return Collections.singleton(frame);
-  }
-
   @BeforeEach
   void setUp() {
-    snapshotlatch = new ResettableCountDownLatch(1);
+    snapshotLatch = new ResettableCountDownLatch(1);
     grpcConnectLatch = new ResettableCountDownLatch(1);
 
   }

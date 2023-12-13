@@ -59,29 +59,25 @@ import org.mockito.Mockito;
 
 class LongPollServiceTest {
 
-
   private Server server;
   private LongPollService longPollService;
 
   private final AtomicReference<PollRequest>  request = new AtomicReference<>(null);
   private PollResponse response;
-  private Throwable responseError;
-  private int port;
   private GrpcService grpcService;
 
   @BeforeEach
   void setUp() throws IOException {
     final TestPollService testPollService = new TestPollService((req, responseObserver) -> {
       request.set(req);
-      if (responseError != null) {
-        responseObserver.onError(responseError);
-      } else {
-        responseObserver.onNext(response);
-      }
+
+      responseObserver.onNext(response);
+
       responseObserver.onCompleted();
     });
 
     // find a free port
+    int port;
     try (ServerSocket socket = new ServerSocket(0)) {
       port = socket.getLocalPort();
     }
@@ -183,6 +179,7 @@ class LongPollServiceTest {
 
     longPollService.run(100);
 
+    //noinspection unchecked
     final ArgumentCaptor<Collection<com.intergral.deep.agent.types.TracePointConfig>> captor = ArgumentCaptor.forClass(Collection.class);
     verify(instrumentationService).processBreakpoints(captor.capture());
 

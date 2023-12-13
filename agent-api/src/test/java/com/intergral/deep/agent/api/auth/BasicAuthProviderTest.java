@@ -29,7 +29,8 @@ class BasicAuthProviderTest {
   @Test
   void canProvide() {
     final ISettings settings = Mockito.mock(ISettings.class);
-    final BasicAuthProvider basicAuthProvider = new BasicAuthProvider(settings);
+    final BasicAuthProvider basicAuthProvider = new BasicAuthProvider();
+    basicAuthProvider.configure(settings, null);
 
     assertEquals(0, basicAuthProvider.provide().size());
   }
@@ -38,7 +39,8 @@ class BasicAuthProviderTest {
   void canProvide_settings() {
     final ISettings settings = Mockito.mock(ISettings.class);
     Mockito.doReturn("username").doReturn("password").when(settings).getSettingAs(Mockito.anyString(), Mockito.any());
-    final BasicAuthProvider basicAuthProvider = new BasicAuthProvider(settings);
+    final BasicAuthProvider basicAuthProvider = new BasicAuthProvider();
+    basicAuthProvider.configure(settings, null);
 
     final Map<String, String> provide = basicAuthProvider.provide();
     assertEquals(1, provide.size());
@@ -49,7 +51,8 @@ class BasicAuthProviderTest {
   void canProvide_missingUsername() {
     final ISettings settings = Mockito.mock(ISettings.class);
     Mockito.doReturn(null).doReturn("password").when(settings).getSettingAs(Mockito.anyString(), Mockito.any());
-    final BasicAuthProvider basicAuthProvider = new BasicAuthProvider(settings);
+    final BasicAuthProvider basicAuthProvider = new BasicAuthProvider();
+    basicAuthProvider.configure(settings, null);
 
     final Map<String, String> provide = basicAuthProvider.provide();
     assertEquals(0, provide.size());
@@ -59,7 +62,8 @@ class BasicAuthProviderTest {
   void canProvide_missingPassword() {
     final ISettings settings = Mockito.mock(ISettings.class);
     Mockito.doReturn("username").doReturn(null).when(settings).getSettingAs(Mockito.anyString(), Mockito.any());
-    final BasicAuthProvider basicAuthProvider = new BasicAuthProvider(settings);
+    final BasicAuthProvider basicAuthProvider = new BasicAuthProvider();
+    basicAuthProvider.configure(settings, null);
 
     final Map<String, String> provide = basicAuthProvider.provide();
     assertEquals(0, provide.size());

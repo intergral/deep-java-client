@@ -19,17 +19,12 @@ package com.intergral.deep.agent;
 
 import com.intergral.deep.agent.api.DeepVersion;
 import com.intergral.deep.agent.api.IDeep;
-import com.intergral.deep.agent.api.auth.IAuthProvider;
-import com.intergral.deep.agent.api.logger.ITracepointLogger;
-import com.intergral.deep.agent.api.plugin.IPlugin;
-import com.intergral.deep.agent.api.plugin.IPlugin.IPluginRegistration;
 import com.intergral.deep.agent.api.resource.Resource;
-import com.intergral.deep.agent.api.settings.ISettings;
-import com.intergral.deep.agent.api.spi.ResourceProvider;
+import com.intergral.deep.agent.api.spi.IDeepPlugin;
 import com.intergral.deep.agent.api.tracepoint.ITracepoint;
 import com.intergral.deep.agent.api.tracepoint.ITracepoint.ITracepointRegistration;
 import com.intergral.deep.agent.grpc.GrpcService;
-import com.intergral.deep.agent.plugins.PluginLoader;
+import com.intergral.deep.agent.plugins.PluginSpiLoader;
 import com.intergral.deep.agent.poll.LongPollService;
 import com.intergral.deep.agent.push.PushService;
 import com.intergral.deep.agent.resource.ResourceDetector;
@@ -42,15 +37,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This is the agent that is provided via the API, and is what holds all deep together.
  */
 public class DeepAgent implements IDeep {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(DeepAgent.class);
   private final Settings settings;
   private final GrpcService grpcService;
   private final LongPollService pollService;
@@ -77,8 +69,8 @@ public class DeepAgent implements IDeep {
    * Start deep.
    */
   public void start() {
-    final List<IPlugin> iLoadedPlugins = PluginLoader.loadPlugins(settings, Reflection.getInstance());
-    final Resource resource = ResourceDetector.configureResource(settings, DeepAgent.class.getClassLoader());
+    final List<IDeepPlugin> iLoadedPlugins = PluginSpiLoader.loadPlugins(settings, Reflection.getInstance(), DeepAgent.class.getClassLoader());
+    final Resource resource = ResourceDetector.configureResource(this.settings, iLoadedPlugins);
     this.settings.setPlugins(iLoadedPlugins);
     this.settings.setResource(Resource.DEFAULT.merge(resource));
     this.grpcService.start();
@@ -88,70 +80,6 @@ public class DeepAgent implements IDeep {
   @Override
   public String getVersion() {
     return DeepVersion.VERSION;
-  }
-
-  @Override
-  public IPluginRegistration registerPlugin(final IPlugin plugin) {
-    this.settings.addPlugin(plugin);
-
-    boolean isResourceProvider = false;
-    // if plugin provides resource definitions then merge them into the resource
-    if (plugin instanceof ResourceProvider) {
-      try {
-        final Resource resource = ((ResourceProvider) plugin).createResource(this.settings);
-        this.settings.setResource(this.settings.getResource().merge(resource));
-        isResourceProvider = true;
-      } catch (Throwable t) {
-        LOGGER.error("Cannot create resource from plugin: {}", plugin.name(), t);
-      }
-    }
-
-    final boolean isAuthProvider;
-    if (plugin instanceof IAuthProvider) {
-      final String settingAs = this.settings.getSettingAs(ISettings.KEY_AUTH_PROVIDER, String.class);
-      isAuthProvider = settingAs != null && settingAs.equals(plugin.getClass().getName());
-    } else {
-      isAuthProvider = false;
-    }
-
-    if (plugin instanceof ITracepointLogger) {
-      this.settings.setTracepointLogger((ITracepointLogger) plugin);
-    }
-
-    final boolean finalIsResourceProvider = isResourceProvider;
-    return new IPluginRegistration() {
-
-      @Override
-      public boolean isResourceProvider() {
-        return finalIsResourceProvider;
-      }
-
-      @Override
-      public boolean isTracepointLogger() {
-        //noinspection ObjectEquality,EqualsBetweenInconvertibleTypes
-        return DeepAgent.this.settings.getTracepointLogger() == plugin;
-      }
-
-      @Override
-      public boolean isAuthProvider() {
-        return isAuthProvider;
-      }
-
-      @Override
-      public void unregister() {
-        settings.removePlugin(plugin);
-        // if plugin provides resource definitions then we need to recalculate the resource
-        if (plugin instanceof ResourceProvider) {
-          final Resource resource = ResourceDetector.configureResource(settings, DeepAgent.class.getClassLoader());
-          DeepAgent.this.settings.setResource(Resource.DEFAULT.merge(resource));
-        }
-      }
-
-      @Override
-      public IPlugin get() {
-        return plugin;
-      }
-    };
   }
 
   @Override
