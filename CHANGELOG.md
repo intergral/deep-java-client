@@ -1,5 +1,16 @@
-# 1.1.1 (xx/xx/2023)
+# 1.2.0 (xx/xx/2023)
+- **[CHANGE]**: plugin: Change the plugins to use SPI to load [#77](https://github.com/intergral/deep/pull/77) [@Umaaz](https://github.com/Umaaz)
 
+# 1.1.2 (29/09/2023)
+- **[CHANGE]**: version: Override grpc-netty dependencies to remove CVE [#44](https://github.com/intergral/deep/pull/44) [@LMarkie](https://github.com/LMarkie)
+- **[BUGFIX]**: build: change mvn dep graph to run only on master [#45](https://github.com/intergral/deep/pull/45) [@Umaaz](https://github.com/Umaaz)
+- **[BUGFIX]**: build: update build to ensure agent is built for cf-tests [#55](https://github.com/intergral/deep/pull/55) [@Umaaz](https://github.com/Umaaz)
+- **[Snyk]**:  Upgrade: net.bytebuddy:byte-buddy-agent from 1.14.4 to 1.14.7 [#43](https://github.com/intergral/deep/pull/43) [@Umaaz](https://github.com/Umaaz)
+
+# 1.1.1 (25/09/2023)
+- **[CHANGE]**: reflection: reduce duplicate reflection code and proxy style [#34](https://github.com/intergral/deep/pull/34) [@Umaaz](https://github.com/Umaaz)
+- **[Snyk]**: vulnerability: Fix for 1 vulnerability [#35](https://github.com/intergral/deep/pull/35) [@Umaaz](https://github.com/Umaaz)
+- **[Snyk]**: Upgrade: org.junit.jupiter:junit-jupiter from 5.9.3 to 5.10.0 [#38](https://github.com/intergral/deep/pull/38) [@Umaaz](https://github.com/Umaaz)
 
 # 1.1.0 (06/09/2023)
 

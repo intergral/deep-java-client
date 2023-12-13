@@ -58,14 +58,6 @@ public interface IDeep {
   String getVersion();
 
   /**
-   * This allows the registration of custom plugins.
-   *
-   * @param plugin the plugin that can be used to decorate snapshots
-   * @return a {@link IPluginRegistration} that can be used to unregister the plugin
-   */
-  IPluginRegistration registerPlugin(final IPlugin plugin);
-
-  /**
    * Create a tracepoint that will only exist on this instance.
    *
    * @param path the path to the file

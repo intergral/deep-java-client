@@ -24,10 +24,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.plugin.ISnapshotContext;
+import com.intergral.deep.agent.api.plugin.ISnapshotDecorator;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
+import com.intergral.deep.agent.api.spi.IDeepPlugin;
 import com.intergral.deep.agent.grpc.GrpcService;
 import com.intergral.deep.agent.push.PushService.LoggingObserver;
 import com.intergral.deep.agent.settings.Settings;
@@ -77,7 +78,8 @@ class PushServiceTest {
 
   @Test
   void doesDecorate() {
-    settings.addPlugin(new TestDecorator());
+
+    settings.setPlugins(Collections.singleton(new TestDecorator()));
 
     final ISnapshotContext context = Mockito.mock(ISnapshotContext.class);
     pushService.pushSnapshot(new MockEventSnapshot(), context);
@@ -94,7 +96,7 @@ class PushServiceTest {
     assertEquals("value", attributes.getValue().getStringValue());
   }
 
-  public static class TestDecorator implements IPlugin {
+  public static class TestDecorator implements IDeepPlugin, ISnapshotDecorator {
 
     @Override
     public Resource decorate(final ISettings settings, final ISnapshotContext snapshot) {

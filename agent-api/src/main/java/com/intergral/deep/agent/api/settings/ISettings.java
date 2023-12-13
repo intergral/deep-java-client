@@ -17,7 +17,6 @@
 
 package com.intergral.deep.agent.api.settings;
 
-import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.resource.Resource;
 import java.util.List;
 import java.util.Map;
@@ -46,11 +45,6 @@ public interface ISettings {
    * This is the setting key for the service secure setting.
    */
   String KEY_SERVICE_SECURE = "service.secure";
-
-  /**
-   * This is the setting key for the plugin list.
-   */
-  String PLUGINS = "plugins";
 
   /**
    * To let us calculate the class and file names for JSP classes we need to know the JSP suffix that is being used by monitored service.
@@ -127,12 +121,4 @@ public interface ISettings {
    * @return the {@link Resource}
    */
   Resource getResource();
-
-  /**
-   * Look for a plugin with the given name or class name.
-   *
-   * @param name the plugin name or the plugin class name
-   * @return the {@link IPlugin} or {@code null}
-   */
-  IPlugin getPlugin(final String name);
 }

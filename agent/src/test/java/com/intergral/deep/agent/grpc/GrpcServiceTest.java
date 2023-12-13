@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import com.intergral.deep.agent.api.auth.IAuthProvider;
 import com.intergral.deep.agent.api.settings.ISettings;
+import com.intergral.deep.agent.api.spi.IDeepPlugin;
 import com.intergral.deep.agent.logging.Logger;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.proto.poll.v1.PollRequest;
@@ -55,7 +56,6 @@ class GrpcServiceTest {
   private CountDownLatch pollLatch;
   private final AtomicReference<PollRequest> pollRequest = new AtomicReference<>();
   private CountDownLatch snapshotLatch;
-  private final AtomicReference<Snapshot> snapshotRequest = new AtomicReference<>();
 
   private final AtomicReference<String> header = new AtomicReference<>();
   private int port;
@@ -76,7 +76,6 @@ class GrpcServiceTest {
     final TestSnapshotService testSnapshotService = new TestSnapshotService((snapshot, responseObserver) -> {
       final String headerVal = testInterceptor.contextKey().get();
       header.set(headerVal);
-      snapshotRequest.set(snapshot);
       snapshotLatch.countDown();
       responseObserver.onNext(SnapshotResponse.newBuilder().build());
       responseObserver.onCompleted();
@@ -119,10 +118,13 @@ class GrpcServiceTest {
     map.put(ISettings.KEY_SERVICE_SECURE, "false");
     map.put(ISettings.KEY_AUTH_PROVIDER, MockAuthProvider.class.getName());
 
-    grpcService = new GrpcService(Settings.build(map));
+    final Settings build = Settings.build(map);
+    build.setPlugins(Collections.singleton(new MockAuthProvider()));
+    grpcService = new GrpcService(build);
 
     final PollResponse pollResponse = grpcService.pollService().poll(PollRequest.newBuilder().setTsNanos(101010L).build());
     assertEquals(202020L, pollResponse.getTsNanos());
+    //noinspection ResultOfMethodCallIgnored
     pollLatch.await(5, TimeUnit.SECONDS);
 
     final PollRequest pollRequest = this.pollRequest.get();
@@ -139,7 +141,9 @@ class GrpcServiceTest {
     map.put(ISettings.KEY_SERVICE_SECURE, "false");
     map.put(ISettings.KEY_AUTH_PROVIDER, MockAuthProvider.class.getName());
 
-    grpcService = new GrpcService(Settings.build(map));
+    final Settings build = Settings.build(map);
+    build.setPlugins(Collections.singleton(new MockAuthProvider()));
+    grpcService = new GrpcService(build);
 
     final CountDownLatch responseLatch = new CountDownLatch(1);
     final AtomicReference<SnapshotResponse> responseAtomicReference = new AtomicReference<>();
@@ -162,6 +166,7 @@ class GrpcServiceTest {
 
           }
         });
+    //noinspection ResultOfMethodCallIgnored
     responseLatch.await(5, TimeUnit.SECONDS);
     final SnapshotResponse snapshotResponse = responseAtomicReference.get();
     assertNotNull(snapshotResponse);
@@ -169,7 +174,7 @@ class GrpcServiceTest {
   }
 
 
-  public static class MockAuthProvider implements IAuthProvider {
+  public static class MockAuthProvider implements IAuthProvider, IDeepPlugin {
 
     @Override
     public Map<String, String> provide() {

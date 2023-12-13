@@ -17,10 +17,12 @@
 
 package com.intergral.deep.plugin.cf;
 
-import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.plugin.ISnapshotContext;
+import com.intergral.deep.agent.api.plugin.ISnapshotDecorator;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
+import com.intergral.deep.agent.api.spi.IConditional;
+import com.intergral.deep.agent.api.spi.IDeepPlugin;
 import java.util.HashMap;
 
 /**
@@ -28,7 +30,7 @@ import java.util.HashMap;
  * <p>
  * This plugin will attach the cf version and the cf app name to the captured snapshots.
  */
-public class CFPlugin implements IPlugin {
+public class CFPlugin implements IDeepPlugin, IConditional, ISnapshotDecorator {
 
   @Override
   public Resource decorate(final ISettings settings, final ISnapshotContext context) {
@@ -48,10 +50,7 @@ public class CFPlugin implements IPlugin {
   }
 
   @Override
-  public boolean isActive(final ISettings settings) {
-    if (!Utils.isCFServer()) {
-      return false;
-    }
-    return IPlugin.super.isActive(settings);
+  public boolean isActive() {
+    return Utils.isCFServer();
   }
 }

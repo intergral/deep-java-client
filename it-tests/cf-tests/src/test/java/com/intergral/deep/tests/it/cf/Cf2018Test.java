@@ -17,9 +17,23 @@
 
 package com.intergral.deep.tests.it.cf;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.intergral.deep.proto.common.v1.KeyValue;
+import com.intergral.deep.proto.tracepoint.v1.Snapshot;
+
 public class Cf2018Test extends ACFTest {
 
   public Cf2018Test() {
     super("adobecoldfusion/coldfusion:latest-2018");
   }
+
+  @Override
+  protected void checkPluignData(final Snapshot snapshot) {
+    final KeyValue cfVersion = findAttribute(snapshot, "cf_version");
+    assertEquals("2018", cfVersion.getValue().getStringValue());
+    final KeyValue appName = findAttribute(snapshot, "app_name");
+    assertEquals("cf-test-app", appName.getValue().getStringValue());
+  }
+
 }

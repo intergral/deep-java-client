@@ -17,10 +17,10 @@
 
 package com.intergral.deep.agent.grpc;
 
-import com.intergral.deep.agent.Reflection;
-import com.intergral.deep.agent.api.auth.AuthProvider;
+import com.intergral.deep.agent.api.DeepRuntimeException;
 import com.intergral.deep.agent.api.auth.IAuthProvider;
 import com.intergral.deep.agent.api.settings.ISettings;
+import com.intergral.deep.agent.api.spi.IDeepPlugin;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.proto.poll.v1.PollConfigGrpc;
 import com.intergral.deep.proto.tracepoint.v1.SnapshotServiceGrpc;
@@ -37,6 +37,8 @@ import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.PreferHeapByteBufAllocator;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -166,7 +168,7 @@ public class GrpcService {
   }
 
   private Metadata buildMetaData() {
-    final IAuthProvider provider = AuthProvider.provider(this.settings, Reflection.getInstance());
+    final IAuthProvider provider = loadAuth();
     final Map<String, String> headers = provider.provide();
 
     final Metadata metadata = new Metadata();
@@ -175,5 +177,33 @@ public class GrpcService {
           header.getValue());
     }
     return metadata;
+  }
+
+  private IAuthProvider loadAuth() {
+    final String settingAs = this.settings.getSettingAs("service.auth.provider", String.class);
+    if (settingAs == null || settingAs.isEmpty()) {
+      return new NoopProvider();
+    }
+
+    final Collection<IDeepPlugin> plugins = this.settings.getPlugins();
+    for (IDeepPlugin plugin : plugins) {
+      if (plugin.getClass().getName().equals(settingAs)) {
+        if (plugin instanceof IAuthProvider) {
+          return (IAuthProvider) plugin;
+        } else {
+          throw new DeepRuntimeException(
+              String.format("Cannot use plugin %s as auth provider, must implement IAuthProvider interface.", plugin.getClass().getName()));
+        }
+      }
+    }
+    throw new DeepRuntimeException(String.format("Cannot load auth provider %s", settingAs));
+  }
+
+  static class NoopProvider implements IAuthProvider {
+
+    @Override
+    public Map<String, String> provide() {
+      return Collections.emptyMap();
+    }
   }
 }

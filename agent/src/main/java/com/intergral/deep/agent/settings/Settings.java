@@ -20,11 +20,10 @@ package com.intergral.deep.agent.settings;
 import com.intergral.deep.agent.api.logger.ITracepointLogger;
 import com.intergral.deep.agent.api.logger.TracepointLogger;
 import com.intergral.deep.agent.api.plugin.IMetricProcessor;
-import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
+import com.intergral.deep.agent.api.spi.IDeepPlugin;
 import com.intergral.deep.agent.api.spi.MetricProvider;
-import com.intergral.deep.agent.resource.SpiUtil;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -38,7 +37,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
@@ -50,9 +48,8 @@ import java.util.regex.Pattern;
 public class Settings implements ISettings {
   private static final AtomicBoolean IS_ACTIVE = new AtomicBoolean(true);
   private final Properties properties;
-  private final Collection<IPlugin> customPlugins = new ArrayList<>();
   private Resource resource;
-  private Collection<IPlugin> plugins = Collections.emptyList();
+  private Collection<IDeepPlugin> plugins = Collections.emptyList();
   private ITracepointLogger tracepointLogger = new TracepointLogger();
   private IMetricProcessor metricProcessor;
 
@@ -233,6 +230,7 @@ public class Settings implements ISettings {
     return coerc(systemProperty, clazz);
   }
 
+  @SuppressWarnings({"rawtypes", "unchecked"})
   @Override
   public Map<String, String> getMap(String key) {
     final Map settingAs = getSettingAs(key, Map.class);
@@ -304,6 +302,7 @@ public class Settings implements ISettings {
    * @param key the key for the setting
    * @return the value as a list
    */
+  @SuppressWarnings({"rawtypes", "unchecked"})
   public List<String> getAsList(final String key) {
     final List settingAs = getSettingAs(key, List.class);
     if (settingAs == null) {
@@ -317,10 +316,8 @@ public class Settings implements ISettings {
    *
    * @return the full list on plugins
    */
-  public Collection<IPlugin> getPlugins() {
-    final ArrayList<IPlugin> actualPlugins = new ArrayList<>(this.plugins);
-    actualPlugins.addAll(this.customPlugins);
-    return actualPlugins;
+  public Collection<IDeepPlugin> getPlugins() {
+    return new ArrayList<>(this.plugins);
   }
 
   /**
@@ -328,43 +325,8 @@ public class Settings implements ISettings {
    *
    * @param plugins the plugins to use
    */
-  public void setPlugins(Collection<IPlugin> plugins) {
+  public void setPlugins(Collection<IDeepPlugin> plugins) {
     this.plugins = plugins;
-  }
-
-  /**
-   * Add a custom plugin.
-   *
-   * @param plugin the plugin to add
-   * @see com.intergral.deep.agent.api.IDeep#registerPlugin(IPlugin)
-   */
-  public void addPlugin(final IPlugin plugin) {
-    final Optional<IPlugin> first = this.customPlugins.stream().filter(current -> current.name().equals(plugin.name())).findFirst();
-    if (first.isPresent()) {
-      throw new IllegalStateException(String.format("Cannot add duplicate named (%s) plugin", plugin.name()));
-    }
-    this.customPlugins.add(plugin);
-  }
-
-  /**
-   * Remove a plugin that was added via {@link #addPlugin(IPlugin)}.
-   *
-   * @param plugin the plugin to remove
-   */
-  public void removePlugin(final IPlugin plugin) {
-    this.customPlugins.removeIf(current -> current.name().equals(plugin.name()));
-  }
-
-
-  @Override
-  public IPlugin getPlugin(final String name) {
-    final Collection<IPlugin> allPlugins = this.getPlugins();
-    for (IPlugin plugin : allPlugins) {
-      if (plugin.name().equals(name) || plugin.getClass().getName().equals(name)) {
-        return plugin;
-      }
-    }
-    return null;
   }
 
   /**
