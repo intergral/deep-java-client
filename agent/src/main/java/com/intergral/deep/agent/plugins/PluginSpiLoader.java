@@ -28,12 +28,24 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * This acts as the main loader for plugins using the SPI loader system.
+ */
 public class PluginSpiLoader {
 
   // Visible for testing
   static final String ENABLED_PLUGIN_KEY = "deep.java.enabled.plugin";
   static final String DISABLED_PLUGIN_KEY = "deep.java.disabled.plugin";
 
+  /**
+   * Load all available plugins.
+   *
+   * @param settings   the current settings
+   * @param reflection the reflection service
+   * @param loader     the classloader to use
+   * @return the list of loaded plugins in order
+   * @see IDeepPlugin
+   */
   public static List<IDeepPlugin> loadPlugins(final ISettings settings, final IReflection reflection, final ClassLoader loader) {
     Set<String> enabledProviders =
         new HashSet<>(settings.getAsList(ENABLED_PLUGIN_KEY));
@@ -41,14 +53,14 @@ public class PluginSpiLoader {
         new HashSet<>(settings.getAsList(DISABLED_PLUGIN_KEY));
     final List<IDeepPlugin> iDeepPlugins = SpiUtil.loadOrdered(IDeepPlugin.class, loader);
     return iDeepPlugins.stream()
-        .filter(iDeepPlugin -> !ResourceDetector.isDisabled(iDeepPlugin.getClass(), enabledProviders, disabledProviders))
-        .filter(iDeepPlugin -> {
-          if (iDeepPlugin instanceof IConditional) {
-            return ((IConditional) iDeepPlugin).isActive();
+        .filter(plugin -> !ResourceDetector.isDisabled(plugin.getClass(), enabledProviders, disabledProviders))
+        .filter(plugin -> {
+          if (plugin instanceof IConditional) {
+            return ((IConditional) plugin).isActive();
           }
           return true;
         })
-        .map(iDeepPlugin -> iDeepPlugin.configure(settings, reflection))
+        .map(plugin -> plugin.configure(settings, reflection))
         .collect(Collectors.toList());
   }
 }

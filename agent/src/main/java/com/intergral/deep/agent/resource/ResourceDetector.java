@@ -73,12 +73,20 @@ public final class ResourceDetector {
     return result.merge(resourceProvider.createResource(settings));
   }
 
-  public static boolean isDisabled(final Class<?> providerClass, final Set<String> enabledProviders, final Set<String> disabledProviders) {
-    if (!enabledProviders.isEmpty()
-        && !enabledProviders.contains(providerClass.getName())) {
+  /**
+   * Check if a class is disabled based on the list of enabled and disabled classes.
+   *
+   * @param providerClass   the class to check
+   * @param enabledClasses  the enabled classes
+   * @param disabledClasses the disabled classes
+   * @return {@code true} if the class should be disabled, else {@code false}
+   */
+  public static boolean isDisabled(final Class<?> providerClass, final Set<String> enabledClasses, final Set<String> disabledClasses) {
+    if (!enabledClasses.isEmpty()
+        && !enabledClasses.contains(providerClass.getName())) {
       return true;
     }
-    return disabledProviders.contains(providerClass.getName());
+    return disabledClasses.contains(providerClass.getName());
   }
 
   // visible for testing

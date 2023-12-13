@@ -23,6 +23,9 @@ import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
 import com.intergral.deep.agent.api.spi.IDeepPlugin;
 
+/**
+ * This is an example plugin.
+ */
 public class MyPlugin implements IDeepPlugin, ISnapshotDecorator {
 
   @Override

@@ -227,6 +227,7 @@ public abstract class ACFTest {
   }
 
   protected abstract void checkPluignData(final Snapshot snapshot);
+
   protected KeyValue findAttribute(final Snapshot snapshot, final String key) {
     final List<KeyValue> attributesList = snapshot.getAttributesList();
     for (KeyValue keyValue : attributesList) {
