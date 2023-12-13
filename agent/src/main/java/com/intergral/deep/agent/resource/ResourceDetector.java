@@ -5,13 +5,14 @@
 
 package com.intergral.deep.agent.resource;
 
-import com.intergral.deep.agent.api.plugin.IPlugin;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.spi.ConditionalResourceProvider;
+import com.intergral.deep.agent.api.spi.IDeepPlugin;
 import com.intergral.deep.agent.api.spi.ResourceProvider;
 import com.intergral.deep.agent.settings.Settings;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,18 +25,18 @@ public final class ResourceDetector {
   }
 
   // Visible for testing
-  static final String DISABLED_ATTRIBUTE_KEYS = "deep.resource.disabled.keys";
-  static final String ENABLED_PROVIDERS_KEY = "deep.java.enabled.resource.providers";
-  static final String DISABLED_PROVIDERS_KEY = "deep.java.disabled.resource.providers";
+  static final String DISABLED_ATTRIBUTE_KEYS = "resource.disabled.keys";
+  static final String ENABLED_PROVIDERS_KEY = "java.enabled.resource.providers";
+  static final String DISABLED_PROVIDERS_KEY = "java.disabled.resource.providers";
 
   /**
    * Create and configure a resource for this agent.
    *
-   * @param settings           the settings for the agent
-   * @param serviceClassLoader the class loader to use to load the SPI services
+   * @param settings the settings for the agent
+   * @param plugins  the list of discovered plugins
    * @return the loaded resource
    */
-  public static Resource configureResource(Settings settings, ClassLoader serviceClassLoader) {
+  public static Resource configureResource(final Settings settings, final List<IDeepPlugin> plugins) {
     Resource result = Resource.create(Collections.emptyMap());
 
     Set<String> enabledProviders =
@@ -43,19 +44,11 @@ public final class ResourceDetector {
     Set<String> disabledProviders =
         new HashSet<>(settings.getAsList(DISABLED_PROVIDERS_KEY));
 
-    for (ResourceProvider resourceProvider :
-        SpiUtil.loadOrdered(ResourceProvider.class, serviceClassLoader)) {
-      final Resource resource = getResource(settings, resourceProvider, enabledProviders, disabledProviders, result);
-      if (resource != null) {
-        result = resource;
-      }
-    }
-
-    // let plugins also act as resource providers
-    for (IPlugin plugin : settings.getPlugins()) {
+    for (IDeepPlugin plugin : plugins) {
       if (!(plugin instanceof ResourceProvider)) {
         continue;
       }
+
       final Resource resource = getResource(settings, (ResourceProvider) plugin, enabledProviders, disabledProviders, result);
       if (resource != null) {
         result = resource;
@@ -69,18 +62,31 @@ public final class ResourceDetector {
 
   private static Resource getResource(final Settings settings, final ResourceProvider resourceProvider, final Set<String> enabledProviders,
       final Set<String> disabledProviders, final Resource result) {
-    if (!enabledProviders.isEmpty()
-        && !enabledProviders.contains(resourceProvider.getClass().getName())) {
+    if (isDisabled(resourceProvider.getClass(), enabledProviders, disabledProviders)) {
       return null;
     }
-    if (disabledProviders.contains(resourceProvider.getClass().getName())) {
-      return null;
-    }
+
     if (resourceProvider instanceof ConditionalResourceProvider
         && !((ConditionalResourceProvider) resourceProvider).shouldApply(settings, result)) {
       return null;
     }
     return result.merge(resourceProvider.createResource(settings));
+  }
+
+  /**
+   * Check if a class is disabled based on the list of enabled and disabled classes.
+   *
+   * @param providerClass   the class to check
+   * @param enabledClasses  the enabled classes
+   * @param disabledClasses the disabled classes
+   * @return {@code true} if the class should be disabled, else {@code false}
+   */
+  public static boolean isDisabled(final Class<?> providerClass, final Set<String> enabledClasses, final Set<String> disabledClasses) {
+    if (!enabledClasses.isEmpty()
+        && !enabledClasses.contains(providerClass.getName())) {
+      return true;
+    }
+    return disabledClasses.contains(providerClass.getName());
   }
 
   // visible for testing

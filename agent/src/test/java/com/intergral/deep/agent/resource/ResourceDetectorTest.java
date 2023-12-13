@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.settings.Settings;
+import java.util.Collections;
 import java.util.HashMap;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +34,7 @@ class ResourceDetectorTest {
     agentArgs.put(ResourceDetector.ENABLED_PROVIDERS_KEY, "");
     agentArgs.put(ResourceDetector.DISABLED_PROVIDERS_KEY, JavaResourceDetector.class.getName());
     final Settings settings = Settings.build(agentArgs);
-    final Resource resource = ResourceDetector.configureResource(settings, getClass().getClassLoader());
+    final Resource resource = ResourceDetector.configureResource(settings, Collections.singletonList(new JavaResourceDetector()));
 
     assertNotNull(resource);
     assertEquals(0, resource.getAttributes().size());
@@ -42,7 +43,7 @@ class ResourceDetectorTest {
   @Test
   void loadResourceFromSettings() {
     final Settings settings = Settings.build(new HashMap<>());
-    final Resource resource = ResourceDetector.configureResource(settings, getClass().getClassLoader());
+    final Resource resource = ResourceDetector.configureResource(settings, Collections.singletonList(new JavaResourceDetector()));
     assertEquals(System.getProperty("java.version"), resource.getAttributes().get("java_version"));
   }
 
@@ -51,7 +52,7 @@ class ResourceDetectorTest {
     final HashMap<String, String> agentArgs = new HashMap<>();
     agentArgs.put(EnvironmentResourceProvider.ATTRIBUTE_PROPERTY, "key=value,other=thing");
     final Settings settings = Settings.build(agentArgs);
-    final Resource resource = ResourceDetector.configureResource(settings, getClass().getClassLoader());
+    final Resource resource = ResourceDetector.configureResource(settings, Collections.singletonList(new EnvironmentResourceProvider()));
 
     assertEquals("value", resource.getAttributes().get("key"));
     assertEquals("thing", resource.getAttributes().get("other"));

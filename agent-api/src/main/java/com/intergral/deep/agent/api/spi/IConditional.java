@@ -15,25 +15,17 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.agent.resource;
-
-import com.intergral.deep.agent.api.resource.Resource;
-import com.intergral.deep.agent.api.settings.ISettings;
-import com.intergral.deep.agent.api.spi.IDeepPlugin;
-import com.intergral.deep.agent.api.spi.ResourceProvider;
-import java.util.Collections;
+package com.intergral.deep.agent.api.spi;
 
 /**
- * A resource provider that detects the hava version to add to the resource.
+ * This interface allows an instance of {@link IDeepPlugin} to only be loaded based on a condition.
  */
-public class JavaResourceDetector implements IDeepPlugin, ResourceProvider {
+public interface IConditional {
 
-  @Override
-  public Resource createResource(final ISettings settings) {
-    final String property = System.getProperty("java.version");
-    if (property == null) {
-      return null;
-    }
-    return Resource.create(Collections.singletonMap("java_version", property));
-  }
+  /**
+   * Should determine if the plugin is active.
+   *
+   * @return {@code true} if and only if the plugins is active, else {@code false}
+   */
+  boolean isActive();
 }

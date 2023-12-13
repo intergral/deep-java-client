@@ -15,25 +15,25 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.agent.resource;
+package com.intergral.deep.tests.it.cf;
 
-import com.intergral.deep.agent.api.resource.Resource;
-import com.intergral.deep.agent.api.settings.ISettings;
-import com.intergral.deep.agent.api.spi.IDeepPlugin;
-import com.intergral.deep.agent.api.spi.ResourceProvider;
-import java.util.Collections;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * A resource provider that detects the hava version to add to the resource.
- */
-public class JavaResourceDetector implements IDeepPlugin, ResourceProvider {
+import com.intergral.deep.proto.common.v1.KeyValue;
+import com.intergral.deep.proto.tracepoint.v1.Snapshot;
+
+public class Cf2021Test extends ACFTest {
+
+  public Cf2021Test() {
+    super("adobecoldfusion/coldfusion:latest-2021");
+  }
 
   @Override
-  public Resource createResource(final ISettings settings) {
-    final String property = System.getProperty("java.version");
-    if (property == null) {
-      return null;
-    }
-    return Resource.create(Collections.singletonMap("java_version", property));
+  protected void checkPluignData(final Snapshot snapshot) {
+    final KeyValue cfVersion = findAttribute(snapshot, "cf_version");
+    assertEquals("2021", cfVersion.getValue().getStringValue());
+    final KeyValue appName = findAttribute(snapshot, "app_name");
+    assertEquals("cf-test-app", appName.getValue().getStringValue());
   }
+
 }
