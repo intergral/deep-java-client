@@ -31,7 +31,10 @@ import java.util.stream.Collectors;
 /**
  * This acts as the main loader for plugins using the SPI loader system.
  */
-public class PluginSpiLoader {
+public final class PluginSpiLoader {
+
+  private PluginSpiLoader() {
+  }
 
   // Visible for testing
   static final String ENABLED_PLUGIN_KEY = "deep.java.enabled.plugin";
