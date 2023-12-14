@@ -17,6 +17,7 @@
 
 package com.intergral.deep.test;
 
+import com.intergral.deep.agent.api.plugin.MetricDefinition;
 import com.intergral.deep.agent.types.TracePointConfig;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,6 +48,12 @@ public class MockTracepointConfig extends TracePointConfig {
 
   public MockTracepointConfig withWatches(final String... watches) {
     this.getWatches().addAll(Arrays.asList(watches));
+    return this;
+  }
+
+  public MockTracepointConfig withMetric() {
+    this.getMetricDefinitions()
+        .add(new MetricDefinition("name", new HashMap<>(), "COUNTER", "", "deep_agent", "Metric generated from expression: ", "unit"));
     return this;
   }
 }

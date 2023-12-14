@@ -114,19 +114,19 @@ public class LongPollService implements ITimerTask {
         .collect(Collectors.toList());
   }
 
-  private List<MetricDefinition> covertMetrics(final List<Metric> metricsList) {
+  List<MetricDefinition> covertMetrics(final List<Metric> metricsList) {
     if (metricsList == null || metricsList.isEmpty()) {
       return Collections.emptyList();
     }
     return metricsList.stream().map(
             metric -> new MetricDefinition(metric.getName(), metric.getTagsMap(), metric.getType().toString(), metric.getExpression(),
-                namespaceOrDefault(metric.getNamespace()), helpOrDefault(metric.getHelp(), metric.getExpression())))
+                namespaceOrDefault(metric.getNamespace()), helpOrDefault(metric.getHelp(), metric.getExpression()), metric.getUnit()))
         .collect(Collectors.toList());
   }
 
   private String namespaceOrDefault(final String namespace) {
     if (namespace == null || namespace.trim().isEmpty()) {
-      return "deep_metrics";
+      return "deep_agent";
     }
     return namespace;
   }

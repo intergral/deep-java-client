@@ -26,6 +26,7 @@ import com.intergral.deep.agent.api.plugin.ISnapshotContext;
 import com.intergral.deep.agent.api.plugin.MetricDefinition;
 import com.intergral.deep.agent.api.reflection.IReflection;
 import com.intergral.deep.agent.api.resource.Resource;
+import com.intergral.deep.agent.grpc.GrpcService;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.types.TracePointConfig;
 import com.intergral.deep.agent.types.snapshot.EventSnapshot;
@@ -36,11 +37,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This type deals with matching tracepoints to the current state and working out if we can collect the data.
  */
 public class FrameProcessor extends FrameCollector implements ISnapshotContext {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(GrpcService.class);
 
   /**
    * The tracepoints that have been triggered by the Callback.
@@ -175,46 +180,64 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
     return snapshots;
   }
 
-  private void processMetric(final TracePointConfig tracepoint, final MetricDefinition metricDefinition) {
-    final IExpressionResult iExpressionResult = evaluateWatchExpression(metricDefinition.getExpression());
-    final Number number = iExpressionResult.numberValue();
-    if (iExpressionResult.isError() || Double.isNaN(number.doubleValue())) {
-      //todo how do we want to handle metrics that cannot be handled
+  void processMetric(final TracePointConfig tracepoint, final MetricDefinition metricDefinition) {
+
+    final Collection<IMetricProcessor> metricProcessors = this.settings.getPlugins(IMetricProcessor.class);
+    if (metricProcessors.isEmpty()) {
       return;
+    }
+
+    final Number value;
+    if (!metricDefinition.getExpression().trim().isEmpty()) {
+      final IExpressionResult iExpressionResult = evaluateWatchExpression(metricDefinition.getExpression());
+      value = iExpressionResult.numberValue();
+      if (iExpressionResult.isError() || Double.isNaN(value.doubleValue())) {
+        // the result of the expression is an error or not a number, so we skip for now
+        return;
+      }
+    } else {
+      // if there is no expression than default the value to 1
+      value = 1d;
     }
 
     final HashMap<String, String> processedTags = new HashMap<>();
     final Map<String, String> tags = metricDefinition.getTags();
     for (Entry<String, String> entry : tags.entrySet()) {
       final IExpressionResult tagResult = evaluateWatchExpression(entry.getValue());
-      // todo check metric tag length
-      processedTags.put(entry.getKey(), Utils.truncate(tagResult.logString(), 200).value());
+      processedTags.put(entry.getKey(), tagResult.logString());
     }
 
-    final IMetricProcessor metricProcessor = this.settings.getMetricProcessor();
+    for (IMetricProcessor metricProcessor : metricProcessors) {
+      try {
+        switch (metricDefinition.getType()) {
+          case "GAUGE":
+            metricProcessor.gauge(metricDefinition.getName(), processedTags, metricDefinition.getNamespace(), metricDefinition.getHelp(),
+                metricDefinition.getUnit(),
+                value.doubleValue());
+            break;
+          case "COUNTER":
+            metricProcessor.counter(metricDefinition.getName(), processedTags, metricDefinition.getNamespace(), metricDefinition.getHelp(),
+                metricDefinition.getUnit(),
+                value.doubleValue());
+            break;
+          case "HISTOGRAM":
+            metricProcessor.histogram(metricDefinition.getName(), processedTags, metricDefinition.getNamespace(),
+                metricDefinition.getHelp(), metricDefinition.getUnit(),
+                value.doubleValue());
+            break;
+          case "SUMMARY":
+            metricProcessor.summary(metricDefinition.getName(), processedTags, metricDefinition.getNamespace(), metricDefinition.getHelp(),
+                metricDefinition.getUnit(),
+                value.doubleValue());
+            break;
+          default:
+            LOGGER.error("Unsupported metric type: {}", metricDefinition.getType());
+            break;
+        }
 
-    try {
-      switch (metricDefinition.getType()) {
-        case "gauge":
-          metricProcessor.gauge(metricDefinition.getName(), processedTags, metricDefinition.getNamespace(), metricDefinition.getHelp(),
-              number.doubleValue());
-          break;
-        case "counter":
-          metricProcessor.counter(metricDefinition.getName(), processedTags, metricDefinition.getNamespace(), metricDefinition.getHelp(),
-              number.doubleValue());
-          break;
-        case "histogram":
-          metricProcessor.histogram(metricDefinition.getName(), processedTags, metricDefinition.getNamespace(), metricDefinition.getHelp(),
-              number.doubleValue());
-          break;
-        case "summary":
-          metricProcessor.summary(metricDefinition.getName(), processedTags, metricDefinition.getNamespace(), metricDefinition.getHelp(),
-              number.doubleValue());
-          break;
+      } catch (Throwable t) {
+        LOGGER.error("Cannot process metric via {}", metricProcessor.getClass(), t);
       }
-
-    } catch (Throwable t) {
-      t.printStackTrace();
     }
   }
 

@@ -17,8 +17,6 @@
 
 package com.intergral.deep.agent.api;
 
-import com.intergral.deep.agent.api.plugin.IPlugin;
-import com.intergral.deep.agent.api.plugin.IPlugin.IPluginRegistration;
 import com.intergral.deep.agent.api.plugin.MetricDefinition;
 import com.intergral.deep.agent.api.tracepoint.ITracepoint.ITracepointRegistration;
 import java.util.Collection;

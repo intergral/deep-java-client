@@ -179,7 +179,8 @@ public class TracePointConfig {
   }
 
   /**
-   * Get the tracepoint metric definitions
+   * Get the tracepoint metric definitions.
+   *
    * @return the metric definitions
    */
   public Collection<MetricDefinition> getMetricDefinitions() {

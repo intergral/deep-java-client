@@ -1,5 +1,6 @@
 # 1.2.0 (xx/xx/2023)
 - **[CHANGE]**: plugin: Change the plugins to use SPI to load [#77](https://github.com/intergral/deep/pull/77) [@Umaaz](https://github.com/Umaaz)
+- **[FEATURE]**: metrics: Add support for metrics from tracepoints [#74](https://github.com/intergral/deep/pull/74) [@Umaaz](https://github.com/Umaaz)
 
 # 1.1.2 (29/09/2023)
 - **[CHANGE]**: version: Override grpc-netty dependencies to remove CVE [#44](https://github.com/intergral/deep/pull/44) [@LMarkie](https://github.com/LMarkie)

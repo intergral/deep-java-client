@@ -17,8 +17,10 @@
 
 package com.intergral.deep.plugin;
 
-import com.intergral.deep.agent.api.spi.ConditionalProvider;
-import com.intergral.deep.agent.api.spi.MetricProvider;
+import com.intergral.deep.agent.api.plugin.IMetricProcessor;
+import com.intergral.deep.agent.api.spi.IConditional;
+import com.intergral.deep.agent.api.spi.IDeepPlugin;
+import com.intergral.deep.agent.api.spi.Ordered;
 import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.core.metrics.Counter.Builder;
 import io.prometheus.metrics.core.metrics.Gauge;
@@ -30,7 +32,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class PrometheusMetricsPlugin implements MetricProvider, ConditionalProvider {
+/**
+ * This plugin provides the ability to post tracepoint generated metric to prometheus.
+ * <p>
+ * This plugin is loaded by the Deep module and not the agent. As we need to be loaded in the app class path and not the boot class path.
+ */
+public class PrometheusMetricsPlugin implements IDeepPlugin, IConditional, IMetricProcessor, Ordered {
 
   private static final Map<String, Object> REGISTRY_CACHE = new ConcurrentHashMap<>();
 
@@ -46,7 +53,8 @@ public class PrometheusMetricsPlugin implements MetricProvider, ConditionalProvi
   }
 
   @Override
-  public void counter(final String name, final Map<String, String> tags, final String namespace, final String help, final Double value) {
+  public void counter(final String name, final Map<String, String> tags, final String namespace, final String help, final String unit,
+      final Double value) {
     final String ident = buildIdent("counter", namespace, name, tags.keySet());
     Object o = REGISTRY_CACHE.get(ident);
     if (o == null) {
@@ -69,7 +77,8 @@ public class PrometheusMetricsPlugin implements MetricProvider, ConditionalProvi
   }
 
   @Override
-  public void gauge(final String name, final Map<String, String> tags, final String namespace, final String help, final Double value) {
+  public void gauge(final String name, final Map<String, String> tags, final String namespace, final String help, final String unit,
+      final Double value) {
     final String ident = buildIdent("gauge", namespace, name, tags.keySet());
     Object o = REGISTRY_CACHE.get(ident);
     if (o == null) {
@@ -91,7 +100,8 @@ public class PrometheusMetricsPlugin implements MetricProvider, ConditionalProvi
   }
 
   @Override
-  public void histogram(final String name, final Map<String, String> tags, final String namespace, final String help, final Double value) {
+  public void histogram(final String name, final Map<String, String> tags, final String namespace, final String help, final String unit,
+      final Double value) {
     final String ident = buildIdent("histogram", namespace, name, tags.keySet());
     Object o = REGISTRY_CACHE.get(ident);
     if (o == null) {
@@ -112,7 +122,8 @@ public class PrometheusMetricsPlugin implements MetricProvider, ConditionalProvi
   }
 
   @Override
-  public void summary(final String name, final Map<String, String> tags, final String namespace, final String help, final Double value) {
+  public void summary(final String name, final Map<String, String> tags, final String namespace, final String help, final String unit,
+      final Double value) {
     final String ident = buildIdent("summary", namespace, name, tags.keySet());
     Object o = REGISTRY_CACHE.get(ident);
     if (o == null) {

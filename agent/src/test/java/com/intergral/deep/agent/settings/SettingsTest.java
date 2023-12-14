@@ -20,13 +20,18 @@ package com.intergral.deep.agent.settings;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.intergral.deep.agent.api.logger.ITracepointLogger;
+import com.intergral.deep.agent.api.plugin.IMetricProcessor;
+import com.intergral.deep.agent.api.spi.IDeepPlugin;
 import com.intergral.deep.agent.settings.Settings.InvalidConfigException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -145,5 +150,62 @@ class SettingsTest {
 
     settings.logTracepoint("log", "tp_id", "snap_id");
     Mockito.verify(tracepointLogger, Mockito.times(1)).logTracepoint("log", "tp_id", "snap_id");
+  }
+
+  @Test
+  void plugins() {
+    final Settings settings = Settings.build(new HashMap<>());
+    final TestPlugin plugin = new TestPlugin();
+    settings.setPlugins(Collections.singleton(plugin));
+
+    final Collection<IDeepPlugin> plugins = settings.getPlugins();
+    assertEquals(1, plugins.size());
+    assertEquals(plugin, plugins.iterator().next());
+
+    final Collection<ITracepointLogger> loggers = settings.getPlugins(ITracepointLogger.class);
+    assertEquals(1, loggers.size());
+    assertEquals(plugin, loggers.iterator().next());
+
+    final ITracepointLogger pluginByName = settings.getPluginByName(ITracepointLogger.class, TestPlugin.class.getName());
+    assertNotNull(pluginByName);
+    assertSame(pluginByName, plugin);
+
+    final Collection<String> notPlugin = settings.getPlugins(String.class);
+    assertTrue(notPlugin.isEmpty());
+
+    final ITracepointLogger notFound = settings.getPluginByName(ITracepointLogger.class, getClass().getName());
+    assertNull(notFound);
+  }
+
+  private static class TestPlugin implements IDeepPlugin, IMetricProcessor, ITracepointLogger {
+
+    @Override
+    public void counter(final String name, final Map<String, String> tags, final String namespace, final String help, final String unit,
+        final Double value) {
+
+    }
+
+    @Override
+    public void gauge(final String name, final Map<String, String> tags, final String namespace, final String help, final String unit,
+        final Double value) {
+
+    }
+
+    @Override
+    public void histogram(final String name, final Map<String, String> tags, final String namespace, final String help, final String unit,
+        final Double value) {
+
+    }
+
+    @Override
+    public void summary(final String name, final Map<String, String> tags, final String namespace, final String help, final String unit,
+        final Double value) {
+
+    }
+
+    @Override
+    public void logTracepoint(final String logMsg, final String tracepointId, final String snapshotId) {
+
+    }
   }
 }

@@ -22,7 +22,6 @@ import com.intergral.deep.Deep;
 import com.intergral.deep.agent.api.IDeep;
 import com.intergral.deep.agent.api.plugin.MetricDefinition;
 import com.intergral.deep.agent.api.reflection.IReflection;
-import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
 import com.intergral.deep.api.DeepAPI;
 import io.prometheus.metrics.core.metrics.Histogram;
@@ -55,6 +54,7 @@ public class Main {
   public static void main(String[] args) throws Throwable {
     // this is only needed in this example as we are using a local built module
     // if using the dependency from maven you do not need to set the path
+    //noinspection DataFlowIssue
     Path jarPath = Paths.get(Main.class.getResource("/").toURI())
         .getParent()
         .getParent()
@@ -77,20 +77,6 @@ public class Main {
     System.out.println(DeepAPI.api().getVersion());
     System.out.println(DeepAPI.reflection());
 
-    // Use the API to register a plugin
-    // This plugin will attach the attribute 'example' to the created snapshot
-    // you should also see the log line 'custom plugin' when you run this example
-    DeepAPI.api().registerPlugin((settings, snapshot) -> {
-      System.out.println("custom plugin");
-      return Resource.create(Collections.singletonMap("example", "dynamic_load"));
-    });
-
-//    final Class<?> aClass = Class.forName("com.intergral.deep.plugin.PrometheusMetricsPlugin");
-//    final Constructor<?> constructor = aClass.getConstructor();
-//    final Object o = constructor.newInstance();
-//
-//    DeepAPI.api().registerPlugin((IPlugin) o);
-
     Histogram histogram = Histogram.builder()
         .name("request_latency_seconds")
         .help("request latency in seconds")
@@ -98,38 +84,42 @@ public class Main {
         .labelNames("path", "status")
         .register();
 
-    HTTPServer server = HTTPServer.builder()
+    try (HTTPServer server = HTTPServer.builder()
         .port(9400)
-        .buildAndStart();
+        .buildAndStart()) {
 
-    System.out.println("HTTPServer listening on port http://localhost:" + server.getPort() + "/metrics");
+      System.out.println("HTTPServer listening on port http://localhost:" + server.getPort() + "/metrics");
 
-    final HashMap<String, String> tags = new HashMap<>();
-    // USe the API to create a tracepoint that will fire forever
-    final Map<String, String> fireCount = new HashMap<>();
-    fireCount.put("fire_count", "-1");
-    fireCount.put("log_msg", "This is a log message {this}");
+      final HashMap<String, String> tags = new HashMap<>();
+      // USe the API to create a tracepoint that will fire forever
+      final Map<String, String> fireCount = new HashMap<>();
+      fireCount.put("fire_count", "-1");
+      fireCount.put("log_msg", "This is a log message {this}");
 
-    DeepAPI.api()
-        .registerTracepoint("com/intergral/deep/examples/SimpleTest", 46,
-            fireCount, Collections.emptyList(),
-            Collections.singletonList(new MetricDefinition("custom_metric", tags, "histogram", "this.cnt", "deep", "help message")));
+      DeepAPI.api()
+          .registerTracepoint("com/intergral/deep/examples/SimpleTest", 46,
+              fireCount, Collections.emptyList(),
+              Collections.singletonList(
+                  new MetricDefinition("custom_metric", tags, "histogram", "this.cnt", "deep", "help message", "unit")));
 
-    Random random = new Random(0);
-    final SimpleTest ts = new SimpleTest("This is a test", 2);
-    for (; ; ) {
-      try {
-        ts.message(ts.newId());
-      } catch (Exception e) {
-        e.printStackTrace();
+      Random random = new Random(0);
+      final SimpleTest ts = new SimpleTest("This is a test", 2);
+      //noinspection InfiniteLoopStatement
+      for (; ; ) {
+        try {
+          ts.message(ts.newId());
+        } catch (Exception e) {
+          //noinspection CallToPrintStackTrace
+          e.printStackTrace();
+        }
+
+        double duration = Math.abs(random.nextGaussian() / 10.0 + 0.2);
+        String status = random.nextInt(100) < 20 ? "500" : "200";
+        histogram.labelValues("/", status).observe(duration);
+
+        //noinspection BusyWait
+        Thread.sleep(1000);
       }
-
-      double duration = Math.abs(random.nextGaussian() / 10.0 + 0.2);
-      String status = random.nextInt(100) < 20 ? "500" : "200";
-      histogram.labelValues("/", status).observe(duration);
-
-      Thread.sleep(1000);
     }
-
   }
 }

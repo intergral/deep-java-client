@@ -18,7 +18,11 @@
 package com.intergral.deep.agent.api.plugin;
 
 import java.util.Map;
+import java.util.Objects;
 
+/**
+ * This type defines a metric that is attached to a tracepoint.
+ */
 public class MetricDefinition {
 
   private final String name;
@@ -27,14 +31,27 @@ public class MetricDefinition {
   private final String expression;
   private final String namespace;
   private final String help;
+  private final String unit;
 
+  /**
+   * Create a new MetricDefinition.
+   *
+   * @param name       the name of the metric
+   * @param tags       the tags attached to the metric
+   * @param type       the type of the metric
+   * @param expression the expression used to calculate the value for this metric
+   * @param namespace  the namespace the metric should be in
+   * @param help       the help statement for the metric
+   * @param unit       the unit for the metric
+   */
   public MetricDefinition(
       final String name,
       final Map<String, String> tags,
       final String type,
       final String expression,
       final String namespace,
-      final String help) {
+      final String help,
+      final String unit) {
 
     this.name = name;
     this.tags = tags;
@@ -42,6 +59,7 @@ public class MetricDefinition {
     this.expression = expression;
     this.namespace = namespace;
     this.help = help;
+    this.unit = unit;
   }
 
   public String getName() {
@@ -66,5 +84,41 @@ public class MetricDefinition {
 
   public String getHelp() {
     return help;
+  }
+
+  public String getUnit() {
+    return unit;
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    final MetricDefinition that = (MetricDefinition) o;
+    return Objects.equals(name, that.name) && Objects.equals(tags, that.tags) && Objects.equals(type, that.type)
+        && Objects.equals(expression, that.expression) && Objects.equals(namespace, that.namespace)
+        && Objects.equals(help, that.help) && Objects.equals(unit, that.unit);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(name, tags, type, expression, namespace, help, unit);
+  }
+
+  @Override
+  public String toString() {
+    return "MetricDefinition{"
+        + "name='" + name + '\''
+        + ", tags=" + tags
+        + ", type='" + type + '\''
+        + ", expression='" + expression + '\''
+        + ", namespace='" + namespace + '\''
+        + ", help='" + help + '\''
+        + ", unit='" + unit + '\''
+        + '}';
   }
 }

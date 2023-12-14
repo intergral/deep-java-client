@@ -19,10 +19,6 @@ package com.intergral.deep.agent;
 
 import com.intergral.deep.agent.api.DeepVersion;
 import com.intergral.deep.agent.api.IDeep;
-import com.intergral.deep.agent.api.auth.IAuthProvider;
-import com.intergral.deep.agent.api.logger.ITracepointLogger;
-import com.intergral.deep.agent.api.plugin.IPlugin;
-import com.intergral.deep.agent.api.plugin.IPlugin.IPluginRegistration;
 import com.intergral.deep.agent.api.plugin.MetricDefinition;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.spi.IDeepPlugin;

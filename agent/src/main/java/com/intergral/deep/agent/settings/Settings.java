@@ -19,11 +19,9 @@ package com.intergral.deep.agent.settings;
 
 import com.intergral.deep.agent.api.logger.ITracepointLogger;
 import com.intergral.deep.agent.api.logger.TracepointLogger;
-import com.intergral.deep.agent.api.plugin.IMetricProcessor;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
 import com.intergral.deep.agent.api.spi.IDeepPlugin;
-import com.intergral.deep.agent.api.spi.MetricProvider;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -39,19 +37,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A service that handles the general config of the deep agent.
  */
 public class Settings implements ISettings {
+
   private static final AtomicBoolean IS_ACTIVE = new AtomicBoolean(true);
   private final Properties properties;
   private Resource resource;
   private Collection<IDeepPlugin> plugins = Collections.emptyList();
   private ITracepointLogger tracepointLogger = new TracepointLogger();
-  private IMetricProcessor metricProcessor;
 
   private Settings(Properties properties) {
     this.properties = properties;
@@ -312,12 +313,49 @@ public class Settings implements ISettings {
   }
 
   /**
+   * Get the plugin that is on the provided type and has the given name.
+   *
+   * @param clazz the type of the plugin to match
+   * @param name  the class name of the plugin to match
+   * @param <T>   the type of the plugin
+   * @return the discovered plugin with the given name, or {@code null} if a plugin with the provided name and type cannot be found.
+   */
+  public <T> T getPluginByName(final Class<T> clazz, final String name) {
+    final Collection<T> plugins = getPlugins(clazz, t -> t.getClass().getName().endsWith(name));
+    if (plugins.isEmpty()) {
+      return null;
+    }
+    return plugins.iterator().next();
+  }
+
+  /**
    * Get all configured plugins.
    *
    * @return the full list on plugins
    */
   public Collection<IDeepPlugin> getPlugins() {
     return new ArrayList<>(this.plugins);
+  }
+
+  /**
+   * Get all plugins of the provided type.
+   *
+   * @param target the type of plugin we want
+   * @param <T>    the type of the plugin
+   * @return the list of plugins
+   */
+  public <T> Collection<T> getPlugins(final Class<T> target) {
+    return getPlugins(target, null);
+  }
+
+  private <T> Collection<T> getPlugins(final Class<T> target, final Predicate<T> predicate) {
+    //noinspection unchecked
+    final Stream<T> iDeepPluginStream = this.plugins.stream().filter(plugin -> target.isAssignableFrom(plugin.getClass()))
+        .map(plugin -> (T) plugin);
+    if (predicate != null) {
+      return iDeepPluginStream.filter(predicate).collect(Collectors.toList());
+    }
+    return iDeepPluginStream.collect(Collectors.toList());
   }
 
   /**
@@ -379,14 +417,6 @@ public class Settings implements ISettings {
       return;
     }
     this.tracepointLogger = tracepointLogger;
-  }
-
-  public IMetricProcessor getMetricProcessor() {
-    final List<MetricProvider> metricProviders = SpiUtil.loadOrdered(MetricProvider.class, Thread.currentThread().getContextClassLoader());
-    if(metricProviders.isEmpty()){
-      return null;
-    }
-    return metricProviders.get(0);
   }
 
   /**

@@ -25,6 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.intergral.deep.agent.Utils;
 import com.intergral.deep.agent.api.plugin.EvaluationException;
 import com.intergral.deep.agent.api.plugin.IEvaluator;
+import com.intergral.deep.agent.api.plugin.IMetricProcessor;
+import com.intergral.deep.agent.api.plugin.MetricDefinition;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.tracepoint.evaluator.EvaluatorService;
@@ -232,5 +234,24 @@ class FrameProcessorTest {
     final EventSnapshot next = collect.iterator().next();
     final String logMsg = next.getLogMsg();
     assertEquals("[deep] some log message: 100", logMsg);
+  }
+
+  @Test
+  void processMetric() {
+    final MockTracepointConfig tracepointConfig = new MockTracepointConfig().withMetric();
+    tracepoints.add(tracepointConfig);
+    assertTrue(frameProcessor.canCollect());
+    frameProcessor.configureSelf();
+
+    final IMetricProcessor metricProcessor = Mockito.mock(IMetricProcessor.class);
+
+    Mockito.when(settings.getPlugins(IMetricProcessor.class)).thenReturn(Collections.singleton(metricProcessor));
+
+    final MetricDefinition metricDefinition = tracepointConfig.getMetricDefinitions().iterator().next();
+    frameProcessor.processMetric(tracepointConfig, metricDefinition);
+
+    Mockito.verify(metricProcessor, Mockito.times(1))
+        .counter(metricDefinition.getName(), metricDefinition.getTags(), metricDefinition.getNamespace(), metricDefinition.getHelp(),
+            metricDefinition.getUnit(), 1.0d);
   }
 }

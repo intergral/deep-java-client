@@ -18,6 +18,8 @@
 package com.intergral.deep.agent.tracepoint.handler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.intergral.deep.agent.api.plugin.IEvaluator;
 import com.intergral.deep.agent.api.resource.Resource;
@@ -54,6 +56,8 @@ class FrameCollectorTest {
     assertEquals(1, someExpression.variables().size());
     final Variable variable = someExpression.variables().get("1");
     assertEquals("some result", variable.getValString());
+    assertFalse(someExpression.isError());
+    assertEquals(Double.NaN, someExpression.numberValue());
   }
 
   @Test
@@ -63,6 +67,8 @@ class FrameCollectorTest {
     assertEquals("some expression", someExpression.result().expression());
     assertEquals(0, someExpression.variables().size());
     assertEquals("java.lang.RuntimeException: Test exception", someExpression.result().error());
+    assertTrue(someExpression.isError());
+    assertEquals(Double.NaN, someExpression.numberValue());
   }
 
   @Test
