@@ -180,25 +180,25 @@ class SettingsTest {
   private static class TestPlugin implements IDeepPlugin, IMetricProcessor, ITracepointLogger {
 
     @Override
-    public void counter(final String name, final Map<String, String> tags, final String namespace, final String help, final String unit,
+    public void counter(final String name, final Map<String, Object> labels, final String namespace, final String help, final String unit,
         final Double value) {
 
     }
 
     @Override
-    public void gauge(final String name, final Map<String, String> tags, final String namespace, final String help, final String unit,
+    public void gauge(final String name, final Map<String, Object> labels, final String namespace, final String help, final String unit,
         final Double value) {
 
     }
 
     @Override
-    public void histogram(final String name, final Map<String, String> tags, final String namespace, final String help, final String unit,
+    public void histogram(final String name, final Map<String, Object> labels, final String namespace, final String help, final String unit,
         final Double value) {
 
     }
 
     @Override
-    public void summary(final String name, final Map<String, String> tags, final String namespace, final String help, final String unit,
+    public void summary(final String name, final Map<String, Object> labels, final String namespace, final String help, final String unit,
         final Double value) {
 
     }

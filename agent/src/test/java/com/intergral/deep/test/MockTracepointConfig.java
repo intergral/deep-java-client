@@ -53,7 +53,7 @@ public class MockTracepointConfig extends TracePointConfig {
 
   public MockTracepointConfig withMetric() {
     this.getMetricDefinitions()
-        .add(new MetricDefinition("name", new HashMap<>(), "COUNTER", "", "deep_agent", "Metric generated from expression: ", "unit"));
+        .add(new MetricDefinition("name", new ArrayList<>(), "COUNTER", "", "deep_agent", "Metric generated from expression: ", "unit"));
     return this;
   }
 }

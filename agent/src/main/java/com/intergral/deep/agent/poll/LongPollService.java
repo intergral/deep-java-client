@@ -18,6 +18,7 @@
 package com.intergral.deep.agent.poll;
 
 import com.intergral.deep.agent.api.plugin.MetricDefinition;
+import com.intergral.deep.agent.api.plugin.MetricDefinition.Label;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.grpc.GrpcService;
 import com.intergral.deep.agent.settings.Settings;
@@ -29,6 +30,7 @@ import com.intergral.deep.proto.poll.v1.PollConfigGrpc;
 import com.intergral.deep.proto.poll.v1.PollRequest;
 import com.intergral.deep.proto.poll.v1.PollResponse;
 import com.intergral.deep.proto.poll.v1.ResponseType;
+import com.intergral.deep.proto.tracepoint.v1.LabelExpression;
 import com.intergral.deep.proto.tracepoint.v1.Metric;
 import java.util.Collection;
 import java.util.Collections;
@@ -119,9 +121,39 @@ public class LongPollService implements ITimerTask {
       return Collections.emptyList();
     }
     return metricsList.stream().map(
-            metric -> new MetricDefinition(metric.getName(), metric.getTagsMap(), metric.getType().toString(), metric.getExpression(),
+            metric -> new MetricDefinition(metric.getName(), convertLabels(metric.getLabelExpressionsList()), metric.getType().toString(),
+                metric.getExpression(),
                 namespaceOrDefault(metric.getNamespace()), helpOrDefault(metric.getHelp(), metric.getExpression()), metric.getUnit()))
         .collect(Collectors.toList());
+  }
+
+  private List<Label> convertLabels(final List<LabelExpression> labelsList) {
+    return labelsList.stream().map(labelExpression ->
+        new Label(labelExpression.getKey(), labelExpression.hasStatic() ? convertAnyValue(labelExpression.getStatic()) : null,
+            labelExpression.hasExpression() ? labelExpression.getExpression() : null)
+    ).collect(Collectors.toList());
+  }
+
+  private Object convertAnyValue(final AnyValue staticValue) {
+    switch (staticValue.getValueCase()) {
+      case INT_VALUE:
+        return staticValue.getIntValue();
+      case BOOL_VALUE:
+        return staticValue.getBoolValue();
+      case ARRAY_VALUE:
+        return staticValue.getArrayValue();
+      case BYTES_VALUE:
+        return staticValue.getBytesValue();
+      case DOUBLE_VALUE:
+        return staticValue.getDoubleValue();
+      case KVLIST_VALUE:
+        return staticValue.getKvlistValue();
+      case STRING_VALUE:
+        return staticValue.getStringValue();
+      case VALUE_NOT_SET:
+      default:
+        return null;
+    }
   }
 
   private String namespaceOrDefault(final String namespace) {

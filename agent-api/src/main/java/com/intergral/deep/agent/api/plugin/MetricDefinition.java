@@ -17,7 +17,7 @@
 
 package com.intergral.deep.agent.api.plugin;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -26,7 +26,7 @@ import java.util.Objects;
 public class MetricDefinition {
 
   private final String name;
-  private final Map<String, String> tags;
+  private final List<Label> labels;
   private final String type;
   private final String expression;
   private final String namespace;
@@ -37,7 +37,7 @@ public class MetricDefinition {
    * Create a new MetricDefinition.
    *
    * @param name       the name of the metric
-   * @param tags       the tags attached to the metric
+   * @param labels     the labels attached to the metric
    * @param type       the type of the metric
    * @param expression the expression used to calculate the value for this metric
    * @param namespace  the namespace the metric should be in
@@ -46,7 +46,7 @@ public class MetricDefinition {
    */
   public MetricDefinition(
       final String name,
-      final Map<String, String> tags,
+      final List<Label> labels,
       final String type,
       final String expression,
       final String namespace,
@@ -54,7 +54,7 @@ public class MetricDefinition {
       final String unit) {
 
     this.name = name;
-    this.tags = tags;
+    this.labels = labels;
     this.type = type;
     this.expression = expression;
     this.namespace = namespace;
@@ -66,8 +66,8 @@ public class MetricDefinition {
     return name;
   }
 
-  public Map<String, String> getTags() {
-    return tags;
+  public List<Label> getLabels() {
+    return labels;
   }
 
   public String getType() {
@@ -99,26 +99,91 @@ public class MetricDefinition {
       return false;
     }
     final MetricDefinition that = (MetricDefinition) o;
-    return Objects.equals(name, that.name) && Objects.equals(tags, that.tags) && Objects.equals(type, that.type)
+    return Objects.equals(name, that.name) && Objects.equals(labels, that.labels) && Objects.equals(type, that.type)
         && Objects.equals(expression, that.expression) && Objects.equals(namespace, that.namespace)
         && Objects.equals(help, that.help) && Objects.equals(unit, that.unit);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, tags, type, expression, namespace, help, unit);
+    return Objects.hash(name, labels, type, expression, namespace, help, unit);
   }
 
   @Override
   public String toString() {
     return "MetricDefinition{"
         + "name='" + name + '\''
-        + ", tags=" + tags
+        + ", tags=" + labels
         + ", type='" + type + '\''
         + ", expression='" + expression + '\''
         + ", namespace='" + namespace + '\''
         + ", help='" + help + '\''
         + ", unit='" + unit + '\''
         + '}';
+  }
+
+  /**
+   * This type is used to represent a label that is attached to a metric.
+   * <p>
+   * Labels can have either a static value or an expression. If the value is an expression then this is evaluated as a watcher and the
+   * result is used as the label value.
+   */
+  public static class Label {
+
+    final String key;
+    final Object value;
+    final String expression;
+
+    /**
+     * Create a new label for a metric.
+     *
+     * @param key        the label key
+     * @param value      the label value if a fixed value
+     * @param expression the label expression if we should evaluate the label value
+     */
+    public Label(final String key, final Object value, final String expression) {
+      this.key = key;
+      this.value = value;
+      this.expression = expression;
+    }
+
+    public String getKey() {
+      return key;
+    }
+
+    public Object getValue() {
+      return value;
+    }
+
+    public String getExpression() {
+      return expression;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      final Label label = (Label) o;
+      return Objects.equals(key, label.key) && Objects.equals(value, label.value) && Objects.equals(expression,
+          label.expression);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(key, value, expression);
+    }
+
+    @Override
+    public String toString() {
+      return "Label{"
+          + "key='" + key + '\''
+          + ", value=" + value
+          + ", expression='" + expression + '\''
+          + '}';
+    }
   }
 }

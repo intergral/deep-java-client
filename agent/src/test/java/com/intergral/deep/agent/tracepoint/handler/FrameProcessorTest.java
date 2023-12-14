@@ -38,6 +38,7 @@ import com.intergral.deep.test.target.ConditionTarget;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -251,7 +252,7 @@ class FrameProcessorTest {
     frameProcessor.processMetric(tracepointConfig, metricDefinition);
 
     Mockito.verify(metricProcessor, Mockito.times(1))
-        .counter(metricDefinition.getName(), metricDefinition.getTags(), metricDefinition.getNamespace(), metricDefinition.getHelp(),
+        .counter(metricDefinition.getName(), new HashMap<>(), metricDefinition.getNamespace(), metricDefinition.getHelp(),
             metricDefinition.getUnit(), 1.0d);
   }
 }

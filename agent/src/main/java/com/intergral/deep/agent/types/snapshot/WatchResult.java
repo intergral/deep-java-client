@@ -25,6 +25,7 @@ public class WatchResult {
   private final String error;
   private final VariableID result;
   private final String expression;
+  private final boolean isMetric;
 
 
   /**
@@ -32,11 +33,13 @@ public class WatchResult {
    *
    * @param expression the expression
    * @param error      the error
+   * @param isMetric is this watch generated from a metric expression
    */
-  public WatchResult(final String expression, final String error) {
+  public WatchResult(final String expression, final String error, final boolean isMetric) {
     this.expression = expression;
     this.error = error;
     this.result = null;
+    this.isMetric = isMetric;
   }
 
   /**
@@ -44,9 +47,11 @@ public class WatchResult {
    *
    * @param expression the expression
    * @param result     the result
+   * @param isMetric   is this watch generated from a metric expression
    */
-  public WatchResult(final String expression, final VariableID result) {
+  public WatchResult(final String expression, final VariableID result, final boolean isMetric) {
     this.expression = expression;
+    this.isMetric = isMetric;
     this.error = null;
     this.result = result;
   }
@@ -65,5 +70,9 @@ public class WatchResult {
 
   public String expression() {
     return this.expression;
+  }
+
+  public boolean isMetric() {
+    return isMetric;
   }
 }

@@ -19,9 +19,12 @@ package com.intergral.deep.agent.api.plugin;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.util.HashMap;
+import com.intergral.deep.agent.api.plugin.MetricDefinition.Label;
+import java.util.ArrayList;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class MetricDefinitionTest {
@@ -30,9 +33,9 @@ class MetricDefinitionTest {
 
   @BeforeEach
   void setUp() {
-    final HashMap<String, String> tags = new HashMap<>();
-    tags.put("one", "tag");
-    metricDefinition = new MetricDefinition("metric-name", tags, "metric-type", "metric-expression", "metric-namespace",
+    final ArrayList<Label> labels = new ArrayList<>();
+    labels.add(new Label("key", "value", null));
+    metricDefinition = new MetricDefinition("metric-name", labels, "metric-type", "metric-expression", "metric-namespace",
         "metric-help", "metric-unit");
   }
 
@@ -42,10 +45,10 @@ class MetricDefinitionTest {
   }
 
   @Test
-  void getTags() {
-    final HashMap<String, String> expectedTags = new HashMap<>();
-    expectedTags.put("one", "tag");
-    assertEquals(expectedTags, metricDefinition.getTags());
+  void getLabels() {
+    final ArrayList<Label> expectedLabels = new ArrayList<>();
+    expectedLabels.add(new Label("key", "value", null));
+    assertEquals(expectedLabels, metricDefinition.getLabels());
   }
 
   @Test
@@ -75,19 +78,45 @@ class MetricDefinitionTest {
 
   @Test
   void equals() {
-    final HashMap<String, String> tags = new HashMap<>();
-    tags.put("one", "tag");
-    assertEquals(metricDefinition, new MetricDefinition("metric-name", tags, "metric-type", "metric-expression", "metric-namespace",
+    final ArrayList<Label> labels = new ArrayList<>();
+    labels.add(new Label("key", "value", null));
+    assertEquals(metricDefinition, new MetricDefinition("metric-name", labels, "metric-type", "metric-expression", "metric-namespace",
         "metric-help", "metric-unit"));
-    assertNotSame(metricDefinition, new MetricDefinition("metric-name", tags, "metric-type", "metric-expression", "metric-namespace",
+    assertNotSame(metricDefinition, new MetricDefinition("metric-name", labels, "metric-type", "metric-expression", "metric-namespace",
         "metric-help", "metric-unit"));
 
     assertEquals(metricDefinition.hashCode(),
-        new MetricDefinition("metric-name", tags, "metric-type", "metric-expression", "metric-namespace",
+        new MetricDefinition("metric-name", labels, "metric-type", "metric-expression", "metric-namespace",
             "metric-help", "metric-unit").hashCode());
 
     assertEquals(metricDefinition.toString(),
-        new MetricDefinition("metric-name", tags, "metric-type", "metric-expression", "metric-namespace",
+        new MetricDefinition("metric-name", labels, "metric-type", "metric-expression", "metric-namespace",
             "metric-help", "metric-unit").toString());
+  }
+
+  @Nested
+  class LabelTest {
+
+    private Label label;
+
+    @BeforeEach
+    void setUp() {
+      label = new Label("key", "value", null);
+    }
+
+    @Test
+    void getKey() {
+      assertEquals("key", label.getKey());
+    }
+
+    @Test
+    void getValue() {
+      assertEquals("value", label.getValue());
+    }
+
+    @Test
+    void getExpression() {
+      assertNull(label.getExpression());
+    }
   }
 }

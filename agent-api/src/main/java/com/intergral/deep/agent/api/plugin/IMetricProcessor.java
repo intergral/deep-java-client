@@ -29,51 +29,51 @@ public interface IMetricProcessor {
    * Process a counter type metric.
    *
    * @param name      the name of the metric
-   * @param tags      the tags attached to the metric
+   * @param labels      the labels attached to the metric
    * @param namespace the namespace the metric should be in
    * @param help      the help statement for the metric
    * @param unit      the unit for the metric
    * @param value     the value to post to the metric
    */
-  void counter(final String name, final Map<String, String> tags, final String namespace, final String help, final String unit,
+  void counter(final String name, final Map<String, Object> labels, final String namespace, final String help, final String unit,
       final Double value);
 
   /**
    * Process a gauge type metric.
    *
    * @param name      the name of the metric
-   * @param tags      the tags attached to the metric
+   * @param labels      the labels attached to the metric
    * @param namespace the namespace the metric should be in
    * @param help      the help statement for the metric
    * @param unit      the unit for the metric
    * @param value     the value to post to the metric
    */
-  void gauge(final String name, final Map<String, String> tags, final String namespace, final String help, final String unit,
+  void gauge(final String name, final Map<String, Object> labels, final String namespace, final String help, final String unit,
       final Double value);
 
   /**
    * Process a histogram type metric.
    *
    * @param name      the name of the metric
-   * @param tags      the tags attached to the metric
+   * @param labels      the labels attached to the metric
    * @param namespace the namespace the metric should be in
    * @param help      the help statement for the metric
    * @param unit      the unit for the metric
    * @param value     the value to post to the metric
    */
-  void histogram(final String name, final Map<String, String> tags, final String namespace, final String help, final String unit,
+  void histogram(final String name, final Map<String, Object> labels, final String namespace, final String help, final String unit,
       final Double value);
 
   /**
    * Process a summary type metric.
    *
    * @param name      the name of the metric
-   * @param tags      the tags attached to the metric
+   * @param labels      the labels attached to the metric
    * @param namespace the namespace the metric should be in
    * @param help      the help statement for the metric
    * @param unit      the unit for the metric
    * @param value     the value to post to the metric
    */
-  void summary(final String name, final Map<String, String> tags, final String namespace, final String help, final String unit,
+  void summary(final String name, final Map<String, Object> labels, final String namespace, final String help, final String unit,
       final Double value);
 }

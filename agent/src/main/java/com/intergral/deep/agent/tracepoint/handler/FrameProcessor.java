@@ -24,6 +24,7 @@ import com.intergral.deep.agent.api.plugin.IEvaluator;
 import com.intergral.deep.agent.api.plugin.IMetricProcessor;
 import com.intergral.deep.agent.api.plugin.ISnapshotContext;
 import com.intergral.deep.agent.api.plugin.MetricDefinition;
+import com.intergral.deep.agent.api.plugin.MetricDefinition.Label;
 import com.intergral.deep.agent.api.reflection.IReflection;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.grpc.GrpcService;
@@ -34,8 +35,8 @@ import com.intergral.deep.agent.types.snapshot.WatchResult;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -144,7 +145,7 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
             processedFrame.variables());
 
         for (String watch : tracepoint.getWatches()) {
-          final FrameCollector.IExpressionResult result = evaluateWatchExpression(watch);
+          final FrameCollector.IExpressionResult result = evaluateWatchExpression(watch, false);
           snapshot.addWatchResult(result.result());
           snapshot.mergeVariables(result.variables());
         }
@@ -163,7 +164,11 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
         final Collection<MetricDefinition> metricDefinitions = tracepoint.getMetricDefinitions();
         if (!metricDefinitions.isEmpty()) {
           for (MetricDefinition metricDefinition : metricDefinitions) {
-            processMetric(tracepoint, metricDefinition);
+            final List<FrameCollector.IExpressionResult> watchResults = processMetric(tracepoint, metricDefinition);
+            for (FrameCollector.IExpressionResult watchResult : watchResults) {
+              snapshot.addWatchResult(watchResult.result());
+              snapshot.mergeVariables(watchResult.variables());
+            }
           }
         }
 
@@ -180,31 +185,39 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
     return snapshots;
   }
 
-  void processMetric(final TracePointConfig tracepoint, final MetricDefinition metricDefinition) {
-
+  List<IExpressionResult> processMetric(final TracePointConfig tracepoint, final MetricDefinition metricDefinition) {
+    final List<IExpressionResult> watchResults = new ArrayList<>();
     final Collection<IMetricProcessor> metricProcessors = this.settings.getPlugins(IMetricProcessor.class);
     if (metricProcessors.isEmpty()) {
-      return;
+      return watchResults;
     }
 
     final Number value;
     if (!metricDefinition.getExpression().trim().isEmpty()) {
-      final IExpressionResult iExpressionResult = evaluateWatchExpression(metricDefinition.getExpression());
+      final IExpressionResult iExpressionResult = evaluateWatchExpression(metricDefinition.getExpression(), true);
+      watchResults.add(iExpressionResult);
       value = iExpressionResult.numberValue();
       if (iExpressionResult.isError() || Double.isNaN(value.doubleValue())) {
         // the result of the expression is an error or not a number, so we skip for now
-        return;
+        return watchResults;
       }
     } else {
       // if there is no expression than default the value to 1
       value = 1d;
     }
 
-    final HashMap<String, String> processedTags = new HashMap<>();
-    final Map<String, String> tags = metricDefinition.getTags();
-    for (Entry<String, String> entry : tags.entrySet()) {
-      final IExpressionResult tagResult = evaluateWatchExpression(entry.getValue());
-      processedTags.put(entry.getKey(), tagResult.logString());
+    final HashMap<String, Object> processedTags = new HashMap<>();
+    final List<Label> labels = metricDefinition.getLabels();
+    for (Label label : labels) {
+      final String expression = label.getExpression();
+      if (expression != null) {
+        final IExpressionResult tagResult = evaluateWatchExpression(expression, true);
+        watchResults.add(tagResult);
+
+        processedTags.put(label.getKey(), tagResult.logString());
+      } else {
+        processedTags.put(label.getKey(), label.getValue());
+      }
     }
 
     for (IMetricProcessor metricProcessor : metricProcessors) {
@@ -239,6 +252,7 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
         LOGGER.error("Cannot process metric via {}", metricProcessor.getClass(), t);
       }
     }
+    return watchResults;
   }
 
   /**

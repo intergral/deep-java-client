@@ -53,15 +53,15 @@ public class PrometheusMetricsPlugin implements IDeepPlugin, IConditional, IMetr
   }
 
   @Override
-  public void counter(final String name, final Map<String, String> tags, final String namespace, final String help, final String unit,
+  public void counter(final String name, final Map<String, Object> labels, final String namespace, final String help, final String unit,
       final Double value) {
-    final String ident = buildIdent("counter", namespace, name, tags.keySet());
+    final String ident = buildIdent("counter", namespace, name, labels.keySet());
     Object o = REGISTRY_CACHE.get(ident);
     if (o == null) {
 
       final Builder builder = Counter.builder().name(String.format("%s_%s", namespace, name)).help(help);
-      if (!tags.isEmpty()) {
-        builder.labelNames(Arrays.toString(tags.keySet().toArray()));
+      if (!labels.isEmpty()) {
+        builder.labelNames(Arrays.toString(labels.keySet().toArray()));
       }
       final Counter register = builder.register();
       REGISTRY_CACHE.put(ident, register);
@@ -69,22 +69,22 @@ public class PrometheusMetricsPlugin implements IDeepPlugin, IConditional, IMetr
       o = register;
     }
 
-    if (!tags.isEmpty()) {
-      ((Counter) o).labelValues(Arrays.toString(tags.values().toArray())).inc(value);
+    if (!labels.isEmpty()) {
+      ((Counter) o).labelValues(Arrays.toString(labels.values().toArray())).inc(value);
     } else {
       ((Counter) o).inc(value);
     }
   }
 
   @Override
-  public void gauge(final String name, final Map<String, String> tags, final String namespace, final String help, final String unit,
+  public void gauge(final String name, final Map<String, Object> labels, final String namespace, final String help, final String unit,
       final Double value) {
-    final String ident = buildIdent("gauge", namespace, name, tags.keySet());
+    final String ident = buildIdent("gauge", namespace, name, labels.keySet());
     Object o = REGISTRY_CACHE.get(ident);
     if (o == null) {
       final Gauge.Builder builder = Gauge.builder().name(String.format("%s_%s", namespace, name)).help(help);
-      if (!tags.isEmpty()) {
-        builder.labelNames(Arrays.toString(tags.keySet().toArray()));
+      if (!labels.isEmpty()) {
+        builder.labelNames(Arrays.toString(labels.keySet().toArray()));
       }
       final Gauge register = builder.register();
       REGISTRY_CACHE.put(ident, register);
@@ -92,52 +92,52 @@ public class PrometheusMetricsPlugin implements IDeepPlugin, IConditional, IMetr
       o = register;
     }
 
-    if (!tags.isEmpty()) {
-      ((Gauge) o).labelValues(Arrays.toString(tags.values().toArray())).set(value);
+    if (!labels.isEmpty()) {
+      ((Gauge) o).labelValues(Arrays.toString(labels.values().toArray())).set(value);
     } else {
       ((Gauge) o).set(value);
     }
   }
 
   @Override
-  public void histogram(final String name, final Map<String, String> tags, final String namespace, final String help, final String unit,
+  public void histogram(final String name, final Map<String, Object> labels, final String namespace, final String help, final String unit,
       final Double value) {
-    final String ident = buildIdent("histogram", namespace, name, tags.keySet());
+    final String ident = buildIdent("histogram", namespace, name, labels.keySet());
     Object o = REGISTRY_CACHE.get(ident);
     if (o == null) {
       final Histogram.Builder builder = Histogram.builder().name(String.format("%s_%s", namespace, name)).help(help);
-      if (!tags.isEmpty()) {
-        builder.labelNames(Arrays.toString(tags.keySet().toArray()));
+      if (!labels.isEmpty()) {
+        builder.labelNames(Arrays.toString(labels.keySet().toArray()));
       }
       final Histogram register = builder.register();
       REGISTRY_CACHE.put(ident, register);
       o = register;
     }
 
-    if (!tags.isEmpty()) {
-      ((Histogram) o).labelValues(Arrays.toString(tags.values().toArray())).observe(value);
+    if (!labels.isEmpty()) {
+      ((Histogram) o).labelValues(Arrays.toString(labels.values().toArray())).observe(value);
     } else {
       ((Histogram) o).observe(value);
     }
   }
 
   @Override
-  public void summary(final String name, final Map<String, String> tags, final String namespace, final String help, final String unit,
+  public void summary(final String name, final Map<String, Object> labels, final String namespace, final String help, final String unit,
       final Double value) {
-    final String ident = buildIdent("summary", namespace, name, tags.keySet());
+    final String ident = buildIdent("summary", namespace, name, labels.keySet());
     Object o = REGISTRY_CACHE.get(ident);
     if (o == null) {
       final Summary.Builder builder = Summary.builder().name(String.format("%s_%s", namespace, name)).help(help);
-      if (!tags.isEmpty()) {
-        builder.labelNames(Arrays.toString(tags.keySet().toArray()));
+      if (!labels.isEmpty()) {
+        builder.labelNames(Arrays.toString(labels.keySet().toArray()));
       }
       final Summary register = builder.register();
       REGISTRY_CACHE.put(ident, register);
       o = register;
     }
 
-    if (!tags.isEmpty()) {
-      ((Summary) o).labelValues(Arrays.toString(tags.values().toArray())).observe(value);
+    if (!labels.isEmpty()) {
+      ((Summary) o).labelValues(Arrays.toString(labels.values().toArray())).observe(value);
     } else {
       ((Summary) o).observe(value);
     }
