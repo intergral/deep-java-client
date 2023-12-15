@@ -1,8 +1,8 @@
 # main - Unreleased
-
+- **[CHANGE]**: plugin: Add new API for registering plugins [#84](https://github.com/intergral/deep/pull/84) [@Umaaz](https://github.com/Umaaz) 
 
 # 1.1.3 (15/12/2023)
-- **[CHANGE]**: update:  Update deep proto to 1.0.3 [#74](https://github.com/intergral/deep/pull/74) [@Umaaz](https://github.com/Umaaz)
+- **[CHANGE]**: update: Update deep proto to 1.0.3 [#74](https://github.com/intergral/deep/pull/74) [@Umaaz](https://github.com/Umaaz)
 - **[CHANGE]**: plugin: Change the plugins to use SPI to load [#77](https://github.com/intergral/deep/pull/77) [@Umaaz](https://github.com/Umaaz)
 - **[FEATURE]**: metrics: Add support for metrics from tracepoints [#74](https://github.com/intergral/deep/pull/74) [@Umaaz](https://github.com/Umaaz)
 
