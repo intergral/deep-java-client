@@ -21,6 +21,7 @@ package com.intergral.deep.examples;
 import com.intergral.deep.Deep;
 import com.intergral.deep.agent.api.IDeep;
 import com.intergral.deep.agent.api.plugin.MetricDefinition;
+import com.intergral.deep.agent.api.plugin.MetricDefinition.Label;
 import com.intergral.deep.agent.api.reflection.IReflection;
 import com.intergral.deep.agent.api.settings.ISettings;
 import com.intergral.deep.api.DeepAPI;
@@ -29,8 +30,10 @@ import io.prometheus.metrics.exporter.httpserver.HTTPServer;
 import io.prometheus.metrics.model.snapshots.Unit;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -90,7 +93,7 @@ public class Main {
 
       System.out.println("HTTPServer listening on port http://localhost:" + server.getPort() + "/metrics");
 
-      final HashMap<String, String> tags = new HashMap<>();
+      final List<Label> labels = new ArrayList<>();
       // USe the API to create a tracepoint that will fire forever
       final Map<String, String> fireCount = new HashMap<>();
       fireCount.put("fire_count", "-1");
@@ -100,7 +103,7 @@ public class Main {
           .registerTracepoint("com/intergral/deep/examples/SimpleTest", 46,
               fireCount, Collections.emptyList(),
               Collections.singletonList(
-                  new MetricDefinition("custom_metric", tags, "histogram", "this.cnt", "deep", "help message", "unit")));
+                  new MetricDefinition("custom_metric", labels, "histogram", "this.cnt", "deep", "help message", "unit")));
 
       Random random = new Random(0);
       final SimpleTest ts = new SimpleTest("This is a test", 2);
