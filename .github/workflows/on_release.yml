@@ -36,11 +36,19 @@ jobs:
       - name: Build and Release
         run: mvn -s .ci-settings.xml clean deploy -DskipTests -P release-ossrh -B -U -pl agent,deep --also-make
 
-      - name: Upload binaries to release
+      - name: Upload agent to release
         uses: svenstaro/upload-release-action@v2
         with:
-          file: ./agent/target/deep-${VERSION}.jar
+          file: ./agent/target/agent-${VERSION}.jar
           asset_name: Deep Agent
+          tag: ${{ github.ref_name }}
+          overwrite: true
+
+      - name: Upload lite agent to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          file: ./agent/target/agent-${VERSION}-lite.jar
+          asset_name: Deep Lite Agent
           tag: ${{ github.ref_name }}
           overwrite: true
 
