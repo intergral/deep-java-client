@@ -357,7 +357,12 @@ public class FrameCollector extends VariableProcessor {
    * So if we cannot get a result from the {@link IEvaluator} then we return an error result.
    *
    * @param watch the watch expression to evaluate
+   * @param source the source of the watch expression
    * @return a {@link IExpressionResult}
+   *
+   * @see WatchResult#LOG
+   * @see WatchResult#METRIC
+   * @see WatchResult#WATCH
    */
   protected IExpressionResult evaluateWatchExpression(final String watch, final String source) {
     try {

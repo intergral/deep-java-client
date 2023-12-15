@@ -38,7 +38,6 @@ jobs:
   mergeBuilds:
     runs-on: ubuntu-latest
     needs:
-      - JavaSite
       - mkdocs
     steps:
       - name: Download Mkdocs artifact
