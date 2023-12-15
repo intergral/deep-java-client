@@ -50,7 +50,7 @@ jobs:
         uses: robinraju/release-downloader@v1.8
         with:
           latest: true
-          fileName: site.tar.gz
+          fileName: Maven Site
 
       - name: Unpack
         run: |
