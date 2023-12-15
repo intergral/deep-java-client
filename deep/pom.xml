@@ -83,9 +83,9 @@
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
-            <!-- Unpack tcnative so we can relocate these -->
-            <id>unpack-tcnative</id>
-            <phase>generate-resources</phase>
+            <!-- Unpack dependant jars -->
+            <id>unpack</id>
+            <phase>prepare-package</phase>
             <goals>
               <goal>copy</goal>
             </goals>
@@ -98,13 +98,6 @@
                   <outputDirectory>${project.build.directory}/unpack/</outputDirectory>
                   <destFileName>deep-agent.jar</destFileName>
                 </dependency>
-                <!--                                <dependency>-->
-                <!--                                    <groupId>com.nerdvision</groupId>-->
-                <!--                                    <artifactId>native</artifactId>-->
-                <!--                                    <version>${project.version}</version>-->
-                <!--                                    <outputDirectory>${project.build.directory}/unpack/</outputDirectory>-->
-                <!--                                    <destFileName>nerdvision-native.jar</destFileName>-->
-                <!--                                </dependency>-->
                 <dependency>
                   <groupId>com.sun</groupId>
                   <artifactId>tools</artifactId>
