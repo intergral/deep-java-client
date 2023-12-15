@@ -48,7 +48,7 @@ public class Main {
     // USe the API to create a tracepoint that will fire forever
     DeepAPI.api()
         .registerTracepoint("com/intergral/deep/examples/SimpleTest", 46, Collections.singletonMap("fire_count", "-1"),
-            Collections.emptyList());
+            Collections.emptyList(), Collections.emptyList());
 
     final SimpleTest ts = new SimpleTest("This is a test", 2);
     //noinspection InfiniteLoopStatement

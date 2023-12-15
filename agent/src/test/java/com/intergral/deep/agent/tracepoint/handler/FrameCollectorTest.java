@@ -18,6 +18,8 @@
 package com.intergral.deep.agent.tracepoint.handler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.intergral.deep.agent.api.plugin.IEvaluator;
 import com.intergral.deep.agent.api.resource.Resource;
@@ -49,20 +51,26 @@ class FrameCollectorTest {
   @Test
   void evaluateWatchers() throws Throwable {
     Mockito.when(evaluator.evaluateExpression(Mockito.anyString(), Mockito.anyMap())).thenReturn("some result");
-    final IExpressionResult someExpression = frameCollector.evaluateWatchExpression("some expression");
+    final IExpressionResult someExpression = frameCollector.evaluateWatchExpression("some expression", "test");
     assertEquals("some expression", someExpression.result().expression());
     assertEquals(1, someExpression.variables().size());
     final Variable variable = someExpression.variables().get("1");
     assertEquals("some result", variable.getValString());
+    assertFalse(someExpression.isError());
+    assertEquals(Double.NaN, someExpression.numberValue());
+    assertEquals("test", someExpression.result().getSource());
   }
 
   @Test
   void evaluateWatchers_error() throws Throwable {
     Mockito.when(evaluator.evaluateExpression(Mockito.anyString(), Mockito.anyMap())).thenThrow(new RuntimeException("Test exception"));
-    final IExpressionResult someExpression = frameCollector.evaluateWatchExpression("some expression");
+    final IExpressionResult someExpression = frameCollector.evaluateWatchExpression("some expression", "test");
     assertEquals("some expression", someExpression.result().expression());
     assertEquals(0, someExpression.variables().size());
     assertEquals("java.lang.RuntimeException: Test exception", someExpression.result().error());
+    assertTrue(someExpression.isError());
+    assertEquals(Double.NaN, someExpression.numberValue());
+    assertEquals("test", someExpression.result().getSource());
   }
 
   @Test

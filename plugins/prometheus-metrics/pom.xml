@@ -21,26 +21,30 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.intergral.deep</groupId>
-    <artifactId>deep-java-client</artifactId>
+    <groupId>com.intergral.deep.plugins</groupId>
+    <artifactId>plugins</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <packaging>pom</packaging>
-  <modules>
-    <module>java-plugin</module>
-    <module>cf-plugin</module>
-    <module>prometheus-metrics</module>
-  </modules>
-
-  <groupId>com.intergral.deep.plugins</groupId>
-  <artifactId>plugins</artifactId>
-  <name>Plugins</name>
-  <description>A set of extensions that add specific functionality to deep given the environment we
-    are running in.
-  </description>
+  <artifactId>prometheus-metrics</artifactId>
 
   <properties>
+    <prometheus.version>1.1.0</prometheus.version>
   </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.intergral.deep</groupId>
+      <artifactId>agent-api</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-core</artifactId>
+      <version>${prometheus.version}</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
 
 </project>

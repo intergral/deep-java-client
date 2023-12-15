@@ -17,6 +17,7 @@
 
 package com.intergral.deep.test;
 
+import com.intergral.deep.agent.api.plugin.MetricDefinition;
 import com.intergral.deep.agent.types.TracePointConfig;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,16 +29,16 @@ import java.util.HashMap;
 public class MockTracepointConfig extends TracePointConfig {
 
   public MockTracepointConfig() {
-    super("tp-id", "path", 123, new HashMap<>(), new ArrayList<>());
+    super("tp-id", "path", 123, new HashMap<>(), new ArrayList<>(), new ArrayList<>());
   }
 
   public MockTracepointConfig(final String path) {
-    super("tp-id", path, 123, new HashMap<>(), new ArrayList<>());
+    super("tp-id", path, 123, new HashMap<>(), new ArrayList<>(), new ArrayList<>());
   }
 
 
   public MockTracepointConfig(final String path, final int line) {
-    super("tp-id", path, line, new HashMap<>(), new ArrayList<>());
+    super("tp-id", path, line, new HashMap<>(), new ArrayList<>(), new ArrayList<>());
   }
 
   public MockTracepointConfig withArg(final String key, final String value) {
@@ -47,6 +48,12 @@ public class MockTracepointConfig extends TracePointConfig {
 
   public MockTracepointConfig withWatches(final String... watches) {
     this.getWatches().addAll(Arrays.asList(watches));
+    return this;
+  }
+
+  public MockTracepointConfig withMetric() {
+    this.getMetricDefinitions()
+        .add(new MetricDefinition("name", new ArrayList<>(), "COUNTER", "", "deep_agent", "Metric generated from expression: ", "unit"));
     return this;
   }
 }

@@ -30,6 +30,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.intergral.deep.agent.api.plugin.MetricDefinition;
+import com.intergral.deep.agent.api.plugin.MetricDefinition.Label;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
 import com.intergral.deep.agent.grpc.GrpcService;
@@ -41,19 +43,28 @@ import com.intergral.deep.proto.common.v1.KeyValue;
 import com.intergral.deep.proto.poll.v1.PollRequest;
 import com.intergral.deep.proto.poll.v1.PollResponse;
 import com.intergral.deep.proto.poll.v1.ResponseType;
+import com.intergral.deep.proto.tracepoint.v1.LabelExpression;
+import com.intergral.deep.proto.tracepoint.v1.Metric;
+import com.intergral.deep.proto.tracepoint.v1.MetricType;
 import com.intergral.deep.proto.tracepoint.v1.TracePointConfig;
 import com.intergral.deep.tests.grpc.TestPollService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -62,7 +73,7 @@ class LongPollServiceTest {
   private Server server;
   private LongPollService longPollService;
 
-  private final AtomicReference<PollRequest>  request = new AtomicReference<>(null);
+  private final AtomicReference<PollRequest> request = new AtomicReference<>(null);
   private PollResponse response;
   private GrpcService grpcService;
 
@@ -210,5 +221,44 @@ class LongPollServiceTest {
     assertNotNull(request.get().getResource());
     assertEquals("test", request.get().getResource().getAttributes(0).getKey());
     assertEquals("resource", request.get().getResource().getAttributes(0).getValue().getStringValue());
+  }
+
+  @ParameterizedTest()
+  @MethodSource("canConvertMetricsSource")
+  void canConvertMetrics(final Metric input, final MetricDefinition expected) {
+    final List<MetricDefinition> name = longPollService.covertMetrics(Collections.singletonList(input));
+
+    assertEquals(expected, name.iterator().next());
+  }
+
+  private static Stream<Arguments> canConvertMetricsSource() {
+    return Stream.of(
+        Arguments.of(Metric.newBuilder().setName("name").build(),
+            new MetricDefinition("name", new ArrayList<>(), "COUNTER", "", "deep_agent", "Metric generated from expression: ", "")),
+        Arguments.of(Metric.newBuilder().setName("name").setNamespace("custom").build(),
+            new MetricDefinition("name", new ArrayList<>(), "COUNTER", "", "custom", "Metric generated from expression: ", "")),
+        Arguments.of(Metric.newBuilder().setName("name").setNamespace("custom").setHelp("This is my metric").build(),
+            new MetricDefinition("name", new ArrayList<>(), "COUNTER", "", "custom", "This is my metric", "")),
+        Arguments.of(Metric.newBuilder().setName("name").setNamespace("custom").setExpression("this.cnt").build(),
+            new MetricDefinition("name", new ArrayList<>(), "COUNTER", "this.cnt", "custom", "Metric generated from expression: this.cnt",
+                "")),
+        Arguments.of(Metric.newBuilder().setUnit("unit").setName("name").setType(MetricType.GAUGE).setExpression("this.cnt").build(),
+            new MetricDefinition("name", new ArrayList<>(), "GAUGE", "this.cnt", "deep_agent", "Metric generated from expression: this.cnt",
+                "unit")),
+        Arguments.of(Metric.newBuilder().addLabelExpressions(
+                    LabelExpression.newBuilder()
+                        .setKey("key")
+                        .setStatic(AnyValue.newBuilder().setStringValue("some string").build())
+                        .build())
+                .setUnit("unit").setName("name").setType(MetricType.GAUGE).setExpression("this.cnt").build(),
+            new MetricDefinition("name", Collections.singletonList(new Label("key", "some string", null)), "GAUGE", "this.cnt",
+                "deep_agent", "Metric generated from expression: this.cnt",
+                "unit")),
+        Arguments.of(Metric.newBuilder().addLabelExpressions(LabelExpression.newBuilder().setKey("key").setExpression("some.thing").build())
+                .setUnit("unit").setName("name").setType(MetricType.GAUGE).setExpression("this.cnt").build(),
+            new MetricDefinition("name", Collections.singletonList(new Label("key", null, "some.thing")), "GAUGE", "this.cnt", "deep_agent",
+                "Metric generated from expression: this.cnt",
+                "unit"))
+    );
   }
 }

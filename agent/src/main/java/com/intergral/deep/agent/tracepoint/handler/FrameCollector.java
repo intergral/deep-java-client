@@ -359,7 +359,7 @@ public class FrameCollector extends VariableProcessor {
    * @param watch the watch expression to evaluate
    * @return a {@link IExpressionResult}
    */
-  protected IExpressionResult evaluateWatchExpression(final String watch) {
+  protected IExpressionResult evaluateWatchExpression(final String watch, final String source) {
     try {
       final Object result = this.evaluator.evaluateExpression(watch, this.variables);
       final List<VariableID> variableIds = processVars(Collections.singletonMap(watch, result));
@@ -367,7 +367,7 @@ public class FrameCollector extends VariableProcessor {
       return new IExpressionResult() {
         @Override
         public WatchResult result() {
-          return new WatchResult(watch, variableIds.get(0));
+          return new WatchResult(watch, variableIds.get(0), source);
         }
 
         @Override
@@ -379,13 +379,32 @@ public class FrameCollector extends VariableProcessor {
         public String logString() {
           return Utils.valueOf(result);
         }
+
+        @Override
+        public Number numberValue() {
+          if (result instanceof Number) {
+            // todo should we wrap this is new Number() ?
+            return (Number) result;
+          }
+          final String string = Utils.valueOf(result);
+          try {
+            return Double.valueOf(string);
+          } catch (NumberFormatException nfe) {
+            return Double.NaN;
+          }
+        }
+
+        @Override
+        public boolean isError() {
+          return false;
+        }
       };
     } catch (Throwable t) {
       return new IExpressionResult() {
         @Override
         public WatchResult result() {
           return new WatchResult(watch,
-              String.format("%s: %s", t.getClass().getName(), t.getMessage()));
+              String.format("%s: %s", t.getClass().getName(), t.getMessage()), source);
         }
 
         @Override
@@ -396,6 +415,16 @@ public class FrameCollector extends VariableProcessor {
         @Override
         public String logString() {
           return Utils.throwableToString(t);
+        }
+
+        @Override
+        public Number numberValue() {
+          return Double.NaN;
+        }
+
+        @Override
+        public boolean isError() {
+          return true;
         }
       };
     }
@@ -464,7 +493,7 @@ public class FrameCollector extends VariableProcessor {
   private String processSubstitution(final String logMsg, final ArrayList<WatchResult> watchResults,
       final HashMap<String, Variable> variables) {
     final StringSubstitutor stringSubstitutor = new StringSubstitutor(key -> {
-      final IExpressionResult iExpressionResult = evaluateWatchExpression(key);
+      final IExpressionResult iExpressionResult = evaluateWatchExpression(key, WatchResult.LOG);
       watchResults.add(iExpressionResult.result());
       variables.putAll(iExpressionResult.variables());
       return iExpressionResult.logString();
@@ -506,7 +535,7 @@ public class FrameCollector extends VariableProcessor {
   /**
    * The result of evaluating an expression.
    *
-   * @see #evaluateWatchExpression(String)
+   * @see #evaluateWatchExpression(String, String)
    */
   protected interface IExpressionResult {
 
@@ -515,6 +544,10 @@ public class FrameCollector extends VariableProcessor {
     Map<String, Variable> variables();
 
     String logString();
+
+    Number numberValue();
+
+    boolean isError();
   }
 
   /**

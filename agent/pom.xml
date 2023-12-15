@@ -77,6 +77,12 @@
       <version>1.0-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>com.intergral.deep.plugins</groupId>
+      <artifactId>prometheus-metrics</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
 
 
     <!-- we use slf4j api but JUL impl for logging -->
