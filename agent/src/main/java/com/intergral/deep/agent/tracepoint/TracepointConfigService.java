@@ -17,6 +17,7 @@
 
 package com.intergral.deep.agent.tracepoint;
 
+import com.intergral.deep.agent.api.plugin.MetricDefinition;
 import com.intergral.deep.agent.tracepoint.inst.TracepointInstrumentationService;
 import com.intergral.deep.agent.types.TracePointConfig;
 import java.util.ArrayList;
@@ -86,12 +87,14 @@ public class TracepointConfigService implements ITracepointConfig {
    * @param line    the tracepoint line
    * @param args    the tracepoint args
    * @param watches the tracepoint watches
+   * @param metrics the list of metric expressions
    * @return the new tracepoint config
    * @see com.intergral.deep.agent.api.IDeep#registerTracepoint(String, int)
    */
   public TracePointConfig addCustom(final String path, final int line, final Map<String, String> args,
-      final Collection<String> watches) {
-    final TracePointConfig tracePointConfig = new TracePointConfig(UUID.randomUUID().toString(), path, line, args, watches);
+      final Collection<String> watches, final Collection<MetricDefinition> metrics) {
+    final TracePointConfig tracePointConfig = new TracePointConfig(UUID.randomUUID().toString(), path, line, args, watches,
+        metrics);
     this.customTracepoints.add(tracePointConfig);
     this.processChange();
     return tracePointConfig;

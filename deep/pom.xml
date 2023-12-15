@@ -69,6 +69,12 @@
       <version>1.0-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>com.intergral.deep.plugins</groupId>
+      <artifactId>prometheus-metrics</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -127,27 +133,43 @@
             </manifest>
             <manifestEntries>
               <!-- Git specific -->
+              <!--suppress UnresolvedMavenProperty -->
               <Git-Branch>${git.branch}</Git-Branch>
+              <!--suppress UnresolvedMavenProperty -->
               <Git-Commit-Id>${git.commit.id}</Git-Commit-Id>
+              <!--suppress UnresolvedMavenProperty -->
               <Git-Commit-Time>${git.commit.time}</Git-Commit-Time>
+              <!--suppress UnresolvedMavenProperty -->
               <Git-Dirty>${git.dirty}</Git-Dirty>
+              <!--suppress UnresolvedMavenProperty -->
               <Git-Tags>${git.tags}</Git-Tags>
+              <!--suppress UnresolvedMavenProperty -->
               <Git-Remote-Origin-Url>${git.remote.origin.url}</Git-Remote-Origin-Url>
               <!-- Add build time -->
               <Build-Time>${maven.build.timestamp}</Build-Time>
               <!-- Version components -->
+              <!--suppress UnresolvedMavenProperty -->
               <Version-Major>${parsedVersion.majorVersion}</Version-Major>
+              <!--suppress UnresolvedMavenProperty -->
               <Version-Minor>${parsedVersion.minorVersion}</Version-Minor>
+              <!--suppress UnresolvedMavenProperty -->
               <Version-Micro>${parsedVersion.incrementalVersion}</Version-Micro>
               <Version>${project.version}</Version>
               <!-- Add info -->
+              <!--suppress UnresolvedMavenProperty -->
               <Implementation-Build>${git.commit.id}</Implementation-Build>
+              <!--suppress UnresolvedMavenProperty -->
               <Implementation-Branch>${git.branch}</Implementation-Branch>
               <!-- Add Build Info -->
+              <!--suppress UnresolvedMavenProperty -->
               <X-CI-Project-Name>${env.CI_PROJECT_NAME}</X-CI-Project-Name>
+              <!--suppress UnresolvedMavenProperty -->
               <X-CI-Pipeline-Id>${env.CI_PIPELINE_ID}</X-CI-Pipeline-Id>
+              <!--suppress UnresolvedMavenProperty -->
               <X-CI-Pipeline-Iid>${env.CI_PIPELINE_IID}</X-CI-Pipeline-Iid>
+              <!--suppress UnresolvedMavenProperty -->
               <X-CI-Pipeline-Source>${env.CI_PIPELINE_SOURCE}</X-CI-Pipeline-Source>
+              <!--suppress UnresolvedMavenProperty -->
               <X-CI-Pipeline-Url>${env.CI_PIPELINE_URL}</X-CI-Pipeline-Url>
 
               <Specification-Title>${project.artifactId}</Specification-Title>

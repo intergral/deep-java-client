@@ -58,7 +58,7 @@ class TracepointConfigServiceTest {
   void customCallsUpdate() {
     // add a custom tracepoint will call instrumentation update
     final TracePointConfig tracePointConfig = tracepointConfigService.addCustom("/path", 123, Collections.emptyMap(),
-        Collections.emptyList());
+        Collections.emptyList(), Collections.emptyList());
 
     final ArgumentCaptor<Collection<TracePointConfig>> captor = ArgumentCaptor.forClass(Collection.class);
 
@@ -88,11 +88,11 @@ class TracepointConfigServiceTest {
   void canLoadTracepointConfigs() {
 
     final TracePointConfig tracePointConfig1 = tracepointConfigService.addCustom("/path", 123, Collections.emptyMap(),
-        Collections.emptyList());
+        Collections.emptyList(), Collections.emptyList());
     final TracePointConfig tracePointConfig2 = tracepointConfigService.addCustom("/path", 123, Collections.emptyMap(),
-        Collections.emptyList());
+        Collections.emptyList(), Collections.emptyList());
     final TracePointConfig tracePointConfig3 = tracepointConfigService.addCustom("/path", 123, Collections.emptyMap(),
-        Collections.emptyList());
+        Collections.emptyList(), Collections.emptyList());
 
     {
       final Collection<TracePointConfig> tracePointConfigs = tracepointConfigService.loadTracepointConfigs(
@@ -121,7 +121,8 @@ class TracepointConfigServiceTest {
   void configUpdate() {
     // TP config is passed to instrumentation
     tracepointConfigService.configUpdate(10101, "hash",
-        Collections.singletonList(new TracePointConfig("some-id", "path", 123, Collections.emptyMap(), Collections.emptyList())));
+        Collections.singletonList(
+            new TracePointConfig("some-id", "path", 123, Collections.emptyMap(), Collections.emptyList(), Collections.emptyList())));
 
     final ArgumentCaptor<Collection<TracePointConfig>> captor = ArgumentCaptor.forClass(Collection.class);
 
@@ -135,7 +136,7 @@ class TracepointConfigServiceTest {
 
     // custom and config are passed to instrumentation
     final TracePointConfig customTp = tracepointConfigService.addCustom("path", 123, Collections.emptyMap(),
-        Collections.emptyList());
+        Collections.emptyList(), Collections.emptyList());
 
     Mockito.verify(instrumentationService, Mockito.times(2)).processBreakpoints(captor.capture());
 
@@ -149,7 +150,8 @@ class TracepointConfigServiceTest {
 
     //custom remains after update
     tracepointConfigService.configUpdate(10101, "hash",
-        Collections.singletonList(new TracePointConfig("some-id", "path", 123, Collections.emptyMap(), Collections.emptyList())));
+        Collections.singletonList(
+            new TracePointConfig("some-id", "path", 123, Collections.emptyMap(), Collections.emptyList(), Collections.emptyList())));
 
     Mockito.verify(instrumentationService, Mockito.times(3)).processBreakpoints(captor.capture());
 

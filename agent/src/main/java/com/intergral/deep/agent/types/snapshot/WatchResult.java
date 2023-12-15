@@ -22,9 +22,31 @@ package com.intergral.deep.agent.types.snapshot;
  */
 public class WatchResult {
 
+  /**
+   * Watch source is METRIC.
+   *
+   * @see com.intergral.deep.proto.tracepoint.v1.WatchSource
+   */
+  public static final String METRIC = "METRIC";
+
+  /**
+   * Watch source is WATCH.
+   *
+   * @see com.intergral.deep.proto.tracepoint.v1.WatchSource
+   */
+  public static final String WATCH = "WATCH";
+
+  /**
+   * Watch source is LOG.
+   *
+   * @see com.intergral.deep.proto.tracepoint.v1.WatchSource
+   */
+  public static final String LOG = "LOG";
+
   private final String error;
   private final VariableID result;
   private final String expression;
+  private final String source;
 
 
   /**
@@ -32,11 +54,13 @@ public class WatchResult {
    *
    * @param expression the expression
    * @param error      the error
+   * @param source     the source of this result
    */
-  public WatchResult(final String expression, final String error) {
+  public WatchResult(final String expression, final String error, final String source) {
     this.expression = expression;
     this.error = error;
     this.result = null;
+    this.source = source;
   }
 
   /**
@@ -44,9 +68,11 @@ public class WatchResult {
    *
    * @param expression the expression
    * @param result     the result
+   * @param source     the source of this result
    */
-  public WatchResult(final String expression, final VariableID result) {
+  public WatchResult(final String expression, final VariableID result, final String source) {
     this.expression = expression;
+    this.source = source;
     this.error = null;
     this.result = result;
   }
@@ -65,5 +91,9 @@ public class WatchResult {
 
   public String expression() {
     return this.expression;
+  }
+
+  public String getSource() {
+    return source;
   }
 }

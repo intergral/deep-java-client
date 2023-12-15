@@ -21,22 +21,32 @@ import com.intergral.deep.agent.Reflection;
 import com.intergral.deep.agent.Utils;
 import com.intergral.deep.agent.api.plugin.EvaluationException;
 import com.intergral.deep.agent.api.plugin.IEvaluator;
+import com.intergral.deep.agent.api.plugin.IMetricProcessor;
 import com.intergral.deep.agent.api.plugin.ISnapshotContext;
+import com.intergral.deep.agent.api.plugin.MetricDefinition;
+import com.intergral.deep.agent.api.plugin.MetricDefinition.Label;
 import com.intergral.deep.agent.api.reflection.IReflection;
 import com.intergral.deep.agent.api.resource.Resource;
+import com.intergral.deep.agent.grpc.GrpcService;
 import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.types.TracePointConfig;
 import com.intergral.deep.agent.types.snapshot.EventSnapshot;
 import com.intergral.deep.agent.types.snapshot.WatchResult;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This type deals with matching tracepoints to the current state and working out if we can collect the data.
  */
 public class FrameProcessor extends FrameCollector implements ISnapshotContext {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(GrpcService.class);
 
   /**
    * The tracepoints that have been triggered by the Callback.
@@ -124,7 +134,7 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
   public Collection<EventSnapshot> collect() {
     final Collection<EventSnapshot> snapshots = new ArrayList<>();
 
-    final IFrameResult processedFrame = super.processFrame();
+    final IFrameResult processedFrame = processFrame();
 
     for (final TracePointConfig tracepoint : filteredTracepoints) {
       try {
@@ -135,7 +145,7 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
             processedFrame.variables());
 
         for (String watch : tracepoint.getWatches()) {
-          final FrameCollector.IExpressionResult result = super.evaluateWatchExpression(watch);
+          final FrameCollector.IExpressionResult result = evaluateWatchExpression(watch, WatchResult.WATCH);
           snapshot.addWatchResult(result.result());
           snapshot.mergeVariables(result.variables());
         }
@@ -151,7 +161,18 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
           this.logTracepoint(result.processedLog(), tracepoint.getId(), snapshot.getID());
         }
 
-        final Resource attributes = super.processAttributes(tracepoint);
+        final Collection<MetricDefinition> metricDefinitions = tracepoint.getMetricDefinitions();
+        if (!metricDefinitions.isEmpty()) {
+          for (MetricDefinition metricDefinition : metricDefinitions) {
+            final List<FrameCollector.IExpressionResult> watchResults = processMetric(tracepoint, metricDefinition);
+            for (FrameCollector.IExpressionResult watchResult : watchResults) {
+              snapshot.addWatchResult(watchResult.result());
+              snapshot.mergeVariables(watchResult.variables());
+            }
+          }
+        }
+
+        final Resource attributes = processAttributes(tracepoint);
         snapshot.mergeAttributes(attributes);
 
         snapshots.add(snapshot);
@@ -162,6 +183,76 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
     }
 
     return snapshots;
+  }
+
+  List<IExpressionResult> processMetric(final TracePointConfig tracepoint, final MetricDefinition metricDefinition) {
+    final List<IExpressionResult> watchResults = new ArrayList<>();
+    final Collection<IMetricProcessor> metricProcessors = this.settings.getPlugins(IMetricProcessor.class);
+    if (metricProcessors.isEmpty()) {
+      return watchResults;
+    }
+
+    final Number value;
+    if (!metricDefinition.getExpression().trim().isEmpty()) {
+      final IExpressionResult iExpressionResult = evaluateWatchExpression(metricDefinition.getExpression(), WatchResult.METRIC);
+      watchResults.add(iExpressionResult);
+      value = iExpressionResult.numberValue();
+      if (iExpressionResult.isError() || Double.isNaN(value.doubleValue())) {
+        // the result of the expression is an error or not a number, so we skip for now
+        return watchResults;
+      }
+    } else {
+      // if there is no expression than default the value to 1
+      value = 1d;
+    }
+
+    final HashMap<String, Object> processedTags = new HashMap<>();
+    final List<Label> labels = metricDefinition.getLabels();
+    for (Label label : labels) {
+      final String expression = label.getExpression();
+      if (expression != null) {
+        final IExpressionResult tagResult = evaluateWatchExpression(expression, WatchResult.METRIC);
+        watchResults.add(tagResult);
+
+        processedTags.put(label.getKey(), tagResult.logString());
+      } else {
+        processedTags.put(label.getKey(), label.getValue());
+      }
+    }
+
+    for (IMetricProcessor metricProcessor : metricProcessors) {
+      try {
+        switch (metricDefinition.getType()) {
+          case "GAUGE":
+            metricProcessor.gauge(metricDefinition.getName(), processedTags, metricDefinition.getNamespace(), metricDefinition.getHelp(),
+                metricDefinition.getUnit(),
+                value.doubleValue());
+            break;
+          case "COUNTER":
+            metricProcessor.counter(metricDefinition.getName(), processedTags, metricDefinition.getNamespace(), metricDefinition.getHelp(),
+                metricDefinition.getUnit(),
+                value.doubleValue());
+            break;
+          case "HISTOGRAM":
+            metricProcessor.histogram(metricDefinition.getName(), processedTags, metricDefinition.getNamespace(),
+                metricDefinition.getHelp(), metricDefinition.getUnit(),
+                value.doubleValue());
+            break;
+          case "SUMMARY":
+            metricProcessor.summary(metricDefinition.getName(), processedTags, metricDefinition.getNamespace(), metricDefinition.getHelp(),
+                metricDefinition.getUnit(),
+                value.doubleValue());
+            break;
+          default:
+            LOGGER.error("Unsupported metric type: {}", metricDefinition.getType());
+            break;
+        }
+
+      } catch (Throwable t) {
+        LOGGER.error("Cannot process metric via {}", metricProcessor.getClass(), t);
+      }
+    }
+    return watchResults;
   }
 
   /**

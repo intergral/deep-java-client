@@ -15,25 +15,36 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.agent.tracepoint.inst.jsp;
+package com.intergral.deep.examples;
 
-import com.intergral.deep.agent.types.TracePointConfig;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.UUID;
 
-/**
- * This is a simple wrapper of the tracepoint config with the mapped line we need to use.
- */
-public class JSPMappedBreakpoint extends TracePointConfig {
+public class BaseTest {
 
-  private final int mappedLine;
+  protected final Properties systemProps = System.getProperties();
 
 
-  public JSPMappedBreakpoint(final TracePointConfig tp, final int mappedLine) {
-    super(tp.getId(), tp.getPath(), tp.getLineNo(), tp.getArgs(), tp.getWatches(), tp.getMetricDefinitions());
-    this.mappedLine = mappedLine;
+  public String newId() {
+    return UUID.randomUUID().toString();
   }
 
-  @Override
-  public int getLineNo() {
-    return this.mappedLine;
+
+  public Map<Character, Integer> makeCharCountMap(final String str) {
+    final HashMap<Character, Integer> res = new HashMap<Character, Integer>();
+
+    for (int i = 0; i < str.length(); i++) {
+      final char c = str.charAt(i);
+      final Integer cnt = res.get(c);
+      if (cnt == null) {
+        res.put(c, 0);
+      } else {
+        res.put(c, cnt + 1);
+      }
+    }
+
+    return res;
   }
 }
