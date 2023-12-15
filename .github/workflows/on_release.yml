@@ -82,5 +82,5 @@ jobs:
         with:
           upload_url: ${{ steps.get_release.outputs.upload_url }}
           asset_content_type: application/octet-stream
-          name: Maven Site
+          asset_name: Maven Site
           asset_path: site.tar.gz
