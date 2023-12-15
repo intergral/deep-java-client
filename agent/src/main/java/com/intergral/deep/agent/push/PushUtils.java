@@ -30,6 +30,7 @@ import com.intergral.deep.proto.tracepoint.v1.StackFrame.Builder;
 import com.intergral.deep.proto.tracepoint.v1.TracePointConfig;
 import com.intergral.deep.proto.tracepoint.v1.Variable;
 import com.intergral.deep.proto.tracepoint.v1.WatchResult;
+import com.intergral.deep.proto.tracepoint.v1.WatchSource;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -103,6 +104,7 @@ public final class PushUtils {
     return watches.stream().map(watchResult -> {
       final WatchResult.Builder builder = WatchResult.newBuilder();
       builder.setExpression(watchResult.expression());
+      builder.setSource(WatchSource.valueOf(watchResult.getSource()));
       if (watchResult.isError()) {
         builder.setErrorResult(watchResult.error());
       } else {

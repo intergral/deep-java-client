@@ -359,7 +359,7 @@ public class FrameCollector extends VariableProcessor {
    * @param watch the watch expression to evaluate
    * @return a {@link IExpressionResult}
    */
-  protected IExpressionResult evaluateWatchExpression(final String watch, final boolean isMetric) {
+  protected IExpressionResult evaluateWatchExpression(final String watch, final String source) {
     try {
       final Object result = this.evaluator.evaluateExpression(watch, this.variables);
       final List<VariableID> variableIds = processVars(Collections.singletonMap(watch, result));
@@ -367,7 +367,7 @@ public class FrameCollector extends VariableProcessor {
       return new IExpressionResult() {
         @Override
         public WatchResult result() {
-          return new WatchResult(watch, variableIds.get(0), isMetric);
+          return new WatchResult(watch, variableIds.get(0), source);
         }
 
         @Override
@@ -404,7 +404,7 @@ public class FrameCollector extends VariableProcessor {
         @Override
         public WatchResult result() {
           return new WatchResult(watch,
-              String.format("%s: %s", t.getClass().getName(), t.getMessage()), isMetric);
+              String.format("%s: %s", t.getClass().getName(), t.getMessage()), source);
         }
 
         @Override
@@ -493,7 +493,7 @@ public class FrameCollector extends VariableProcessor {
   private String processSubstitution(final String logMsg, final ArrayList<WatchResult> watchResults,
       final HashMap<String, Variable> variables) {
     final StringSubstitutor stringSubstitutor = new StringSubstitutor(key -> {
-      final IExpressionResult iExpressionResult = evaluateWatchExpression(key, false);
+      final IExpressionResult iExpressionResult = evaluateWatchExpression(key, WatchResult.LOG);
       watchResults.add(iExpressionResult.result());
       variables.putAll(iExpressionResult.variables());
       return iExpressionResult.logString();
@@ -535,7 +535,7 @@ public class FrameCollector extends VariableProcessor {
   /**
    * The result of evaluating an expression.
    *
-   * @see #evaluateWatchExpression(String, boolean)
+   * @see #evaluateWatchExpression(String, String)
    */
   protected interface IExpressionResult {
 

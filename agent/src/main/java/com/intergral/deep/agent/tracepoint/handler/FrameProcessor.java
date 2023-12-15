@@ -145,7 +145,7 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
             processedFrame.variables());
 
         for (String watch : tracepoint.getWatches()) {
-          final FrameCollector.IExpressionResult result = evaluateWatchExpression(watch, false);
+          final FrameCollector.IExpressionResult result = evaluateWatchExpression(watch, WatchResult.WATCH);
           snapshot.addWatchResult(result.result());
           snapshot.mergeVariables(result.variables());
         }
@@ -194,7 +194,7 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
 
     final Number value;
     if (!metricDefinition.getExpression().trim().isEmpty()) {
-      final IExpressionResult iExpressionResult = evaluateWatchExpression(metricDefinition.getExpression(), true);
+      final IExpressionResult iExpressionResult = evaluateWatchExpression(metricDefinition.getExpression(), WatchResult.METRIC);
       watchResults.add(iExpressionResult);
       value = iExpressionResult.numberValue();
       if (iExpressionResult.isError() || Double.isNaN(value.doubleValue())) {
@@ -211,7 +211,7 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
     for (Label label : labels) {
       final String expression = label.getExpression();
       if (expression != null) {
-        final IExpressionResult tagResult = evaluateWatchExpression(expression, true);
+        final IExpressionResult tagResult = evaluateWatchExpression(expression, WatchResult.METRIC);
         watchResults.add(tagResult);
 
         processedTags.put(label.getKey(), tagResult.logString());

@@ -85,7 +85,7 @@
     </modules>
 
     <properties>
-        <deep-proto.version>0.0.1-SNAPSHOT</deep-proto.version>
+        <deep-proto.version>1.0.3</deep-proto.version>
         <grpc.version>1.60.0</grpc.version>
         <netty.version>4.1.98.Final</netty.version>
         <tcnative.version>2.0.62.Final</tcnative.version>

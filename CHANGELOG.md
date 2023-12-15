@@ -1,4 +1,5 @@
 # 1.2.0 (xx/xx/2023)
+- **[CHANGE]**: update:  Update deep proto to 1.0.3 [#74](https://github.com/intergral/deep/pull/74) [@Umaaz](https://github.com/Umaaz)
 - **[CHANGE]**: plugin: Change the plugins to use SPI to load [#77](https://github.com/intergral/deep/pull/77) [@Umaaz](https://github.com/Umaaz)
 - **[FEATURE]**: metrics: Add support for metrics from tracepoints [#74](https://github.com/intergral/deep/pull/74) [@Umaaz](https://github.com/Umaaz)
 

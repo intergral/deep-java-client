@@ -70,8 +70,8 @@ public class MockEventSnapshot extends EventSnapshot {
   }
 
   public MockEventSnapshot withWatches() {
-    getWatches().add(new WatchResult("error", "this is an error", false));
-    getWatches().add(new WatchResult("good", new VariableID("some-var", "withName", new HashSet<>(), null), false));
+    getWatches().add(new WatchResult("error", "this is an error", "LOG"));
+    getWatches().add(new WatchResult("good", new VariableID("some-var", "withName", new HashSet<>(), null), "LOG"));
     return this;
   }
 
