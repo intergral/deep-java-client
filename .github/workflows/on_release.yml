@@ -4,6 +4,9 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -33,21 +36,13 @@ jobs:
       - name: Build and Release
         run: mvn -s .ci-settings.xml clean deploy -DskipTests -P release-ossrh -B -U -pl agent,deep --also-make
 
-      - name: Get release
-        id: get_release
-        uses: bruceadams/get-release@v1.3.2
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-
-      - name: Upload release binary
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
         with:
-          upload_url: ${{ steps.get_release.outputs.upload_url }}
-          asset_path: ./agent/target/deep-${VERSION}.jar
+          file: ./agent/target/deep-${VERSION}.jar
           asset_name: Deep Agent
-          asset_content_type: application/octet-stream
+          tag: ${{ github.ref_name }}
+          overwrite: true
 
   JavaSite:
     runs-on: ubuntu-latest
@@ -70,17 +65,11 @@ jobs:
       - name: Zip Site
         run: tar -czf site.tar.gz target/staging
 
-      - name: Get release
-        id: get_release
-        uses: bruceadams/get-release@v1.3.2
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-
-      - uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
         with:
-          upload_url: ${{ steps.get_release.outputs.upload_url }}
-          asset_content_type: application/octet-stream
-          name: Maven Site
-          asset_path: site.tar.gz
+          file: site.tar.gz
+          asset_name: Maven Site
+          tag: ${{ github.ref_name }}
+          overwrite: true
+
