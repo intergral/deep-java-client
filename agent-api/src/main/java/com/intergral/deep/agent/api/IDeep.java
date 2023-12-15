@@ -18,6 +18,7 @@
 package com.intergral.deep.agent.api;
 
 import com.intergral.deep.agent.api.plugin.MetricDefinition;
+import com.intergral.deep.agent.api.spi.IDeepPlugin;
 import com.intergral.deep.agent.api.tracepoint.ITracepoint.ITracepointRegistration;
 import java.util.Collection;
 import java.util.Map;
@@ -54,6 +55,14 @@ public interface IDeep {
    * @return the sematic version of deep as a string e.g. 1.2.3
    */
   String getVersion();
+
+  /**
+   * This allows the registration of custom plugins.
+   *
+   * @param plugin the plugin that can be used to decorate snapshots
+   * @return a {@link IRegistration} that can be used to unregister the plugin
+   */
+  IRegistration<IDeepPlugin> registerPlugin(final IDeepPlugin plugin);
 
   /**
    * Create a tracepoint that will only exist on this instance.

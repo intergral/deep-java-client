@@ -24,6 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 
 import com.intergral.deep.agent.api.DeepVersion;
+import com.intergral.deep.agent.api.IRegistration;
+import com.intergral.deep.agent.api.spi.IDeepPlugin;
 import com.intergral.deep.agent.api.tracepoint.ITracepoint;
 import com.intergral.deep.agent.api.tracepoint.ITracepoint.ITracepointRegistration;
 import com.intergral.deep.agent.settings.Settings;
@@ -79,7 +81,19 @@ class DeepAgentTest {
 
     Mockito.verify(settings).setPlugins(Mockito.anyCollection());
     Mockito.verify(settings).setResource(Mockito.any());
+  }
 
+  @Test
+  void registerPlugin() {
+    //noinspection unchecked
+    final IRegistration<IDeepPlugin> iRegistration = Mockito.mock(IRegistration.class);
+    Mockito.when(settings.addPlugin(Mockito.any())).thenReturn(iRegistration);
+
+    final IDeepPlugin deepPlugin = Mockito.mock(IDeepPlugin.class);
+    deepAgent.registerPlugin(deepPlugin);
+
+    Mockito.verify(settings, times(1)).addPlugin(Mockito.any());
+    Mockito.verify(deepPlugin, times(1)).configure(settings, Reflection.getInstance());
   }
 
   @Test

@@ -19,6 +19,7 @@ package com.intergral.deep.agent;
 
 import com.intergral.deep.agent.api.DeepVersion;
 import com.intergral.deep.agent.api.IDeep;
+import com.intergral.deep.agent.api.IRegistration;
 import com.intergral.deep.agent.api.plugin.MetricDefinition;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.spi.IDeepPlugin;
@@ -82,6 +83,12 @@ public class DeepAgent implements IDeep {
   @Override
   public String getVersion() {
     return DeepVersion.VERSION;
+  }
+
+  @Override
+  public IRegistration<IDeepPlugin> registerPlugin(final IDeepPlugin plugin) {
+    plugin.configure(this.settings, Reflection.getInstance());
+    return this.settings.addPlugin(plugin);
   }
 
   @Override

@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.intergral.deep.agent.api.IRegistration;
 import com.intergral.deep.agent.api.logger.ITracepointLogger;
 import com.intergral.deep.agent.api.plugin.IMetricProcessor;
 import com.intergral.deep.agent.api.spi.IDeepPlugin;
@@ -177,6 +178,32 @@ class SettingsTest {
     assertNull(notFound);
   }
 
+  @Test
+  void addPlugin() {
+    final Settings settings = Settings.build(new HashMap<>());
+
+    final TestPlugin plugin = new TestPlugin();
+    final IRegistration<IDeepPlugin> iDeepPluginIRegistration = settings.addPlugin(plugin);
+
+    assertNotNull(iDeepPluginIRegistration.get());
+
+    assertSame(plugin, iDeepPluginIRegistration.get());
+
+    assertEquals(1, settings.getPlugins().size());
+
+    assertNotNull(settings.getPluginByName(TestPlugin.class, TestPlugin.class.getName()));
+
+    iDeepPluginIRegistration.unregister();
+
+    assertEquals(0, settings.getPlugins().size());
+
+    assertNull(settings.getPluginByName(TestPlugin.class, TestPlugin.class.getName()));
+
+    final IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, iDeepPluginIRegistration::unregister);
+    assertEquals("cannot remove plugin: TestPlugin{}", illegalStateException.getMessage());
+
+  }
+
   private static class TestPlugin implements IDeepPlugin, IMetricProcessor, ITracepointLogger {
 
     @Override
@@ -206,6 +233,11 @@ class SettingsTest {
     @Override
     public void logTracepoint(final String logMsg, final String tracepointId, final String snapshotId) {
 
+    }
+
+    @Override
+    public String toString() {
+      return "TestPlugin{}";
     }
   }
 }
