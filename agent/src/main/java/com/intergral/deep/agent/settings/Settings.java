@@ -17,6 +17,7 @@
 
 package com.intergral.deep.agent.settings;
 
+import com.intergral.deep.agent.api.IRegistration;
 import com.intergral.deep.agent.api.logger.ITracepointLogger;
 import com.intergral.deep.agent.api.logger.TracepointLogger;
 import com.intergral.deep.agent.api.resource.Resource;
@@ -51,7 +52,7 @@ public class Settings implements ISettings {
   private static final AtomicBoolean IS_ACTIVE = new AtomicBoolean(true);
   private final Properties properties;
   private Resource resource;
-  private Collection<IDeepPlugin> plugins = Collections.emptyList();
+  private final Collection<IDeepPlugin> plugins = new ArrayList<>();
   private ITracepointLogger tracepointLogger = new TracepointLogger();
 
   private Settings(Properties properties) {
@@ -321,7 +322,7 @@ public class Settings implements ISettings {
    * @return the discovered plugin with the given name, or {@code null} if a plugin with the provided name and type cannot be found.
    */
   public <T> T getPluginByName(final Class<T> clazz, final String name) {
-    final Collection<T> plugins = getPlugins(clazz, t -> t.getClass().getName().endsWith(name));
+    final Collection<T> plugins = getPlugins(clazz, t -> t.getClass().getName().equals(name));
     if (plugins.isEmpty()) {
       return null;
     }
@@ -364,7 +365,8 @@ public class Settings implements ISettings {
    * @param plugins the plugins to use
    */
   public void setPlugins(Collection<IDeepPlugin> plugins) {
-    this.plugins = plugins;
+    this.plugins.clear();
+    this.plugins.addAll(plugins);
   }
 
   /**
@@ -417,6 +419,30 @@ public class Settings implements ISettings {
       return;
     }
     this.tracepointLogger = tracepointLogger;
+  }
+
+  /**
+   * Add a plugin to the current config.
+   *
+   * @param plugin the new plugin
+   * @return the plugin registration
+   */
+  public IRegistration<IDeepPlugin> addPlugin(final IDeepPlugin plugin) {
+    this.plugins.add(plugin);
+    return new IRegistration<IDeepPlugin>() {
+      @Override
+      public void unregister() {
+        final boolean removeIf = Settings.this.plugins.removeIf(existing -> existing == plugin);
+        if (!removeIf) {
+          throw new IllegalStateException(String.format("cannot remove plugin: %s", plugin));
+        }
+      }
+
+      @Override
+      public IDeepPlugin get() {
+        return plugin;
+      }
+    };
   }
 
   /**
