@@ -1,4 +1,6 @@
 # main - Unreleased
+
+# 1.1.4 (15/12/2023)
 - **[CHANGE]**: plugin: Add new API for registering plugins [#84](https://github.com/intergral/deep/pull/84) [@Umaaz](https://github.com/Umaaz) 
 
 # 1.1.3 (15/12/2023)
