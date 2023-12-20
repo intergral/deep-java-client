@@ -18,6 +18,7 @@
 package java.com.intergral.deep;
 
 import com.intergral.deep.agent.tracepoint.handler.Callback;
+import java.io.Closeable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -83,5 +84,20 @@ public class ProxyCallback {
   public static void callBackFinally(final Set<String> breakpointIds,
       final Map<String, Object> map) {
     Callback.callBackFinally(breakpointIds, map);
+  }
+
+  /**
+   * Create a span using the tracepoint callback.
+   * <p>
+   * This method will <b>Always</b> return a closable. This way the injected code never deals with anything but calling close. Even if close
+   * doesn't do anything.
+   * <p>
+   * We use {@link Closeable} here, so we can stick to java types in the injected code. This makes testing and injected code simpler.
+   *
+   * @param name the name of the span
+   * @return a {@link Closeable} to close the span
+   */
+  public static Closeable span(final String name) {
+    return Callback.span(name);
   }
 }

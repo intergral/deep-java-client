@@ -17,6 +17,7 @@
 
 package com.intergral.deep.agent.api.spi;
 
+import com.intergral.deep.agent.api.plugin.ITraceProvider;
 import com.intergral.deep.agent.api.reflection.IReflection;
 import com.intergral.deep.agent.api.settings.ISettings;
 
@@ -30,6 +31,7 @@ import com.intergral.deep.agent.api.settings.ISettings;
  *   allow plugins to provide additional attributes to captured snapshots</li>
  *   <li>{@link com.intergral.deep.agent.api.auth.IAuthProvider} - allow plugin to provide additional ways to authenticate</li>
  *   <li>{@link ResourceProvider} - allow plugins to provide additional information for the resource definition</li>
+ *   <li>{@link ITraceProvider} - allows plugins to connect deep to a tracing provider</li>
  * </ul>
  * <p>
  * Plugins will be instantiated via the default constructor and then the {@link #configure(ISettings, IReflection)}

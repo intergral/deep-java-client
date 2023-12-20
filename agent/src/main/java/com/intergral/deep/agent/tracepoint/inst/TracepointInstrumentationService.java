@@ -295,7 +295,7 @@ public class TracepointInstrumentationService implements ClassFileTransformer {
         className); // we use the method fileName as it strips all but the last of the internal class name for us
     final Collection<TracePointConfig> matchedTracepoints = matchTracepoints(className,
         shortClassName);
-    // no breakpoints for this class or any CF classes
+    // no breakpoints for this class or any CF/JSP classes
     if (matchedTracepoints.isEmpty() && !this.classPrefixTracepoints.containsKey(CFM_CLASS_KEY)
         && !this.classPrefixTracepoints.containsKey(JSP_CLASS_KEY)) {
       return null;

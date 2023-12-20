@@ -31,6 +31,7 @@
     <module>java-plugin</module>
     <module>cf-plugin</module>
     <module>prometheus-metrics</module>
+    <module>otel-plugin</module>
   </modules>
 
   <groupId>com.intergral.deep.plugins</groupId>

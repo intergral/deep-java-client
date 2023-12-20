@@ -19,6 +19,8 @@ package com.intergral.deep.agent.tracepoint.handler;
 
 import com.intergral.deep.agent.Utils;
 import com.intergral.deep.agent.api.plugin.IEvaluator;
+import com.intergral.deep.agent.api.plugin.ITraceProvider;
+import com.intergral.deep.agent.api.plugin.ITraceProvider.ISpan;
 import com.intergral.deep.agent.api.plugin.LazyEvaluator;
 import com.intergral.deep.agent.push.PushService;
 import com.intergral.deep.agent.settings.Settings;
@@ -29,6 +31,7 @@ import com.intergral.deep.agent.tracepoint.evaluator.EvaluatorService;
 import com.intergral.deep.agent.tracepoint.inst.asm.Visitor;
 import com.intergral.deep.agent.types.TracePointConfig;
 import com.intergral.deep.agent.types.snapshot.EventSnapshot;
+import java.io.Closeable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -314,4 +317,42 @@ public final class Callback {
   //            return String.format( "%s:%s", value.getRelPath(), value.getLineNo() );
   //        }
   //    }
+
+  /**
+   * Create a span using the tracepoint callback.
+   * <p>
+   * This method will <b>Always</b> return a closable. This way the injected code never deals with anything but calling close. Even if close
+   * doesn't do anything.
+   * <p>
+   * We use {@link Closeable} here, so we can stick to java types in the injected code. This makes testing and injected code simpler.
+   *
+   * @param name the name of the span
+   * @return a {@link Closeable} to close the span
+   */
+  public static Closeable span(final String name) {
+    try {
+      final ITraceProvider plugin = SETTINGS.getPlugin(ITraceProvider.class);
+      if (plugin == null) {
+        return () -> {
+        };
+      }
+      final ISpan span = plugin.createSpan(name);
+
+      if (span == null) {
+        return () -> {
+        };
+      }
+      return () -> {
+        try {
+          span.close();
+        } catch (Throwable t) {
+          LOGGER.error("Cannot close span: {}", name, t);
+        }
+      };
+    } catch (Throwable t) {
+      LOGGER.error("Cannot create span: {}", name, t);
+      return () -> {
+      };
+    }
+  }
 }

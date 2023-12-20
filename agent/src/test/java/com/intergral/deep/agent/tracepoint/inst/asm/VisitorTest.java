@@ -1437,4 +1437,96 @@ class VisitorTest {
     assertEquals(3, stackFrame.getLineNumber());
     assertEquals("testfile_cfm$cf", stackFrame.getClassName());
   }
+
+  @Test
+  void methodWrapperTest() throws Exception {
+    final MockTracepointConfig tracepointConfig = new MockTracepointConfig(
+        "/agent/src/test/java/com/intergral/deep/test/target/BPTestTarget.java", 151)
+        .withArg(TracePointConfig.METHOD_NAME, "someFunctionWithABody");
+
+    tracepointRef.set(Collections.singletonList(tracepointConfig));
+
+    final String name = "com/intergral/deep/test/target/BPTestTarget";
+    final ByteClassLoader classLoader = ByteClassLoader.forFile(name);
+
+    instrumentationService.processBreakpoints(Collections.singletonList(tracepointConfig));
+
+    final byte[] originalBytes = classLoader.getBytes(name);
+    final byte[] transformed = instrumentationService.transform(null, name, null, null, originalBytes);
+    // we do this here so each test can save the modified bytes, else as they all use the same target class they would stomp over each other
+    TransformerUtils.storeUnsafe(disPath, originalBytes, transformed, name + Thread.currentThread().getStackTrace()[1].getMethodName());
+
+    assertNotNull(transformed, "Failed to transform the test class!");
+    assertNotEquals(originalBytes.length, transformed.length);
+
+    final String clazzName = InstUtils.externalClassName(name);
+    classLoader.setBytes(clazzName, transformed);
+
+    final Class<?> aClass = classLoader.loadClass(clazzName);
+    assertNotNull(aClass);
+
+    final Constructor<?> constructor = aClass.getConstructor(String.class, int.class);
+    final Object myTest = constructor.newInstance(null, 4);
+    assertNotNull(myTest);
+
+    final Method method = aClass.getDeclaredMethod("someFunctionWithABody", String.class);
+    method.invoke(myTest, "some string");
+
+    final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
+
+    Mockito.verify(pushService, Mockito.times(1))
+        .pushSnapshot(argumentCaptor.capture(), Mockito.any());
+
+    final EventSnapshot value = argumentCaptor.getValue();
+    assertEquals(tracepointConfig.getId(), value.getTracepoint().getId());
+
+    final Snapshot snapshot = PushUtils.convertToGrpc(value);
+
+  }
+
+  @Test
+  void methodWrapperVoidTest() throws Exception {
+    final MockTracepointConfig tracepointConfig = new MockTracepointConfig(
+        "/agent/src/test/java/com/intergral/deep/test/target/BPTestTarget.java", 51)
+        .withArg(TracePointConfig.METHOD_NAME, "setName");
+
+    tracepointRef.set(Collections.singletonList(tracepointConfig));
+
+    final String name = "com/intergral/deep/test/target/BPTestTarget";
+    final ByteClassLoader classLoader = ByteClassLoader.forFile(name);
+
+    instrumentationService.processBreakpoints(Collections.singletonList(tracepointConfig));
+
+    final byte[] originalBytes = classLoader.getBytes(name);
+    final byte[] transformed = instrumentationService.transform(null, name, null, null, originalBytes);
+    // we do this here so each test can save the modified bytes, else as they all use the same target class they would stomp over each other
+    TransformerUtils.storeUnsafe(disPath, originalBytes, transformed, name + Thread.currentThread().getStackTrace()[1].getMethodName());
+
+    assertNotNull(transformed, "Failed to transform the test class!");
+    assertNotEquals(originalBytes.length, transformed.length);
+
+    final String clazzName = InstUtils.externalClassName(name);
+    classLoader.setBytes(clazzName, transformed);
+
+    final Class<?> aClass = classLoader.loadClass(clazzName);
+    assertNotNull(aClass);
+
+    final Constructor<?> constructor = aClass.getConstructor(String.class, int.class);
+    final Object myTest = constructor.newInstance(null, 4);
+    assertNotNull(myTest);
+
+    final Method method = aClass.getDeclaredMethod("setName", String.class);
+    method.invoke(myTest, "some string");
+
+    final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
+
+    Mockito.verify(pushService, Mockito.times(1))
+        .pushSnapshot(argumentCaptor.capture(), Mockito.any());
+
+    final EventSnapshot value = argumentCaptor.getValue();
+    assertEquals(tracepointConfig.getId(), value.getTracepoint().getId());
+
+    final Snapshot snapshot = PushUtils.convertToGrpc(value);
+
+  }
 }

@@ -17,11 +17,14 @@
 
 package com.intergral.deep.agent.tracepoint.inst.asm;
 
+import static org.objectweb.asm.Opcodes.ACC_ABSTRACT;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import org.objectweb.asm.Opcodes;
 
 /**
  * Utilities for transforming the classes.
@@ -30,7 +33,9 @@ public final class TransformerUtils {
 
   private TransformerUtils() {
   }
-
+  static final boolean ALLOW_LINE_NUMBERS = Boolean.getBoolean( "deep.line.numbers" );
+  static final int LINE_OFFSET = Integer.getInteger( "deep.line.offset", 20000 );
+  static final boolean USE_SYNTHETIC = Boolean.parseBoolean(System.getProperty("deep.use.synthetic", "false"));
   private static final List<String> EXCLUDE_PACKAGES = Collections.emptyList();
   private static final List<String> EXCLUDE_CONTAINS = Collections.emptyList();
 
@@ -123,5 +128,13 @@ public final class TransformerUtils {
     }
 
     return false;
+  }
+
+  static boolean isStatic(final int acc) {
+    return (acc & Opcodes.ACC_STATIC) == Opcodes.ACC_STATIC;
+  }
+
+  static boolean isAbstract(final int access) {
+    return (access & ACC_ABSTRACT) == ACC_ABSTRACT;
   }
 }

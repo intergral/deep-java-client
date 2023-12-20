@@ -446,6 +446,21 @@ public class Settings implements ISettings {
   }
 
   /**
+   * Get the first plugin that matches the given type.
+   *
+   * @param clazz the type of plugin we need
+   * @param <T>   the plugin type
+   * @return the discovered plugin or {@code null} if we couldn't find a plugin of this type.
+   */
+  public <T> T getPlugin(final Class<T> clazz) {
+    final Collection<T> plugins = this.getPlugins(clazz);
+    if (plugins.isEmpty()) {
+      return null;
+    }
+    return plugins.iterator().next();
+  }
+
+  /**
    * Used to indicate an invalid config value.
    */
   public static class InvalidConfigException extends RuntimeException {
