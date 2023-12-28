@@ -28,7 +28,6 @@ import com.intergral.deep.agent.tracepoint.TracepointConfigService;
 import com.intergral.deep.agent.tracepoint.cf.CFEvaluator;
 import com.intergral.deep.agent.tracepoint.cf.CFFrameProcessor;
 import com.intergral.deep.agent.tracepoint.evaluator.EvaluatorService;
-import com.intergral.deep.agent.tracepoint.inst.asm.Visitor;
 import com.intergral.deep.agent.types.TracePointConfig;
 import com.intergral.deep.agent.types.snapshot.EventSnapshot;
 import java.io.Closeable;
@@ -69,7 +68,7 @@ public final class Callback {
 
   private static TracepointConfigService TRACEPOINT_SERVICE;
   private static PushService PUSH_SERVICE;
-  private static int offset;
+  private static int OFFSET;
 
   /**
    * Initialise the callback with the deep services.
@@ -85,10 +84,12 @@ public final class Callback {
     Callback.SETTINGS = settings;
     Callback.TRACEPOINT_SERVICE = tracepointConfigService;
     Callback.PUSH_SERVICE = pushService;
-    if (Visitor.CALLBACK_CLASS == Callback.class) {
-      offset = 3;
+    // to avoid using the property Visitor.CALLBACK_CLASS (as this defaults to a java. class that makes tests complicated)
+    final String property = System.getProperty("deep.callback.class");
+    if (property == null || !property.equals(Callback.class.getName())) {
+      Callback.OFFSET = 4;
     } else {
-      offset = 4;
+      Callback.OFFSET = 3;
     }
   }
 
@@ -159,9 +160,9 @@ public final class Callback {
           tracepointIds);
 
       StackTraceElement[] stack = Thread.currentThread().getStackTrace();
-      if (stack.length > offset) {
+      if (stack.length > OFFSET) {
         // Remove callBackProxy() + callBack() + commonCallback() + getStackTrace() entries to get to the real bp location
-        stack = Arrays.copyOfRange(stack, offset, stack.length);
+        stack = Arrays.copyOfRange(stack, OFFSET, stack.length);
       }
 
       final FrameProcessor frameProcessor = factory.provide(Callback.SETTINGS,

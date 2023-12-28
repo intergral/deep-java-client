@@ -24,8 +24,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
 
+import com.intergral.deep.agent.api.plugin.ITraceProvider;
 import com.intergral.deep.agent.api.resource.Resource;
+import com.intergral.deep.agent.api.spi.IDeepPlugin;
 import com.intergral.deep.agent.logging.Logger;
 import com.intergral.deep.agent.push.PushService;
 import com.intergral.deep.agent.push.PushUtils;
@@ -168,7 +171,7 @@ class VisitorTest {
 
     final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
 
-    Mockito.verify(pushService, Mockito.times(1))
+    Mockito.verify(pushService, times(1))
         .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
     final EventSnapshot value = argumentCaptor.getValue();
@@ -216,7 +219,7 @@ class VisitorTest {
 
     final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
 
-    Mockito.verify(pushService, Mockito.times(1))
+    Mockito.verify(pushService, times(1))
         .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
     final EventSnapshot value = argumentCaptor.getValue();
@@ -282,7 +285,7 @@ class VisitorTest {
 
     final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
 
-    Mockito.verify(pushService, Mockito.times(1))
+    Mockito.verify(pushService, times(1))
         .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
     final EventSnapshot value = argumentCaptor.getValue();
@@ -351,7 +354,7 @@ class VisitorTest {
 
     final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
 
-    Mockito.verify(pushService, Mockito.times(1))
+    Mockito.verify(pushService, times(1))
         .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
     final EventSnapshot value = argumentCaptor.getValue();
@@ -420,7 +423,7 @@ class VisitorTest {
 
     final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
 
-    Mockito.verify(pushService, Mockito.times(1))
+    Mockito.verify(pushService, times(1))
         .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
     final EventSnapshot value = argumentCaptor.getValue();
@@ -488,7 +491,7 @@ class VisitorTest {
 
     final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
 
-    Mockito.verify(pushService, Mockito.times(1))
+    Mockito.verify(pushService, times(1))
         .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
     final EventSnapshot value = argumentCaptor.getValue();
@@ -558,7 +561,7 @@ class VisitorTest {
 
     final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
 
-    Mockito.verify(pushService, Mockito.times(1))
+    Mockito.verify(pushService, times(1))
         .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
     final EventSnapshot value = argumentCaptor.getValue();
@@ -628,7 +631,7 @@ class VisitorTest {
 
     final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
 
-    Mockito.verify(pushService, Mockito.times(1))
+    Mockito.verify(pushService, times(1))
         .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
     final EventSnapshot value = argumentCaptor.getValue();
@@ -696,7 +699,7 @@ class VisitorTest {
 
     final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
 
-    Mockito.verify(pushService, Mockito.times(1))
+    Mockito.verify(pushService, times(1))
         .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
     final EventSnapshot value = argumentCaptor.getValue();
@@ -764,7 +767,7 @@ class VisitorTest {
 
     final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
 
-    Mockito.verify(pushService, Mockito.times(1))
+    Mockito.verify(pushService, times(1))
         .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
     final EventSnapshot value = argumentCaptor.getValue();
@@ -836,7 +839,7 @@ class VisitorTest {
         .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
     assertThrows(InvocationTargetException.class, () -> method.invoke(myTest, 3, 2));
-    Mockito.verify(pushService, Mockito.times(1))
+    Mockito.verify(pushService, times(1))
         .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
     final EventSnapshot value = argumentCaptor.getValue();
@@ -904,7 +907,7 @@ class VisitorTest {
 
     final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
 
-    Mockito.verify(pushService, Mockito.times(1))
+    Mockito.verify(pushService, times(1))
         .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
     final EventSnapshot value = argumentCaptor.getValue();
@@ -972,7 +975,7 @@ class VisitorTest {
 
     final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
 
-    Mockito.verify(pushService, Mockito.times(1))
+    Mockito.verify(pushService, times(1))
         .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
     final EventSnapshot value = argumentCaptor.getValue();
@@ -1045,7 +1048,7 @@ class VisitorTest {
 
     final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
 
-    Mockito.verify(pushService, Mockito.times(1))
+    Mockito.verify(pushService, times(1))
         .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
     final EventSnapshot value = argumentCaptor.getValue();
@@ -1109,7 +1112,7 @@ class VisitorTest {
 
     final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
 
-    Mockito.verify(pushService, Mockito.times(2))
+    Mockito.verify(pushService, times(2))
         .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
     final EventSnapshot value = argumentCaptor.getValue();
@@ -1178,7 +1181,7 @@ class VisitorTest {
 
     final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
 
-    Mockito.verify(pushService, Mockito.times(2))
+    Mockito.verify(pushService, times(2))
         .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
     final EventSnapshot value = argumentCaptor.getValue();
@@ -1245,7 +1248,7 @@ class VisitorTest {
 
     final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
 
-    Mockito.verify(pushService, Mockito.times(1))
+    Mockito.verify(pushService, times(1))
         .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
     final EventSnapshot value = argumentCaptor.getValue();
@@ -1380,7 +1383,7 @@ class VisitorTest {
 
     final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
 
-    Mockito.verify(pushService, Mockito.times(1))
+    Mockito.verify(pushService, times(1))
         .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
     final EventSnapshot value = argumentCaptor.getValue();
@@ -1425,7 +1428,7 @@ class VisitorTest {
 
     final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
 
-    Mockito.verify(pushService, Mockito.times(1))
+    Mockito.verify(pushService, times(1))
         .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
     final EventSnapshot value = argumentCaptor.getValue();
@@ -1440,6 +1443,10 @@ class VisitorTest {
 
   @Test
   void methodWrapperTest() throws Exception {
+    final MockTraceProvider traceProvider = new MockTraceProvider();
+    final MockTraceProvider traceProviderSpy = Mockito.spy(traceProvider);
+
+    Mockito.when(settings.getPlugin(ITraceProvider.class)).thenReturn(traceProviderSpy);
     final MockTracepointConfig tracepointConfig = new MockTracepointConfig(
         "/agent/src/test/java/com/intergral/deep/test/target/BPTestTarget.java", 151)
         .withArg(TracePointConfig.METHOD_NAME, "someFunctionWithABody");
@@ -1474,7 +1481,7 @@ class VisitorTest {
 
     final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
 
-    Mockito.verify(pushService, Mockito.times(1))
+    Mockito.verify(pushService, times(1))
         .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
     final EventSnapshot value = argumentCaptor.getValue();
@@ -1482,10 +1489,16 @@ class VisitorTest {
 
     final Snapshot snapshot = PushUtils.convertToGrpc(value);
 
+    Mockito.verify(traceProviderSpy, times(1)).createSpan("someFunctionWithABody");
   }
 
   @Test
   void methodWrapperVoidTest() throws Exception {
+    final MockTraceProvider traceProvider = new MockTraceProvider();
+    final MockTraceProvider traceProviderSpy = Mockito.spy(traceProvider);
+
+    Mockito.when(settings.getPlugin(ITraceProvider.class)).thenReturn(traceProviderSpy);
+
     final MockTracepointConfig tracepointConfig = new MockTracepointConfig(
         "/agent/src/test/java/com/intergral/deep/test/target/BPTestTarget.java", 51)
         .withArg(TracePointConfig.METHOD_NAME, "setName");
@@ -1520,7 +1533,7 @@ class VisitorTest {
 
     final ArgumentCaptor<EventSnapshot> argumentCaptor = ArgumentCaptor.forClass(EventSnapshot.class);
 
-    Mockito.verify(pushService, Mockito.times(1))
+    Mockito.verify(pushService, times(1))
         .pushSnapshot(argumentCaptor.capture(), Mockito.any());
 
     final EventSnapshot value = argumentCaptor.getValue();
@@ -1528,5 +1541,40 @@ class VisitorTest {
 
     final Snapshot snapshot = PushUtils.convertToGrpc(value);
 
+    Mockito.verify(traceProviderSpy, times(1)).createSpan("setName");
+
+  }
+
+  public static class MockTraceProvider implements IDeepPlugin, ITraceProvider {
+
+    @Override
+    public ISpan createSpan(final String name) {
+      return new ISpan() {
+        @Override
+        public String name() {
+          return name;
+        }
+
+        @Override
+        public String traceId() {
+          return "-1";
+        }
+
+        @Override
+        public String spanId() {
+          return "-2";
+        }
+
+        @Override
+        public void close() throws Exception {
+
+        }
+      };
+    }
+
+    @Override
+    public ISpan currentSpan() {
+      return null;
+    }
   }
 }
