@@ -17,10 +17,15 @@
 
 package com.intergral.deep.tests.snapshot;
 
+import com.intergral.deep.proto.common.v1.AnyValue;
+import com.intergral.deep.proto.common.v1.ArrayValue;
+import com.intergral.deep.proto.common.v1.KeyValue;
+import com.intergral.deep.proto.common.v1.KeyValueList;
 import com.intergral.deep.proto.tracepoint.v1.Snapshot;
 import com.intergral.deep.proto.tracepoint.v1.Variable;
 import com.intergral.deep.proto.tracepoint.v1.VariableID;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -76,6 +81,51 @@ public final class SnapshotUtils {
         return variableId;
       }
     };
+  }
+
+  public static String attributeByName(final String name, final Snapshot snapshot) {
+    final List<KeyValue> attributesList = snapshot.getAttributesList();
+    for (KeyValue keyValue : attributesList) {
+      if (keyValue.getKey().equals(name)) {
+        return keyValueAsString(keyValue.getValue());
+      }
+    }
+    return null;
+  }
+
+  private static String keyValueAsString(final AnyValue value) {
+    if (value.hasArrayValue()) {
+      final ArrayValue arrayValue = value.getArrayValue();
+      final StringBuilder stringBuilder = new StringBuilder();
+      for (AnyValue anyValue : arrayValue.getValuesList()) {
+        stringBuilder.append(keyValueAsString(anyValue)).append(",");
+      }
+      return stringBuilder.toString();
+    }
+    if (value.hasStringValue()) {
+      return value.getStringValue();
+    }
+    if (value.hasBoolValue()) {
+      return String.valueOf(value.getBoolValue());
+    }
+    if (value.hasBytesValue()) {
+      return String.valueOf(value.getBytesValue());
+    }
+    if (value.hasDoubleValue()) {
+      return String.valueOf(value.getDoubleValue());
+    }
+    if (value.hasIntValue()) {
+      return String.valueOf(value.getIntValue());
+    }
+    if (value.hasKvlistValue()) {
+      final KeyValueList kvlistValue = value.getKvlistValue();
+      final StringBuilder stringBuilder = new StringBuilder();
+      for (KeyValue anyValue : kvlistValue.getValuesList()) {
+        stringBuilder.append(anyValue.getKey()).append(":").append(keyValueAsString(anyValue.getValue())).append(",");
+      }
+      return stringBuilder.toString();
+    }
+    return null;
   }
 
   public interface IVariableScan {

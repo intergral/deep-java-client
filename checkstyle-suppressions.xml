@@ -28,6 +28,8 @@
   <suppress checks="MissingJavadocType" files=".*/tests/.*"/>
   <suppress checks="MissingJavadocMethod" files=".*/tests/.*"/>
   <suppress checks="AvoidStarImport" files=".*Test(Target|).java"/>
+  <!-- We do not care to check the method names in this file  -->
+  <suppress checks="MethodName" files=".*MockMixinTemplate.java"/>
   <!-- These files are imported from external libraries and should not have our copyright -->
   <suppress id="license-agpl" files=".*resource/Resource.*"/>
   <suppress id="license-agpl" files=".*resource/SpiUtil.*"/>

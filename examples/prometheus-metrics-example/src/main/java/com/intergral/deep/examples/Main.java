@@ -103,7 +103,7 @@ public class Main {
           .registerTracepoint("com/intergral/deep/examples/SimpleTest", 46,
               fireCount, Collections.emptyList(),
               Collections.singletonList(
-                  new MetricDefinition("custom_metric", labels, "histogram", "this.cnt", "deep", "help message", "unit")));
+                  new MetricDefinition("custom_metric", labels, "HISTOGRAM", "this.cnt", "deep", "help message", "unit")));
 
       Random random = new Random(0);
       final SimpleTest ts = new SimpleTest("This is a test", 2);

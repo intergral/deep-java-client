@@ -19,6 +19,8 @@ package com.intergral.deep.agent.tracepoint.handler;
 
 import com.intergral.deep.agent.Utils;
 import com.intergral.deep.agent.api.plugin.IEvaluator;
+import com.intergral.deep.agent.api.plugin.ITraceProvider;
+import com.intergral.deep.agent.api.plugin.ITraceProvider.ISpan;
 import com.intergral.deep.agent.api.plugin.LazyEvaluator;
 import com.intergral.deep.agent.push.PushService;
 import com.intergral.deep.agent.settings.Settings;
@@ -26,9 +28,9 @@ import com.intergral.deep.agent.tracepoint.TracepointConfigService;
 import com.intergral.deep.agent.tracepoint.cf.CFEvaluator;
 import com.intergral.deep.agent.tracepoint.cf.CFFrameProcessor;
 import com.intergral.deep.agent.tracepoint.evaluator.EvaluatorService;
-import com.intergral.deep.agent.tracepoint.inst.asm.Visitor;
 import com.intergral.deep.agent.types.TracePointConfig;
 import com.intergral.deep.agent.types.snapshot.EventSnapshot;
+import java.io.Closeable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -66,7 +68,7 @@ public final class Callback {
 
   private static TracepointConfigService TRACEPOINT_SERVICE;
   private static PushService PUSH_SERVICE;
-  private static int offset;
+  private static int OFFSET;
 
   /**
    * Initialise the callback with the deep services.
@@ -82,10 +84,12 @@ public final class Callback {
     Callback.SETTINGS = settings;
     Callback.TRACEPOINT_SERVICE = tracepointConfigService;
     Callback.PUSH_SERVICE = pushService;
-    if (Visitor.CALLBACK_CLASS == Callback.class) {
-      offset = 3;
+    // to avoid using the property Visitor.CALLBACK_CLASS (as this defaults to a java. class that makes tests complicated)
+    final String property = System.getProperty("deep.callback.class");
+    if (property == null || !property.equals(Callback.class.getName())) {
+      Callback.OFFSET = 4;
     } else {
-      offset = 4;
+      Callback.OFFSET = 3;
     }
   }
 
@@ -156,9 +160,9 @@ public final class Callback {
           tracepointIds);
 
       StackTraceElement[] stack = Thread.currentThread().getStackTrace();
-      if (stack.length > offset) {
+      if (stack.length > OFFSET) {
         // Remove callBackProxy() + callBack() + commonCallback() + getStackTrace() entries to get to the real bp location
-        stack = Arrays.copyOfRange(stack, offset, stack.length);
+        stack = Arrays.copyOfRange(stack, OFFSET, stack.length);
       }
 
       final FrameProcessor frameProcessor = factory.provide(Callback.SETTINGS,
@@ -314,4 +318,42 @@ public final class Callback {
   //            return String.format( "%s:%s", value.getRelPath(), value.getLineNo() );
   //        }
   //    }
+
+  /**
+   * Create a span using the tracepoint callback.
+   * <p>
+   * This method will <b>Always</b> return a closable. This way the injected code never deals with anything but calling close. Even if close
+   * doesn't do anything.
+   * <p>
+   * We use {@link Closeable} here, so we can stick to java types in the injected code. This makes testing and injected code simpler.
+   *
+   * @param name the name of the span
+   * @return a {@link Closeable} to close the span
+   */
+  public static Closeable span(final String name) {
+    try {
+      final ITraceProvider plugin = SETTINGS.getPlugin(ITraceProvider.class);
+      if (plugin == null) {
+        return () -> {
+        };
+      }
+      final ISpan span = plugin.createSpan(name);
+
+      if (span == null) {
+        return () -> {
+        };
+      }
+      return () -> {
+        try {
+          span.close();
+        } catch (Throwable t) {
+          LOGGER.error("Cannot close span: {}", name, t);
+        }
+      };
+    } catch (Throwable t) {
+      LOGGER.error("Cannot create span: {}", name, t);
+      return () -> {
+      };
+    }
+  }
 }

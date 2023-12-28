@@ -77,6 +77,11 @@ public class TracePointConfig {
    */
   public static final String LOG_MSG = "log_msg";
 
+  /**
+   * This is the key for the arg that defines a method tracepoint.
+   */
+  public static final String METHOD_NAME = "method_name";
+
   private final String id;
   private final String path;
   private final int lineNo;

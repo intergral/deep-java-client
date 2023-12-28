@@ -191,6 +191,8 @@ class SettingsTest {
 
     assertEquals(1, settings.getPlugins().size());
 
+    assertSame(plugin, settings.getPlugin(TestPlugin.class));
+
     assertNotNull(settings.getPluginByName(TestPlugin.class, TestPlugin.class.getName()));
 
     iDeepPluginIRegistration.unregister();
