@@ -39,6 +39,13 @@ import io.opentelemetry.sdk.trace.ReadableSpan;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This plugin provides a connection between Deep and Otel. Allowing:
+ * <ul>
+ *  <li>Metrics to be processed via Otel</li>
+ *  <li>Traces to be created using Otel</li>
+ *  </ul>
+ */
 public class OtelPlugin implements IDeepPlugin, ITraceProvider, IMetricProcessor, IConditional, ISnapshotDecorator {
 
   @Override
@@ -112,7 +119,7 @@ public class OtelPlugin implements IDeepPlugin, ITraceProvider, IMetricProcessor
       }
 
       @Override
-      public void close() throws Exception {
+      public void close() {
         try {
           span.end();
         } catch (Throwable ignored) {

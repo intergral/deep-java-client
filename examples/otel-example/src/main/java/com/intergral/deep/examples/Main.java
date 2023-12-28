@@ -124,16 +124,13 @@ public class Main {
         e.printStackTrace();
       }
 
-      double duration = Math.abs(random.nextGaussian() / 10.0 + 0.2);
-      String status = random.nextInt(100) < 20 ? "500" : "200";
-
       //noinspection BusyWait
       Thread.sleep(1000);
       span.end();
     }
   }
 
-  public static OpenTelemetry openTelemetry() {
+  private static OpenTelemetry openTelemetry() {
     Resource resource = Resource.getDefault().toBuilder().put("service-name", "dice-server").put("service-version", "0.1.0").build();
 
     SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder()
@@ -151,13 +148,12 @@ public class Main {
         .setResource(resource)
         .build();
 
-    OpenTelemetry openTelemetry = OpenTelemetrySdk.builder()
+    return OpenTelemetrySdk.builder()
         .setTracerProvider(sdkTracerProvider)
         .setMeterProvider(sdkMeterProvider)
         .setLoggerProvider(sdkLoggerProvider)
-        .setPropagators(ContextPropagators.create(TextMapPropagator.composite(W3CTraceContextPropagator.getInstance(), W3CBaggagePropagator.getInstance())))
+        .setPropagators(ContextPropagators.create(
+            TextMapPropagator.composite(W3CTraceContextPropagator.getInstance(), W3CBaggagePropagator.getInstance())))
         .buildAndRegisterGlobal();
-
-    return openTelemetry;
   }
 }

@@ -15,7 +15,7 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.intergral.deep.agent.tracepoint.inst;
+package com.intergral.deep.test;
 
 import com.intergral.deep.agent.tracepoint.handler.Callback;
 import java.io.Closeable;
@@ -26,9 +26,12 @@ import java.io.IOException;
  * <p>
  * We use the ASM plugin for idea to simplify this process <a href="https://plugins.jetbrains.com/plugin/23368-asm-viewer">ASM Viewer</a>.
  */
-public class MixinTemplate {
+public class MockMixinTemplate {
 
   public void $deep$voidTemplate() {
+  }
+
+  public void $deep$voidTemplate(final String arg1) {
   }
 
   public void voidTemplate() {
@@ -46,7 +49,26 @@ public class MixinTemplate {
     }
   }
 
+  public void voidTemplate(final String arg1) {
+    final Closeable closeable = Callback.span("voidTemplate");
+    try {
+      $deep$voidTemplate(arg1);
+    } finally {
+      try {
+        if (closeable != null) {
+          closeable.close();
+        }
+      } catch (IOException ignored) {
+        // we ignore this exception
+      }
+    }
+  }
+
   public int $deep$intTemplate() {
+    return -1;
+  }
+
+  public int $deep$intTemplate(final String arg1) {
     return -1;
   }
 
@@ -65,7 +87,27 @@ public class MixinTemplate {
     }
   }
 
+
+  public int intTemplate(final String arg1) {
+    final Closeable closeable = Callback.span("intTemplate");
+    try {
+      return $deep$intTemplate(arg1);
+    } finally {
+      try {
+        if (closeable != null) {
+          closeable.close();
+        }
+      } catch (IOException ignored) {
+        // we ignore this exception
+      }
+    }
+  }
+
   public Object $deep$objectTemplate() {
+    return null;
+  }
+
+  public Object $deep$objectTemplate(final String arg1) {
     return null;
   }
 
@@ -84,46 +126,6 @@ public class MixinTemplate {
     }
   }
 
-  public void $deep$voidTemplate(final String arg1) {
-  }
-
-  public void voidTemplate(final String arg1) {
-    final Closeable closeable = Callback.span("voidTemplate");
-    try {
-      $deep$voidTemplate(arg1);
-    } finally {
-      try {
-        if (closeable != null) {
-          closeable.close();
-        }
-      } catch (IOException ignored) {
-        // we ignore this exception
-      }
-    }
-  }
-
-  public int $deep$intTemplate(final String arg1) {
-    return -1;
-  }
-
-  public int intTemplate(final String arg1) {
-    final Closeable closeable = Callback.span("intTemplate");
-    try {
-      return $deep$intTemplate(arg1);
-    } finally {
-      try {
-        if (closeable != null) {
-          closeable.close();
-        }
-      } catch (IOException ignored) {
-        // we ignore this exception
-      }
-    }
-  }
-
-  public Object $deep$objectTemplate(final String arg1) {
-    return null;
-  }
 
   public Object objectTemplate(final String arg1) {
     final Closeable closeable = Callback.span("objectTemplate");

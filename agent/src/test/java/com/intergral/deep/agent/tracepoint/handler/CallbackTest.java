@@ -37,6 +37,7 @@ class CallbackTest {
   private final Settings settings = Mockito.mock(Settings.class);
   private final TracepointConfigService tracepointConfigService = Mockito.mock(TracepointConfigService.class);
   private final PushService pushService = Mockito.mock(PushService.class);
+
   @BeforeEach
   void setUp() {
     Callback.init(settings, tracepointConfigService, pushService);

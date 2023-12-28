@@ -33,8 +33,9 @@ public final class TransformerUtils {
 
   private TransformerUtils() {
   }
-  static final boolean ALLOW_LINE_NUMBERS = Boolean.getBoolean( "deep.line.numbers" );
-  static final int LINE_OFFSET = Integer.getInteger( "deep.line.offset", 20000 );
+
+  static final boolean ALLOW_LINE_NUMBERS = Boolean.getBoolean("deep.line.numbers");
+  static final int LINE_OFFSET = Integer.getInteger("deep.line.offset", 20000);
   static final boolean USE_SYNTHETIC = Boolean.parseBoolean(System.getProperty("deep.use.synthetic", "false"));
   private static final List<String> EXCLUDE_PACKAGES = Collections.emptyList();
   private static final List<String> EXCLUDE_CONTAINS = Collections.emptyList();
