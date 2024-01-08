@@ -21,7 +21,6 @@ import com.intergral.deep.agent.tracepoint.handler.Callback;
 import java.io.Closeable;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * This type is here to allow us to access it from anywhere (once it is loaded into the boot class path).
@@ -76,28 +75,71 @@ public class ProxyCallback {
 
 
   /**
-   * This is called when a tracepoint 'finally' wrap is called.
+   * This is called when the visited line is completed.
    *
-   * @param breakpointIds the ids for the tracepoints that are complete
-   * @param map           the variables at this point
+   * @param bpIds the tracepoint ids that triggered this
+   * @param filename the source file name
+   * @param lineNo the line number we are on
+   * @param variables the captured local variables
    */
-  public static void callBackFinally(final Set<String> breakpointIds,
-      final Map<String, Object> map) {
-    Callback.callBackFinally(breakpointIds, map);
+  public static void callBackFinally(final List<String> bpIds,
+      final String filename,
+      final int lineNo,
+      final Map<String, Object> variables) {
+    Callback.callBackFinally(bpIds, filename, lineNo, variables);
   }
 
   /**
-   * Create a span using the tracepoint callback.
+   * This method is called when a tracepoint has triggered a method entry type.
    * <p>
    * This method will <b>Always</b> return a closable. This way the injected code never deals with anything but calling close. Even if close
    * doesn't do anything.
    * <p>
    * We use {@link Closeable} here, so we can stick to java types in the injected code. This makes testing and injected code simpler.
    *
-   * @param name the name of the span
-   * @return a {@link Closeable} to close the span
+   * @param methodName the method name we have entered
+   * @param filename   the file name the method is in
+   * @param lineNo     the line number the method is on
+   * @param bpIds      the tracepoint ids that have been triggered by this entry
+   * @param variables  the map of variables captured
+   * @param spanOnlyIds the CSV of the tracepoints ids that just want a span
    */
-  public static Closeable span(final String name) {
-    return Callback.span(name);
+  public static void methodEntry(final String methodName, final String filename, final int lineNo, final List<String> bpIds,
+      final Map<String, Object> variables, final String spanOnlyIds) {
+    Callback.methodEntry(methodName, filename, lineNo, bpIds, variables, spanOnlyIds);
+  }
+
+  /**
+   * This is called when an exception is captured from a wrapped method.
+   *
+   * @param t the captured throwable
+   */
+  public static void methodException(final Throwable t) {
+    Callback.methodException(t);
+  }
+
+  /**
+   * This is called when the returned value from the wrapped method is captured.
+   * <p>
+   * This method is not called on void methods.
+   *
+   * @param value the captured return value.
+   */
+  public static void methodRet(final Object value) {
+    Callback.methodRet(value);
+  }
+
+  /**
+   * This method is called when a wrapped method has completed.
+   *
+   * @param methodName the method name
+   * @param filename the source file name
+   * @param lineNo the line number
+   * @param bpIds the triggering tracepoints ids
+   * @param variables the captured local variables
+   */
+  public static void methodEnd(final String methodName, final String filename, final int lineNo, final List<String> bpIds,
+      final Map<String, Object> variables) {
+    Callback.methodEnd(methodName, filename, lineNo, bpIds, variables);
   }
 }

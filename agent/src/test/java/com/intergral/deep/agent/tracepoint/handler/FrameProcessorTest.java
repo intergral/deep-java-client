@@ -55,7 +55,7 @@ class FrameProcessorTest {
     Mockito.when(settings.getResource()).thenReturn(Resource.DEFAULT);
     tracepoints.clear();
     frameProcessor = new FrameProcessor(settings, evaluator, Collections.singletonMap("this", new ConditionTarget()), tracepoints,
-        Utils.currentTimeNanos(), Thread.currentThread().getStackTrace());
+        Utils.currentTimeNanos(), Thread.currentThread().getStackTrace(), null);
   }
 
   @Test

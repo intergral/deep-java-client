@@ -62,7 +62,7 @@ public class DeepAgent implements IDeep {
     this.grpcService = new GrpcService(settings);
     this.pollService = new LongPollService(settings, this.grpcService);
     this.tracepointConfig = new TracepointConfigService(tracepointInstrumentationService);
-    final PushService pushService = new PushService(settings, grpcService);
+    final PushService pushService = new PushService(grpcService);
 
     Callback.init(settings, tracepointConfig, pushService);
   }

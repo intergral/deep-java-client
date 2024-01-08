@@ -18,8 +18,8 @@
 package com.intergral.deep.test;
 
 import com.intergral.deep.agent.tracepoint.handler.Callback;
-import java.io.Closeable;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * This type is used as a template for generating the ASM code used in the {@link com.intergral.deep.agent.tracepoint.inst.asm.Visitor}.
@@ -35,32 +35,26 @@ public class MockMixinTemplate {
   }
 
   public void voidTemplate() {
-    final Closeable closeable = Callback.span("voidTemplate");
+    Callback.methodEntry("voidTemplate", "MockMixinTemplate.java", 40, new ArrayList<>(), new HashMap<>(), "");
     try {
       $deep$voidTemplate();
+    } catch (Throwable t) {
+      Callback.methodException(t);
+      throw t;
     } finally {
-      try {
-        if (closeable != null) {
-          closeable.close();
-        }
-      } catch (IOException ignored) {
-        // we ignore this exception
-      }
+      Callback.methodEnd("voidTemplate", "MockMixinTemplate.java", 40, new ArrayList<>(), new HashMap<>());
     }
   }
 
   public void voidTemplate(final String arg1) {
-    final Closeable closeable = Callback.span("voidTemplate");
+    Callback.methodEntry("voidTemplate", "MockMixinTemplate.java", 40, new ArrayList<>(), new HashMap<>(), "");
     try {
       $deep$voidTemplate(arg1);
+    } catch (Throwable t) {
+      Callback.methodException(t);
+      throw t;
     } finally {
-      try {
-        if (closeable != null) {
-          closeable.close();
-        }
-      } catch (IOException ignored) {
-        // we ignore this exception
-      }
+      Callback.methodEnd("voidTemplate", "MockMixinTemplate.java", 40, new ArrayList<>(), new HashMap<>());
     }
   }
 
@@ -73,33 +67,31 @@ public class MockMixinTemplate {
   }
 
   public int intTemplate() {
-    final Closeable closeable = Callback.span("intTemplate");
+    Callback.methodEntry("intTemplate", "MockMixinTemplate.java", 78, new ArrayList<>(), new HashMap<>(), "");
     try {
-      return $deep$intTemplate();
+      final int i = $deep$intTemplate();
+      Callback.methodRet(i);
+      return i;
+    } catch (Throwable t) {
+      Callback.methodException(t);
+      throw t;
     } finally {
-      try {
-        if (closeable != null) {
-          closeable.close();
-        }
-      } catch (IOException ignored) {
-        // we ignore this exception
-      }
+      Callback.methodEnd("intTemplate", "MockMixinTemplate.java", 78, new ArrayList<>(), new HashMap<>());
     }
   }
 
 
   public int intTemplate(final String arg1) {
-    final Closeable closeable = Callback.span("intTemplate");
+    Callback.methodEntry("intTemplate", "MockMixinTemplate.java", 94, new ArrayList<>(), new HashMap<>(), "");
     try {
-      return $deep$intTemplate(arg1);
+      final int i = $deep$intTemplate(arg1);
+      Callback.methodRet(i);
+      return i;
+    } catch (Throwable t) {
+      Callback.methodException(t);
+      throw t;
     } finally {
-      try {
-        if (closeable != null) {
-          closeable.close();
-        }
-      } catch (IOException ignored) {
-        // we ignore this exception
-      }
+      Callback.methodEnd("intTemplate", "MockMixinTemplate.java", 94, new ArrayList<>(), new HashMap<>());
     }
   }
 
@@ -112,33 +104,31 @@ public class MockMixinTemplate {
   }
 
   public Object objectTemplate() {
-    final Closeable closeable = Callback.span("objectTemplate");
+    Callback.methodEntry("objectTemplate", "MockMixinTemplate.java", 117, new ArrayList<>(), new HashMap<>(), "");
     try {
-      return $deep$intTemplate();
+      final Object o = $deep$objectTemplate();
+      Callback.methodRet(o);
+      return o;
+    } catch (Throwable t) {
+      Callback.methodException(t);
+      throw t;
     } finally {
-      try {
-        if (closeable != null) {
-          closeable.close();
-        }
-      } catch (IOException ignored) {
-        // we ignore this exception
-      }
+      Callback.methodEnd("objectTemplate", "MockMixinTemplate.java", 117, new ArrayList<>(), new HashMap<>());
     }
   }
 
 
   public Object objectTemplate(final String arg1) {
-    final Closeable closeable = Callback.span("objectTemplate");
+    Callback.methodEntry("objectTemplate", "MockMixinTemplate.java", 133, new ArrayList<>(), new HashMap<>(), "");
     try {
-      return $deep$intTemplate(arg1);
+      final Object o = $deep$objectTemplate(arg1);
+      Callback.methodRet(o);
+      return o;
+    } catch (Throwable t) {
+      Callback.methodException(t);
+      throw t;
     } finally {
-      try {
-        if (closeable != null) {
-          closeable.close();
-        }
-      } catch (IOException ignored) {
-        // we ignore this exception
-      }
+      Callback.methodEnd("objectTemplate", "MockMixinTemplate.java", 133, new ArrayList<>(), new HashMap<>());
     }
   }
 }

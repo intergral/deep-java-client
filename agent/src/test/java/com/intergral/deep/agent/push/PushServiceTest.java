@@ -18,46 +18,30 @@
 package com.intergral.deep.agent.push;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.intergral.deep.agent.api.plugin.ISnapshotContext;
-import com.intergral.deep.agent.api.plugin.ISnapshotDecorator;
-import com.intergral.deep.agent.api.resource.Resource;
-import com.intergral.deep.agent.api.settings.ISettings;
-import com.intergral.deep.agent.api.spi.IDeepPlugin;
 import com.intergral.deep.agent.grpc.GrpcService;
 import com.intergral.deep.agent.push.PushService.LoggingObserver;
-import com.intergral.deep.agent.settings.Settings;
-import com.intergral.deep.proto.common.v1.KeyValue;
-import com.intergral.deep.proto.tracepoint.v1.Snapshot;
 import com.intergral.deep.proto.tracepoint.v1.SnapshotServiceGrpc.SnapshotServiceStub;
 import com.intergral.deep.test.MockEventSnapshot;
-import java.util.Collections;
-import java.util.HashMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 class PushServiceTest {
 
   private PushService pushService;
   private SnapshotServiceStub snapshotServiceStub;
-  private Settings settings;
 
   @BeforeEach
   void setUp() {
     final GrpcService grpcService = Mockito.mock(GrpcService.class);
     snapshotServiceStub = Mockito.mock(SnapshotServiceStub.class);
     when(grpcService.snapshotService()).thenReturn(snapshotServiceStub);
-    final HashMap<String, String> map = new HashMap<>();
 
-    settings = Settings.build(map);
-    pushService = new PushService(settings, grpcService);
+    pushService = new PushService(grpcService);
   }
 
   @Test
@@ -70,37 +54,8 @@ class PushServiceTest {
 
   @Test
   void canPushSnapshot() {
-    final ISnapshotContext context = Mockito.mock(ISnapshotContext.class);
-    pushService.pushSnapshot(new MockEventSnapshot(), context);
+    pushService.pushSnapshot(new MockEventSnapshot());
 
     verify(snapshotServiceStub).send(any(), any());
-  }
-
-  @Test
-  void doesDecorate() {
-
-    settings.setPlugins(Collections.singleton(new TestDecorator()));
-
-    final ISnapshotContext context = Mockito.mock(ISnapshotContext.class);
-    pushService.pushSnapshot(new MockEventSnapshot(), context);
-
-    final ArgumentCaptor<Snapshot> argumentCaptor = ArgumentCaptor.forClass(Snapshot.class);
-    verify(snapshotServiceStub).send(argumentCaptor.capture(), any());
-
-    final Snapshot value = argumentCaptor.getValue();
-
-    assertNotNull(value);
-
-    final KeyValue attributes = value.getAttributes(0);
-    assertEquals("decorated", attributes.getKey());
-    assertEquals("value", attributes.getValue().getStringValue());
-  }
-
-  public static class TestDecorator implements IDeepPlugin, ISnapshotDecorator {
-
-    @Override
-    public Resource decorate(final ISettings settings, final ISnapshotContext snapshot) {
-      return Resource.create(Collections.singletonMap("decorated", "value"));
-    }
   }
 }

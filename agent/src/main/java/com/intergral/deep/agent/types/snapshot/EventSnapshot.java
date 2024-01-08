@@ -41,7 +41,6 @@ public class EventSnapshot {
   private long durationNanos;
   private final Resource resource;
   private Resource attributes;
-  private boolean open;
   private String logMsg;
 
   /**
@@ -67,7 +66,6 @@ public class EventSnapshot {
     this.attributes = Resource.create(Collections.emptyMap());
     this.durationNanos = 0;
     this.resource = Resource.create(resource.getAttributes(), resource.getSchemaUrl());
-    this.open = true;
   }
 
   /**
@@ -76,9 +74,7 @@ public class EventSnapshot {
    * @param result the watch result
    */
   public void addWatchResult(final WatchResult result) {
-    if (this.open) {
-      this.watches.add(result);
-    }
+    this.watches.add(result);
   }
 
   /**
@@ -87,9 +83,7 @@ public class EventSnapshot {
    * @param variables the variables to merge in
    */
   public void mergeVariables(final Map<String, Variable> variables) {
-    if (this.open) {
-      this.varLookup.putAll(variables);
-    }
+    this.varLookup.putAll(variables);
   }
 
   /**
@@ -98,9 +92,7 @@ public class EventSnapshot {
    * @param attributes the additional attributes
    */
   public void mergeAttributes(final Resource attributes) {
-    if (this.open) {
-      this.attributes = this.attributes.merge(attributes);
-    }
+    this.attributes = this.attributes.merge(attributes);
   }
 
   /**
@@ -156,7 +148,6 @@ public class EventSnapshot {
    * Close the snapshot to prevent further changes.
    */
   public void close() {
-    this.open = false;
     final long currentTimeNano = Utils.currentTimeNanos()[1];
     this.durationNanos = currentTimeNano - this.nanoTs;
   }

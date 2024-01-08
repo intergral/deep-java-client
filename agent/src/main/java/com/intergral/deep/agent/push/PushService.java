@@ -17,16 +17,11 @@
 
 package com.intergral.deep.agent.push;
 
-import com.intergral.deep.agent.api.plugin.ISnapshotContext;
-import com.intergral.deep.agent.api.plugin.ISnapshotDecorator;
-import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.grpc.GrpcService;
-import com.intergral.deep.agent.settings.Settings;
 import com.intergral.deep.agent.types.snapshot.EventSnapshot;
 import com.intergral.deep.proto.tracepoint.v1.Snapshot;
 import com.intergral.deep.proto.tracepoint.v1.SnapshotResponse;
 import io.grpc.stub.StreamObserver;
-import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,12 +31,10 @@ import org.slf4j.LoggerFactory;
 public class PushService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PushService.class);
-  private final Settings settings;
   private final GrpcService grpcService;
 
 
-  public PushService(final Settings settings, final GrpcService grpcService) {
-    this.settings = settings;
+  public PushService(final GrpcService grpcService) {
     this.grpcService = grpcService;
   }
 
@@ -49,27 +42,10 @@ public class PushService {
    * Decorate and push the provided snapshot.
    *
    * @param snapshot the snapshot to push
-   * @param context  the context of where the snapshot is collected
    */
-  public void pushSnapshot(final EventSnapshot snapshot, final ISnapshotContext context) {
-    decorate(snapshot, context);
+  public void pushSnapshot(final EventSnapshot snapshot) {
     final Snapshot grpcSnapshot = PushUtils.convertToGrpc(snapshot);
     this.grpcService.snapshotService().send(grpcSnapshot, new LoggingObserver(snapshot.getID()));
-  }
-
-  private void decorate(final EventSnapshot snapshot, final ISnapshotContext context) {
-    final Collection<ISnapshotDecorator> plugins = this.settings.getPlugins(ISnapshotDecorator.class);
-    for (ISnapshotDecorator plugin : plugins) {
-      try {
-        final Resource decorate = plugin.decorate(this.settings, context);
-        if (decorate != null) {
-          snapshot.mergeAttributes(decorate);
-        }
-      } catch (Throwable t) {
-        LOGGER.error("Error processing plugin {}", plugin.getClass().getName());
-      }
-    }
-    snapshot.close();
   }
 
   static class LoggingObserver implements StreamObserver<SnapshotResponse> {

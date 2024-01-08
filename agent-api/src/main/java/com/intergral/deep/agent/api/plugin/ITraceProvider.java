@@ -47,5 +47,7 @@ public interface ITraceProvider {
     String traceId();
 
     String spanId();
+
+    void addAttribute(String key, String value);
   }
 }

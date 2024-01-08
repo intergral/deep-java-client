@@ -73,13 +73,15 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
    * @param tracePointConfigs the tracepoints that are part of this Callback
    * @param lineStart         the Tuple of the time this Callback started
    * @param stack             the stack trace to use
+   * @param methodName        the name of the method we are wrapping, or {@code null} if not a method wrapped collection
    */
   public FrameProcessor(final Settings settings,
       final IEvaluator evaluator,
       final Map<String, Object> variables,
       final Collection<TracePointConfig> tracePointConfigs,
-      final long[] lineStart, final StackTraceElement[] stack) {
-    super(settings, evaluator, variables, stack);
+      final long[] lineStart, final StackTraceElement[] stack,
+      final String methodName) {
+    super(settings, evaluator, variables, stack, methodName);
     this.tracePointConfigs = tracePointConfigs;
     this.lineStart = lineStart;
   }
@@ -137,6 +139,9 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
     final IFrameResult processedFrame = processFrame();
 
     for (final TracePointConfig tracepoint : filteredTracepoints) {
+      final boolean doCollect = TracePointConfig.COLLECT.equals(
+          tracepoint.getArg(TracePointConfig.SNAPSHOT, String.class, TracePointConfig.COLLECT));
+
       try {
         final EventSnapshot snapshot = new EventSnapshot(tracepoint,
             this.lineStart[1],
@@ -144,38 +149,54 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
             processedFrame.frames(),
             processedFrame.variables());
 
-        for (String watch : tracepoint.getWatches()) {
-          final FrameCollector.IExpressionResult result = evaluateWatchExpression(watch, WatchResult.WATCH);
-          snapshot.addWatchResult(result.result());
-          snapshot.mergeVariables(result.variables());
+        // do not process watches if we are not a collecting tracepoint
+        if (doCollect) {
+          for (String watch : tracepoint.getWatches()) {
+            final FrameCollector.IExpressionResult result = evaluateWatchExpression(watch, WatchResult.WATCH);
+            snapshot.addWatchResult(result.result());
+            snapshot.mergeVariables(result.variables());
+          }
         }
 
+        // always process log message
         final String logMsg = tracepoint.getArg(TracePointConfig.LOG_MSG, String.class, null);
         if (logMsg != null) {
           final ILogProcessResult result = this.processLogMsg(tracepoint, logMsg);
-          snapshot.setLogMsg(result.processedLog());
-          for (WatchResult watchResult : result.result()) {
-            snapshot.addWatchResult(watchResult);
+          // only collect data if we are a collection tracepoint
+          if (doCollect) {
+            snapshot.setLogMsg(result.processedLog());
+            for (WatchResult watchResult : result.result()) {
+              snapshot.addWatchResult(watchResult);
+            }
+            snapshot.mergeVariables(result.variables());
           }
-          snapshot.mergeVariables(result.variables());
           this.logTracepoint(result.processedLog(), tracepoint.getId(), snapshot.getID());
         }
 
+        // always process metrics
         final Collection<MetricDefinition> metricDefinitions = tracepoint.getMetricDefinitions();
         if (!metricDefinitions.isEmpty()) {
           for (MetricDefinition metricDefinition : metricDefinitions) {
             final List<FrameCollector.IExpressionResult> watchResults = processMetric(tracepoint, metricDefinition);
-            for (FrameCollector.IExpressionResult watchResult : watchResults) {
-              snapshot.addWatchResult(watchResult.result());
-              snapshot.mergeVariables(watchResult.variables());
+            // only collect data if we are a collection tracepoint
+            if (doCollect) {
+              for (FrameCollector.IExpressionResult watchResult : watchResults) {
+                snapshot.addWatchResult(watchResult.result());
+                snapshot.mergeVariables(watchResult.variables());
+              }
             }
           }
+        }
+        // if we are not a collection tracepoint, then record fire and continue. Do not collect.
+        if (!doCollect) {
+          tracepoint.fired(this.lineStart[0]);
+          continue;
         }
 
         final Resource attributes = processAttributes(tracepoint);
         snapshot.mergeAttributes(attributes);
-
         snapshots.add(snapshot);
+
         tracepoint.fired(this.lineStart[0]);
       } catch (Exception e) {
         throw new RuntimeException(e);
@@ -276,6 +297,14 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
     return Reflection.getInstance();
   }
 
+  public Collection<TracePointConfig> getFilteredTracepoints() {
+    return filteredTracepoints;
+  }
+
+  public long[] getLineStart() {
+    return lineStart;
+  }
+
   /**
    * This defines a functional interface to allow for creating difference processors in the Callback.
    */
@@ -290,12 +319,13 @@ public class FrameProcessor extends FrameCollector implements ISnapshotContext {
      * @param tracePointConfigs the tracepoints that are part of this Callback
      * @param lineStart         the Tuple of the time this Callback started
      * @param stack             the stack trace to use
+     * @param methodName        the name of the method we are wrapping, or {@code null} if not a method wrapped collection
      * @return the new {@link FrameProcessor}
      * @see FrameProcessor
      * @see com.intergral.deep.agent.tracepoint.cf.CFFrameProcessor
      */
-    FrameProcessor provide(Settings settings, IEvaluator evaluator, Map<String, Object> variables,
-        Collection<TracePointConfig> tracePointConfigs, long[] lineStart,
-        StackTraceElement[] stack);
+    FrameProcessor provide(final Settings settings, final IEvaluator evaluator, final Map<String, Object> variables,
+        final Collection<TracePointConfig> tracePointConfigs, final long[] lineStart,
+        final StackTraceElement[] stack, final String methodName);
   }
 }

@@ -41,6 +41,7 @@ public class FrameConfig {
   private int maxWatchVars = -1;
   private int maxTpProcessTime = -1;
 
+  private boolean noCollect = true;
   private boolean cfRaw = false;
 
   /**
@@ -61,6 +62,11 @@ public class FrameConfig {
         maxWatchVars);
     maxTpProcessTime = Math.max(tracePointConfig.getArg("MAX_TP_PROCESS_TIME", Integer.class, -1),
         maxTpProcessTime);
+
+    // if any tracepoint is set to collect then we need to collect
+    if (tracePointConfig.getArg(TracePointConfig.SNAPSHOT, String.class, TracePointConfig.COLLECT).equals(TracePointConfig.COLLECT)) {
+      noCollect = false;
+    }
 
     final String frameType = tracePointConfig.getFrameType();
     if (frameType != null) {
@@ -157,12 +163,15 @@ public class FrameConfig {
   }
 
   /**
-   * Is this frame set to cf raw.
-   * cf raw allows the collection of the java variables instead of the mapped cf variables.
+   * Is this frame set to cf raw. cf raw allows the collection of the java variables instead of the mapped cf variables.
    *
    * @return {@code true} if we want to collect the raw cf variables.
    */
   public boolean isCfRaw() {
     return this.cfRaw;
+  }
+
+  public boolean isNoCollect() {
+    return noCollect;
   }
 }
