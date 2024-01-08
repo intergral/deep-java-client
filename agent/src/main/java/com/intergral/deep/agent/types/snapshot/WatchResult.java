@@ -43,6 +43,13 @@ public class WatchResult {
    */
   public static final String LOG = "LOG";
 
+  /**
+   * Watch source is CAPTURE.
+   *
+   * @see com.intergral.deep.proto.tracepoint.v1.WatchSource
+   */
+  public static final String CAPTURE = "CAPTURE";
+
   private final String error;
   private final VariableID result;
   private final String expression;
