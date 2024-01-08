@@ -46,4 +46,10 @@ class SpiUtilTest {
 
     assertEquals(3, loadedSpi.size());
   }
+
+  @Test
+  void canHandleConfigErrors() {
+    final List<ITestProvider> ts = SpiUtil.loadOrdered(ITestProvider.class, getClass().getClassLoader());
+    assertEquals(1, ts.size());
+  }
 }
