@@ -21,26 +21,17 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.intergral.deep</groupId>
-    <artifactId>deep-java-client</artifactId>
+    <groupId>com.intergral.deep.examples</groupId>
+    <artifactId>examples</artifactId>
     <version>1.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <groupId>com.intergral.deep.examples</groupId>
-
-  <artifactId>examples</artifactId>
-  <name>Examples</name>
-  <description>A small collection of examples on using deep.</description>
-
-  <packaging>pom</packaging>
-  <modules>
-    <module>agent-load</module>
-    <module>agent-only-load</module>
-    <module>dynamic-load</module>
-    <module>prometheus-metrics-example</module>
-    <module>otel-example</module>
-  </modules>
+  <artifactId>agent-only-load</artifactId>
+  <name>Agent Load</name>
+  <description>This example uses the agent load (-javaagent) to load the deep agent. It therefore
+    has no dependencies of code related to deep.
+  </description>
 
   <properties>
     <maven.compiler.source>8</maven.compiler.source>
@@ -48,4 +39,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
+  <dependencies>
+  </dependencies>
 </project>
