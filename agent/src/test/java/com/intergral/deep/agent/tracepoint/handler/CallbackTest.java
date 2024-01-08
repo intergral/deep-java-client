@@ -37,6 +37,7 @@ class CallbackTest {
   private final Settings settings = Mockito.mock(Settings.class);
   private final TracepointConfigService tracepointConfigService = Mockito.mock(TracepointConfigService.class);
   private final PushService pushService = Mockito.mock(PushService.class);
+  private final String collect = "";
 
   @BeforeEach
   void setUp() {
@@ -47,7 +48,7 @@ class CallbackTest {
   @ValueSource(strings = {"test", ""})
   @NullSource()
   void spanMustAlwaysReturn(final String name) {
-    final Closeable test = Callback.span(name);
+    final Closeable test = Callback.span(name, collect);
     assertNotNull(test);
     assertDoesNotThrow(test::close);
   }
@@ -58,7 +59,7 @@ class CallbackTest {
   void spanMustAlwaysReturn2(final String name) {
     final ITraceProvider iTraceProvider = Mockito.mock(ITraceProvider.class);
     Mockito.when(settings.getPlugin(ITraceProvider.class)).thenReturn(iTraceProvider);
-    final Closeable test = Callback.span(name);
+    final Closeable test = Callback.span(name, collect);
     assertNotNull(test);
     assertDoesNotThrow(test::close);
   }
@@ -71,7 +72,7 @@ class CallbackTest {
     final ISpan iSpan = Mockito.mock(ISpan.class);
     Mockito.when(iTraceProvider.createSpan(name)).thenReturn(iSpan);
     Mockito.when(settings.getPlugin(ITraceProvider.class)).thenReturn(iTraceProvider);
-    final Closeable test = Callback.span(name);
+    final Closeable test = Callback.span(name, collect);
     assertNotNull(test);
     assertDoesNotThrow(test::close);
   }
@@ -85,7 +86,7 @@ class CallbackTest {
     Mockito.doThrow(new RuntimeException("test")).when(iSpan).close();
     Mockito.when(iTraceProvider.createSpan(name)).thenReturn(iSpan);
     Mockito.when(settings.getPlugin(ITraceProvider.class)).thenReturn(iTraceProvider);
-    final Closeable test = Callback.span(name);
+    final Closeable test = Callback.span(name, collect);
     assertNotNull(test);
     assertDoesNotThrow(test::close);
   }
@@ -97,7 +98,7 @@ class CallbackTest {
     final ITraceProvider iTraceProvider = Mockito.mock(ITraceProvider.class);
     Mockito.doThrow(new RuntimeException("test")).when(iTraceProvider).createSpan(name);
     Mockito.when(settings.getPlugin(ITraceProvider.class)).thenReturn(iTraceProvider);
-    final Closeable test = Callback.span(name);
+    final Closeable test = Callback.span(name, collect);
     assertNotNull(test);
     assertDoesNotThrow(test::close);
   }

@@ -50,7 +50,7 @@ public class TracePointConfig {
   /**
    * The number of times this tracepoint should fire.
    */
-  private static final String FIRE_COUNT = "fire_count";
+  public static final String FIRE_COUNT = "fire_count";
   /**
    * The start of the time period this tracepoint can fire in.
    */
@@ -62,7 +62,7 @@ public class TracePointConfig {
   /**
    * The minimum time between successive triggers, in ms.
    */
-  private static final String FIRE_PERIOD = "fire_period";
+  public static final String FIRE_PERIOD = "fire_period";
   /**
    * This is the key to indicate the frame collection type.
    */
@@ -81,6 +81,48 @@ public class TracePointConfig {
    * This is the key for the arg that defines a method tracepoint.
    */
   public static final String METHOD_NAME = "method_name";
+
+  /**
+   * This is the key for the arg that defines a span type.
+   */
+  public static final String SPAN = "span";
+
+  /**
+   * This is used for SPAN type.
+   * <p>
+   * This type means we should wrap the method the tracepoint is in.
+   */
+  public static final String METHOD = "method";
+  /**
+   * This is used for SPAN type.
+   * <p>
+   * This type means we should only wrap the line the tracepoint is on.
+   */
+  @SuppressWarnings("unused")
+  public static final String LINE = "line";
+
+  /**
+   * This is the key to determine the collection state of the snapshot.
+   */
+  public static final String SNAPSHOT = "snapshot";
+
+  /**
+   * This is the default collection type and tells Deep to collect and send the snapshot.
+   */
+  public static final String COLLECT = "collect";
+
+  /**
+   * This type tells Deep to not collect any data and not to send the sanpshot.
+   */
+  public static final String NO_COLLECT = "no_collect";
+
+  public static final String STAGE = "stage";
+  public static final String LINE_START = "line_start";
+  public static final String LINE_END = "line_end";
+  public static final String LINE_CAPTURE = "line_capture";
+  public static final String METHOD_START = "method_start";
+  public static final String METHOD_END = "method_end";
+  public static final String METHOD_CAPTURE = "method_capture";
 
   private final String id;
   private final String path;
@@ -280,6 +322,44 @@ public class TracePointConfig {
     this.stats.fired(ts);
   }
 
+  /**
+   * Does this tracepoint accept the provided stage.
+   * <p>
+   * We can run tracepoints at start or end of line (or method), as well as collecting at start but defer send to end. Here we
+   * want to check the current visitor stage (where we are modifying the code), with the config of the tracepoint.
+   * <p>
+   * We should return {@code true} if the tracepoint should collect data at this stage.
+   *
+   * @param currentStage the stage we are trying to visit
+   * @return {@code true} if this tracepoint accepts this stage, else {@code false}.
+   */
+  public boolean acceptStage(final EStage currentStage) {
+    // if method name is set then we default to method start
+    final String methodName = getArg(METHOD_NAME, String.class, null);
+    final EStage targetStage;
+    if (methodName != null) {
+      targetStage = getArg(STAGE, EStage.class, EStage.METHOD_START);
+    } else {
+      targetStage = getArg(STAGE, EStage.class, EStage.LINE_START);
+    }
+
+    if (targetStage == currentStage) {
+      return true;
+    }
+
+    switch (currentStage) {
+      // if we are at line start - and we are line capture then capture
+      case LINE_START:
+      case LINE_END:
+        return targetStage == EStage.LINE_CAPTURE;
+      case METHOD_START:
+      case METHOD_END:
+        return targetStage == EStage.METHOD_CAPTURE;
+      default:
+        return false;
+    }
+  }
+
   private static class TracepointWindow {
 
     private final Integer start;
@@ -323,6 +403,53 @@ public class TracePointConfig {
     void fired(final long ts) {
       this.lastFire = ts;
       this.fireCount++;
+    }
+  }
+
+  /**
+   * This type describes the different stages that tracepoints can trigger at.
+   */
+  public enum EStage {
+    LINE_START(TracePointConfig.LINE_START),
+    LINE_END(TracePointConfig.LINE_END),
+    LINE_CAPTURE(TracePointConfig.LINE_CAPTURE),
+    METHOD_START(TracePointConfig.METHOD_START),
+    METHOD_END(TracePointConfig.METHOD_END),
+    METHOD_CAPTURE(TracePointConfig.METHOD_CAPTURE),
+    ;
+
+    private final String name;
+
+    EStage(final String name) {
+      this.name = name;
+    }
+
+    @Override
+    public String toString() {
+      return this.name;
+    }
+
+    /**
+     * Convert a string into the equivalent {@link EStage} value.
+     *
+     * @param arg the string to convert
+     * @return the {@link EStage} value.
+     */
+    public static EStage fromArg(final String arg) {
+      switch (arg) {
+        case TracePointConfig.LINE_END:
+          return EStage.LINE_END;
+        case TracePointConfig.LINE_CAPTURE:
+          return EStage.LINE_CAPTURE;
+        case TracePointConfig.METHOD_START:
+          return EStage.METHOD_START;
+        case TracePointConfig.METHOD_END:
+          return EStage.METHOD_END;
+        case TracePointConfig.METHOD_CAPTURE:
+          return EStage.METHOD_CAPTURE;
+        default:
+          return EStage.LINE_START;
+      }
     }
   }
 }

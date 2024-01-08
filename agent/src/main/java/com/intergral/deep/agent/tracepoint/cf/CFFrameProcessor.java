@@ -38,8 +38,9 @@ public class CFFrameProcessor extends FrameProcessor {
       final IEvaluator evaluator,
       final Map<String, Object> variables,
       final Collection<TracePointConfig> tracePointConfigs,
-      final long[] lineStart, final StackTraceElement[] stack) {
-    super(settings, evaluator, variables, tracePointConfigs, lineStart, stack);
+      final long[] lineStart, final StackTraceElement[] stack,
+      final String methodName) {
+    super(settings, evaluator, variables, tracePointConfigs, lineStart, stack, methodName);
   }
 
   @Override

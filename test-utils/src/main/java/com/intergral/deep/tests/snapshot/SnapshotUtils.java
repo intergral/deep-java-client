@@ -24,7 +24,9 @@ import com.intergral.deep.proto.common.v1.KeyValueList;
 import com.intergral.deep.proto.tracepoint.v1.Snapshot;
 import com.intergral.deep.proto.tracepoint.v1.Variable;
 import com.intergral.deep.proto.tracepoint.v1.VariableID;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -126,6 +128,24 @@ public final class SnapshotUtils {
       return stringBuilder.toString();
     }
     return null;
+  }
+
+  public static IVariableScan findVarByPath(final String path, final Snapshot snapshot) {
+    final String[] split = path.split("\\.");
+    final Iterator<String> iterator = Arrays.stream(split).iterator();
+    List<VariableID> vars = snapshot.getFrames(0).getVariablesList();
+    while (iterator.hasNext()) {
+      final String next = iterator.next();
+      final IVariableScan variableScan = findVarByName(next, vars, snapshot.getVarLookupMap());
+      if (!variableScan.found()) {
+        return variableScan;
+      }
+      if (!iterator.hasNext()) {
+        return variableScan;
+      }
+      vars = variableScan.variable().getChildrenList();
+    }
+    return () -> false;
   }
 
   public interface IVariableScan {

@@ -119,6 +119,13 @@ public class OtelPlugin implements IDeepPlugin, ITraceProvider, IMetricProcessor
       }
 
       @Override
+      public void addAttribute(final String key, final String value) {
+        if (span != null) {
+          span.setAttribute(key, value);
+        }
+      }
+
+      @Override
       public void close() {
         try {
           span.end();
@@ -150,6 +157,10 @@ public class OtelPlugin implements IDeepPlugin, ITraceProvider, IMetricProcessor
         return "unknown";
       }
 
+      @Override
+      public void addAttribute(final String key, final String value) {
+        current.setAttribute(key, value);
+      }
 
       @Override
       public String traceId() {

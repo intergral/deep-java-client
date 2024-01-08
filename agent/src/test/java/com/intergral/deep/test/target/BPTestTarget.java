@@ -27,14 +27,14 @@ import java.util.Random;
     {
         if( name == null )
         {
-            try{return null;}catch( Throwable t ){ Callback.callBackException( t ); throw t; }finally {Callback.callBackFinally(null,null);}
+            try{return null;}catch( Throwable t ){ Callback.callBackException( t ); throw t; }finally {Callback.callBackFinally(null,null, 1, null);}
         }
         return name;
     }
 
     public void setName_visited( final String name )
     {
-        try{this.name = name;}catch( Throwable t ){ Callback.callBackException( t ); throw t; }finally {Callback.callBackFinally(null,null);}
+        try{this.name = name;}catch( Throwable t ){ Callback.callBackException( t ); throw t; }finally {Callback.callBackFinally(null,null, 1, null);}
     }
 
     public String getName()
@@ -54,7 +54,7 @@ import java.util.Random;
 
     public String callSomeThing_visited( final String val )
     {
-        try{return getName() + val;}catch( Throwable t ){ Callback.callBackException( t ); throw t; }finally {Callback.callBackFinally(null,null);}
+        try{return getName() + val;}catch( Throwable t ){ Callback.callBackException( t ); throw t; }finally {Callback.callBackFinally(null,null, 1, null);}
     }
 
 
@@ -66,7 +66,7 @@ import java.util.Random;
 
     public int errorSomething_visited( final String withargs )
     {
-        try{return withargs.length();}catch( Throwable t ){ Callback.callBackException( t ); throw t; }finally {Callback.callBackFinally(null,null);}
+        try{return withargs.length();}catch( Throwable t ){ Callback.callBackException( t ); throw t; }finally {Callback.callBackFinally(null,null, 1, null);}
     }
 
 
@@ -78,7 +78,7 @@ import java.util.Random;
 
     public int throwSomething_visited( final String withargs )
     {
-        try{throw new RuntimeException(withargs);}catch( Throwable t ){ Callback.callBackException( t ); throw t; }finally {Callback.callBackFinally(null,null);}
+        try{throw new RuntimeException(withargs);}catch( Throwable t ){ Callback.callBackException( t ); throw t; }finally {Callback.callBackFinally(null,null, 1, null);}
     }
 
 
@@ -96,7 +96,7 @@ import java.util.Random;
         }
         catch( RuntimeException re )
         {
-            try{return re.getMessage();}catch( Throwable t ){ Callback.callBackException( t ); throw t; }finally {Callback.callBackFinally(null,null);}
+            try{return re.getMessage();}catch( Throwable t ){ Callback.callBackException( t ); throw t; }finally {Callback.callBackFinally(null,null, 1, null);}
         }
     }
 
@@ -126,7 +126,7 @@ import java.util.Random;
         }
         finally
         {
-            try{System.out.println("something in finally");}catch( Throwable t ){ Callback.callBackException( t ); throw t; }finally {Callback.callBackFinally(null,null);}
+            try{System.out.println("something in finally");}catch( Throwable t ){ Callback.callBackException( t ); throw t; }finally {Callback.callBackFinally(null,null, 1, null);}
         }
     }
 
@@ -147,7 +147,7 @@ import java.util.Random;
         }
     }
 
-    public String someFunctionWithABody(final String someArg){
+    public String someFunctionWithABody(final String someArg) {
         final String name = this.name;
         final String newName = name + someArg;
         final Random random = new Random();
@@ -189,6 +189,30 @@ import java.util.Random;
             }
             System.out.println( "something else" );
         }
+    }
+
+    public void someOverloaded()
+    {
+        someOverloaded("test");
+    }
+
+    public void someOverloaded(final String name)
+    {
+        System.out.printf("someOverloaded: %s%n", name);
+    }
+
+    public void locationTestTarget() throws Exception {
+        final String name = this.name;
+        final String someValue = someFunctionWithABody(name);
+        setName("locationTestTarget");
+        for(int i = 0; i < 2; i++) {
+            conditionalThrow(i,0);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "BPTestTarget";
     }
 }
 //@formatter:on

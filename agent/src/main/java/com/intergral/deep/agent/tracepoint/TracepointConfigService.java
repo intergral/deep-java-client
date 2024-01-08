@@ -39,7 +39,7 @@ public class TracepointConfigService implements ITracepointConfig {
   private final TracepointInstrumentationService tracepointInstrumentationService;
   private String currentHash = null;
   private final Collection<TracePointConfig> customTracepoints = new ArrayList<>();
-  private Collection<TracePointConfig> installedTracepoints = new ArrayList<>();
+  protected Collection<TracePointConfig> installedTracepoints = new ArrayList<>();
   @SuppressWarnings("unused")
   private long lastUpdate;
 

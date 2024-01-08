@@ -23,6 +23,7 @@ import com.intergral.deep.agent.api.logger.TracepointLogger;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
 import com.intergral.deep.agent.api.spi.IDeepPlugin;
+import com.intergral.deep.agent.types.TracePointConfig.EStage;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -182,6 +183,8 @@ public class Settings implements ISettings {
       return (T) Level.parse(str);
     } else if (type == Pattern.class) {
       return (T) Pattern.compile(str);
+    } else if (type == EStage.class) {
+      return (T) EStage.fromArg(str);
     } else if (type == URL.class) {
       try {
         return (T) new URL(str);

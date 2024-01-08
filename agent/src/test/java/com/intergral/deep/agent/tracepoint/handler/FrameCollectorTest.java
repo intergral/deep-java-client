@@ -44,7 +44,7 @@ class FrameCollectorTest {
   void setUp() {
     Mockito.when(settings.getResource()).thenReturn(Resource.DEFAULT);
     frameCollector = new FrameCollector(settings, evaluator, Collections.singletonMap("this", new ConditionTarget()),
-        Thread.currentThread().getStackTrace());
+        Thread.currentThread().getStackTrace(), null);
     frameCollector.configureSelf(Collections.singletonList(new MockTracepointConfig()));
   }
 

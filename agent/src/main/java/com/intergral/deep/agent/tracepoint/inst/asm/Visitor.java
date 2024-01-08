@@ -32,9 +32,7 @@ import static org.objectweb.asm.Opcodes.FLOAD;
 import static org.objectweb.asm.Opcodes.FSTORE;
 import static org.objectweb.asm.Opcodes.GETSTATIC;
 import static org.objectweb.asm.Opcodes.GOTO;
-import static org.objectweb.asm.Opcodes.IFNULL;
 import static org.objectweb.asm.Opcodes.ILOAD;
-import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
 import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
@@ -47,7 +45,9 @@ import static org.objectweb.asm.Opcodes.POP;
 import static org.objectweb.asm.Opcodes.RETURN;
 
 import com.google.common.collect.Sets;
+import com.intergral.deep.agent.tracepoint.inst.asm.Visitor.MappedMethod.MappedVar;
 import com.intergral.deep.agent.types.TracePointConfig;
+import com.intergral.deep.agent.types.TracePointConfig.EStage;
 import java.com.intergral.deep.ProxyCallback;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -55,11 +55,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -351,11 +352,11 @@ public class Visitor extends ClassVisitor {
 
   @Override
   public MethodVisitor visitMethod(int access, String name, String desc, String signature,
-      String[] exceptions) {
+      String[] exps) {
 
     // if the method is abstract then we cannot inject tracepoints - so skip it
     if (TransformerUtils.isAbstract(access)) {
-      return super.visitMethod(access, name, desc, signature, exceptions);
+      return super.visitMethod(access, name, desc, signature, exps);
     }
 
     LOGGER.debug("visitMethod {} {}", classname, name);
@@ -363,27 +364,45 @@ public class Visitor extends ClassVisitor {
     // if we have a method tracepoint for this method name then rename the method
     final String methodName;
     final int methodAccess;
+    // we use atomic as we have to update this later
+    final AtomicBoolean isMapped = new AtomicBoolean(false);
     final List<TracePointConfig> tracePointConfigs = this.methodBPs.get(name);
+    final MappedMethod mappedMethod = new MappedMethod(access, name, desc, signature, exps, -1);
     // if we have a method tracepoint for this method name then rename the method.
     if (tracePointConfigs != null) {
       // rename the method and make it private synthetic $deep$..
       methodName = determineNewMethodName(name);
       methodAccess = replacedMethodAcc(TransformerUtils.isStatic(access));
       // record the change so we can fix them up later
-      this.mappedMethods.add(new MappedMethod(access, name, desc, signature, exceptions));
+      this.mappedMethods.add(mappedMethod);
+      isMapped.set(true);
     } else {
       methodName = name;
       methodAccess = access;
     }
 
-    final MethodVisitor methodVisitor = super.visitMethod(methodAccess, methodName, desc, signature,
-        exceptions);
-    final JSRInlinerAdapter jsrInlinerAdapter = new JSRInlinerAdapter(methodVisitor, methodAccess, methodName,
-        desc, signature,
-        exceptions);
-
     // MethodNode used to handle the maxes for us to make it simpler
-    return new MethodNode(ASM7, methodAccess, methodName, desc, signature, exceptions) {
+    return new MethodNode(ASM7, methodAccess, methodName, desc, signature, exps) {
+
+      Label startLabel;
+
+      @Override
+      public void visitLocalVariable(final String name, final String descriptor, final String signature, final Label start, final Label end,
+          final int index) {
+        if (startLabel != null && startLabel.equals(start)) {
+          mappedMethod.acceptVariable(name, descriptor, index);
+        }
+        super.visitLocalVariable(name, descriptor, signature, start, end, index);
+      }
+
+      @Override
+      public void visitLineNumber(final int line, final Label start) {
+        mappedMethod.acceptLine(line);
+        if (startLabel == null) {
+          startLabel = start;
+        }
+        super.visitLineNumber(line, start);
+      }
 
       @Override
       public void visitEnd() {
@@ -398,6 +417,7 @@ public class Visitor extends ClassVisitor {
 
         // the start label for the line to wrap
         LabelNode start = null;
+        LineNumberNode ln = null;
 
         // we need to handle constructors a little differently
         final boolean isConstructor = name.equals("<init>");
@@ -479,20 +499,30 @@ public class Visitor extends ClassVisitor {
             }
             hook.add(new LabelNode(endOfTry));
 
-            // set = new HashSet()
-            hook.add(new TypeInsnNode(NEW, Type.getInternalName(HashSet.class)));
+            // list = new ArrayList()
+            hook.add(new TypeInsnNode(NEW, Type.getInternalName(ArrayList.class)));
             hook.add(new InsnNode(DUP));
             hook.add(
-                new MethodInsnNode(INVOKESPECIAL, Type.getInternalName(HashSet.class), "<init>",
+                new MethodInsnNode(INVOKESPECIAL, Type.getInternalName(ArrayList.class), "<init>",
                     "()V", false));
 
             for (final TracePointConfig bp : iBreakpoints) {
-              // set.add(bp.getId());
+              if (!bp.acceptStage(EStage.LINE_END)) {
+                continue;
+              }
+              // list.add(bp.getId());
               hook.add(new InsnNode(DUP)); // we need a ptr to our map
               hook.add(new LdcInsnNode(bp.getId())); // bp id
-              hook.add(new MethodInsnNode(INVOKEVIRTUAL, Type.getInternalName(HashSet.class), "add",
+              hook.add(new MethodInsnNode(INVOKEVIRTUAL, Type.getInternalName(ArrayList.class), "add",
                   "(Ljava/lang/Object;)Z"));
               hook.add(new InsnNode(POP)); // dont care about return
+            }
+
+            hook.add(new LdcInsnNode(filename));
+            if (ln != null) {
+              hook.add(new LdcInsnNode(ln.line));
+            } else {
+              hook.add(new LdcInsnNode(-1));
             }
             // if we are a next line then we need to remove the start line label from the seen labels so
             // the variable capture in the finally does not capture variables defined on the line we are wrapping
@@ -510,7 +540,9 @@ public class Visitor extends ClassVisitor {
                 Type.getInternalName(CALLBACK_CLASS),
                 "callBackFinally",
                 Type.getMethodDescriptor(Type.VOID_TYPE,
-                    Type.getType(Set.class),
+                    Type.getType(List.class),
+                    Type.getType(String.class),
+                    Type.getType(int.class),
                     Type.getType(Map.class)),
                 false));
             if (isReturnNode) {
@@ -590,19 +622,29 @@ public class Visitor extends ClassVisitor {
             hook.add(new LabelNode(endCatch));
 
             // set = new HashSet()
-            hook.add(new TypeInsnNode(NEW, Type.getInternalName(HashSet.class)));
+            hook.add(new TypeInsnNode(NEW, Type.getInternalName(ArrayList.class)));
             hook.add(new InsnNode(DUP));
             hook.add(
-                new MethodInsnNode(INVOKESPECIAL, Type.getInternalName(HashSet.class), "<init>",
+                new MethodInsnNode(INVOKESPECIAL, Type.getInternalName(ArrayList.class), "<init>",
                     "()V", false));
 
             for (final TracePointConfig bp : iBreakpoints) {
+              if (!bp.acceptStage(EStage.LINE_END)) {
+                continue;
+              }
               // set.add(bp.getId());
               hook.add(new InsnNode(DUP)); // we need a ptr to our map
               hook.add(new LdcInsnNode(bp.getId())); // bp id
-              hook.add(new MethodInsnNode(INVOKEVIRTUAL, Type.getInternalName(HashSet.class), "add",
+              hook.add(new MethodInsnNode(INVOKEVIRTUAL, Type.getInternalName(ArrayList.class), "add",
                   "(Ljava/lang/Object;)Z"));
               hook.add(new InsnNode(POP)); // don't care about return
+            }
+
+            hook.add(new LdcInsnNode(filename));
+            if (ln != null) {
+              hook.add(new LdcInsnNode(ln.line));
+            } else {
+              hook.add(new LdcInsnNode(-1));
             }
             // if we are a next line then we need to remove the start line label from the seen labels so
             // the variable capture in the finally does not capture variables defined on the line we are wrapping
@@ -619,7 +661,9 @@ public class Visitor extends ClassVisitor {
                 Type.getInternalName(CALLBACK_CLASS),
                 "callBackFinally",
                 Type.getMethodDescriptor(Type.VOID_TYPE,
-                    Type.getType(Set.class),
+                    Type.getType(List.class),
+                    Type.getType(String.class),
+                    Type.getType(int.class),
                     Type.getType(Map.class)),
                 false));
             // load exception back
@@ -664,7 +708,7 @@ public class Visitor extends ClassVisitor {
 
           if (node.getType() == AbstractInsnNode.LINE) {
             //noinspection DataFlowIssue
-            LineNumberNode ln = (LineNumberNode) node;
+            ln = (LineNumberNode) node;
             // if we are a constructor and have not called super yet - the cache the line for later
             if (isConstructor && !hasCalledSuper) {
               constructorLine = ln;
@@ -679,10 +723,33 @@ public class Visitor extends ClassVisitor {
               // but we might need to use them in forth coming instructions for line end etc
               iBreakpoints.clear();
               iBreakpoints.addAll(thisLineBps);
+              // if we are not already mapped then check if we need to map it
+              if (!isMapped.get()) {
+                // do we need to wrap the method later
+                final List<TracePointConfig> collect = thisLineBps.stream().filter(
+                        tracePointConfig -> TracePointConfig.METHOD.equals(tracePointConfig.getArg(TracePointConfig.SPAN, String.class, null)))
+                    .collect(Collectors.toList());
+                if (!collect.isEmpty()) {
+                  // we have a tracepoint on this line that is set to 'method' span type. So add the method to the mapped methods, then rename this method.
+                  Visitor.this.mappedMethods.add(mappedMethod);
+                  // track the mapped tracepoints, so we can pass them back later
+                  final List<TracePointConfig> mappedTps = Visitor.this.methodBPs.computeIfAbsent(this.name,
+                      k -> new ArrayList<>());
+                  mappedTps.addAll(collect);
+
+                  // rename the method and make it private synthetic $deep$..
+                  this.name = determineNewMethodName(name);
+                  this.access = replacedMethodAcc(TransformerUtils.isStatic(access));
+
+                  // set is mapped so we do not check again
+                  isMapped.set(true);
+                }
+              }
             }
 
             // check if we have any Bps for the constructor
             if (constructorLine != null) {
+              // todo  how do we want to deal with method entry in constructors
               // add any bps for the constructor call into the list to be processed
               final List<TracePointConfig> constructorBps = lineNos.remove(
                   (long) constructorLine.line);
@@ -720,6 +787,13 @@ public class Visitor extends ClassVisitor {
           }
         }
 
+        // now apply the modified instructions using the original class writer
+        final MethodVisitor methodVisitor = Visitor.this.cv.visitMethod(this.access, this.name, desc, signature,
+            exps);
+        final JSRInlinerAdapter jsrInlinerAdapter = new JSRInlinerAdapter(methodVisitor, this.access, this.name,
+            desc, signature,
+            exps);
+
         this.accept(jsrInlinerAdapter);
 
         super.visitEnd();
@@ -751,6 +825,9 @@ public class Visitor extends ClassVisitor {
             "()V", false));
 
         for (final TracePointConfig bp : breakpoints) {
+          if (!bp.acceptStage(EStage.LINE_START)) {
+            continue;
+          }
           // list.add(bp.getId());
           hook.add(new InsnNode(DUP)); // we need a ptr to our map
           hook.add(new LdcInsnNode(bp.getId())); // bp id
@@ -872,139 +949,321 @@ public class Visitor extends ClassVisitor {
       } else {
         createMappedReturnMethod(mappedMethod);
       }
+      changed = true;
     }
+
     super.visitEnd();
   }
 
   private void createMappedReturnMethod(final MappedMethod mappedMethod) {
+
+    final List<TracePointConfig> breakpoints = this.methodBPs.get(mappedMethod.name);
+
     final MethodVisitor methodVisitor = this.cv.visitMethod(mappedMethod.access, mappedMethod.name, mappedMethod.desc, mappedMethod.sign,
         mappedMethod.excp);
     final Type[] argumentTypes = Type.getArgumentTypes(mappedMethod.desc);
     final int offset = argumentTypes.length;
     final Type returnType = Type.getReturnType(mappedMethod.desc);
 
-    methodVisitor.visitCode();
+    // setup try/catch label blocks
     Label label0 = new Label();
     Label label1 = new Label();
     Label label2 = new Label();
-    methodVisitor.visitTryCatchBlock(label0, label1, label2, "java/io/IOException");
+    methodVisitor.visitTryCatchBlock(label0, label1, label2, "java/lang/Throwable");
     Label label3 = new Label();
+    methodVisitor.visitTryCatchBlock(label0, label1, label3, null);
     Label label4 = new Label();
-    methodVisitor.visitTryCatchBlock(label3, label0, label4, null);
-    Label label5 = new Label();
-    Label label6 = new Label();
-    Label label7 = new Label();
-    methodVisitor.visitTryCatchBlock(label5, label6, label7, "java/io/IOException");
-    methodVisitor.visitTryCatchBlock(label4, label5, label4, null);
+    methodVisitor.visitTryCatchBlock(label2, label4, label3, null);
 
-    Label label8 = new Label();
-    methodVisitor.visitLabel(label8);
+    Label label5 = new Label();
+    methodVisitor.visitLabel(label5);
     if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(49 + TransformerUtils.LINE_OFFSET, label8);
+      methodVisitor.visitLineNumber(70 + TransformerUtils.LINE_OFFSET, label5);
     }
-    methodVisitor.visitLdcInsn(mappedMethod.name);
-    methodVisitor.visitMethodInsn(INVOKESTATIC, Type.getInternalName(CALLBACK_CLASS), "span",
-        "(Ljava/lang/String;)Ljava/io/Closeable;", false);
-    methodVisitor.visitVarInsn(ASTORE, 1 + offset);
-    methodVisitor.visitLabel(label3);
+
+    //methodName = "intTemplate()I"
+    methodVisitor.visitLdcInsn(mappedMethod.name + mappedMethod.desc);
+    // filename = "MockMixinTemplate.java"
+    methodVisitor.visitLdcInsn(filename);
+    // lineNo = 79
+    methodVisitor.visitLdcInsn(mappedMethod.line);
+    // list = new ArrayList();
+    methodVisitor.visitTypeInsn(NEW, Type.getInternalName(ArrayList.class));
+    methodVisitor.visitInsn(DUP);
+    methodVisitor.visitMethodInsn(INVOKESPECIAL, Type.getInternalName(ArrayList.class), "<init>", "()V", false);
+
+    final StringBuilder spanOnlyIds = new StringBuilder();
+    for (final TracePointConfig bp : breakpoints) {
+      if (!bp.acceptStage(EStage.METHOD_START)) {
+        if (TracePointConfig.METHOD.equals(bp.getArg(TracePointConfig.SPAN, String.class, null))) {
+          spanOnlyIds.append(bp.getId()).append(",");
+        }
+        continue;
+      }
+      // list.add(bp.getId());
+      methodVisitor.visitInsn(DUP);
+      methodVisitor.visitLdcInsn(bp.getId());
+      methodVisitor.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ArrayList.class), "add",
+          "(Ljava/lang/Object;)Z", false);
+      methodVisitor.visitInsn(POP); // dont care about return
+    }
+
+    // Make a map of locals
+    // vars = new HashMap()
+    processMethodArguments(mappedMethod.access, mappedMethod.vars, methodVisitor); // attach ids of tracepoints that just want a span crated
+    if (spanOnlyIds.length() > 0) {
+      spanOnlyIds.deleteCharAt(spanOnlyIds.length() - 1);
+    }
+    methodVisitor.visitLdcInsn(spanOnlyIds.toString());
+
+    // Callback.methodEntry(mehodName, filename, lineNo, list, vars);
+    methodVisitor.visitMethodInsn(INVOKESTATIC, Type.getInternalName(CALLBACK_CLASS), "methodEntry",
+        Type.getMethodDescriptor(Type.VOID_TYPE,
+            Type.getType(String.class),
+            Type.getType(String.class),
+            Type.getType(int.class),
+            Type.getType(List.class),
+            Type.getType(Map.class),
+            Type.getType(String.class)), false);
+
+    // try {
+    methodVisitor.visitLabel(label0);
     if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(51 + TransformerUtils.LINE_OFFSET, label3);
+      methodVisitor.visitLineNumber(72 + TransformerUtils.LINE_OFFSET, label0);
     }
-    // load 'this'
-    methodVisitor.visitVarInsn(ALOAD, 0);
-    // load all the parameters
+    // i = this.$deep$intTemplate()
+    methodVisitor.visitVarInsn(ALOAD, 0); // load all the parameters
     for (int i = 0; i < argumentTypes.length; i++) {
       final Type argumentType = argumentTypes[i];
       methodVisitor.visitVarInsn(argumentType.getOpcode(ILOAD), i + 1);
     }
-    // call original method with all parameters
     methodVisitor.visitMethodInsn(INVOKEVIRTUAL, this.classname, determineNewMethodName(mappedMethod.name), mappedMethod.desc,
         false);
-    methodVisitor.visitVarInsn(returnType.getOpcode(ISTORE), 2 + offset);
-    methodVisitor.visitLabel(label0);
-    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(54 + TransformerUtils.LINE_OFFSET, label0);
-    }
-    methodVisitor.visitVarInsn(ALOAD, 1 + offset);
-    methodVisitor.visitJumpInsn(IFNULL, label1);
-    Label label9 = new Label();
-    methodVisitor.visitLabel(label9);
-    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(55 + TransformerUtils.LINE_OFFSET, label9);
-    }
-    methodVisitor.visitVarInsn(ALOAD, 1 + offset);
-    methodVisitor.visitMethodInsn(INVOKEINTERFACE, "java/io/Closeable", "close", "()V", true);
-    methodVisitor.visitLabel(label1);
-    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(59 + TransformerUtils.LINE_OFFSET, label1);
-    }
+    methodVisitor.visitVarInsn(returnType.getOpcode(ISTORE), 1 + offset);
 
-    Label label10 = new Label();
-    methodVisitor.visitJumpInsn(GOTO, label10);
-    methodVisitor.visitLabel(label2);
-    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(57 + TransformerUtils.LINE_OFFSET, label2);
-    }
-
-    methodVisitor.visitVarInsn(ASTORE, 3 + offset);
-    methodVisitor.visitLabel(label10);
-    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(51 + TransformerUtils.LINE_OFFSET, label10);
-    }
-
-    // change return/load opcodes based on return type of method
-    methodVisitor.visitVarInsn(returnType.getOpcode(ILOAD), 2 + offset);
-    methodVisitor.visitInsn(returnType.getOpcode(IRETURN));
-
-    methodVisitor.visitLabel(label4);
-    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(53 + TransformerUtils.LINE_OFFSET, label4);
-    }
-
-    methodVisitor.visitVarInsn(ASTORE, 4 + offset);
-    methodVisitor.visitLabel(label5);
-    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(54 + TransformerUtils.LINE_OFFSET, label5);
-    }
-    methodVisitor.visitVarInsn(ALOAD, 1 + offset);
-    methodVisitor.visitJumpInsn(IFNULL, label6);
-    Label label11 = new Label();
-    methodVisitor.visitLabel(label11);
-    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(55 + TransformerUtils.LINE_OFFSET, label11);
-    }
-    methodVisitor.visitVarInsn(ALOAD, 1 + offset);
-    methodVisitor.visitMethodInsn(INVOKEINTERFACE, "java/io/Closeable", "close", "()V", true);
+    Label label6 = new Label();
     methodVisitor.visitLabel(label6);
     if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(59 + TransformerUtils.LINE_OFFSET, label6);
+      methodVisitor.visitLineNumber(73 + TransformerUtils.LINE_OFFSET, label6);
     }
+    // ret = new Integer(i);
+    final InsnList abstractInsnNodes = loadVariable(returnType, 1 + offset);
+    appendToVisitor(methodVisitor, abstractInsnNodes);
 
-    Label label12 = new Label();
-    methodVisitor.visitJumpInsn(GOTO, label12);
+    // Callback.methodRet(ret);
+    methodVisitor.visitMethodInsn(INVOKESTATIC, Type.getInternalName(CALLBACK_CLASS), "methodRet",
+        Type.getMethodDescriptor(Type.VOID_TYPE, Type.getType(Object.class)), false);
+    // -- start good finally (ie the code in the finally block is run here if there is no exception)
+    Label label7 = new Label();
     methodVisitor.visitLabel(label7);
     if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(57 + TransformerUtils.LINE_OFFSET, label7);
+      methodVisitor.visitLineNumber(74 + TransformerUtils.LINE_OFFSET, label7);
     }
+    // load and store ret
+    // ret2 = ret;
+    methodVisitor.visitVarInsn(returnType.getOpcode(ILOAD), 1 + offset);
+    methodVisitor.visitVarInsn(returnType.getOpcode(ISTORE), 2 + offset);
+    methodVisitor.visitLabel(label1);
 
-    methodVisitor.visitVarInsn(ASTORE, 5 + offset);
-    methodVisitor.visitLabel(label12);
     if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(60 + TransformerUtils.LINE_OFFSET, label12);
+      methodVisitor.visitLineNumber(79 + TransformerUtils.LINE_OFFSET, label1);
     }
 
-    methodVisitor.visitVarInsn(ALOAD, 4 + offset);
+    //methodName = "intTemplate()I"
+    methodVisitor.visitLdcInsn(mappedMethod.name + mappedMethod.desc);
+    // filename = "MockMixinTemplate.java"
+    methodVisitor.visitLdcInsn(filename);
+    // lineNo = 79
+    methodVisitor.visitLdcInsn(mappedMethod.line);
+    // list = new ArrayList();
+    methodVisitor.visitTypeInsn(NEW, Type.getInternalName(ArrayList.class));
+    methodVisitor.visitInsn(DUP);
+    methodVisitor.visitMethodInsn(INVOKESPECIAL, Type.getInternalName(ArrayList.class), "<init>", "()V", false);
+
+    for (final TracePointConfig bp : breakpoints) {
+      if (!bp.acceptStage(EStage.METHOD_END)) {
+        continue;
+      }
+      // list.add(bp.getId());
+      methodVisitor.visitInsn(DUP);
+      methodVisitor.visitLdcInsn(bp.getId());
+      methodVisitor.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ArrayList.class), "add",
+          "(Ljava/lang/Object;)Z", false);
+      methodVisitor.visitInsn(POP); // dont care about return
+    }
+
+    // Make a map of locals
+    // vars = new HashMap()
+    processMethodArguments(mappedMethod.access, mappedMethod.vars, methodVisitor);
+    methodVisitor.visitMethodInsn(INVOKESTATIC, Type.getInternalName(CALLBACK_CLASS), "methodEnd",
+        Type.getMethodDescriptor(Type.VOID_TYPE,
+            Type.getType(String.class),
+            Type.getType(String.class),
+            Type.getType(int.class),
+            Type.getType(List.class),
+            Type.getType(Map.class)), false);
+
+    // reload ret and return
+    Label label8 = new Label();
+    methodVisitor.visitLabel(label8);
+
+    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
+      methodVisitor.visitLineNumber(74 + TransformerUtils.LINE_OFFSET, label8);
+    }
+    // return ret2;
+    methodVisitor.visitVarInsn(returnType.getOpcode(ILOAD), 2 + offset);
+    methodVisitor.visitInsn(returnType.getOpcode(IRETURN));
+    methodVisitor.visitLabel(label2);
+    // catch block
+    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
+      methodVisitor.visitLineNumber(75 + TransformerUtils.LINE_OFFSET, label2);
+    }
+    // throwable = thrownException (store thrown exception into slot 1)
+    methodVisitor.visitVarInsn(ASTORE, 1 + offset);
+    Label label9 = new Label();
+    methodVisitor.visitLabel(label9);
+
+    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
+      methodVisitor.visitLineNumber(76 + TransformerUtils.LINE_OFFSET, label9);
+    }
+    // t = throwable
+    methodVisitor.visitVarInsn(ALOAD, 1 + offset);
+    // Callback.methodException(t)
+    methodVisitor.visitMethodInsn(INVOKESTATIC, Type.getInternalName(CALLBACK_CLASS), "methodException",
+        Type.getMethodDescriptor(Type.VOID_TYPE, Type.getType(Throwable.class)), false);
+
+    Label label10 = new Label();
+    methodVisitor.visitLabel(label10);
+    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
+      methodVisitor.visitLineNumber(77 + TransformerUtils.LINE_OFFSET, label10);
+    }
+    // throw t;
+    methodVisitor.visitVarInsn(ALOAD, 1 + offset);
     methodVisitor.visitInsn(ATHROW);
-    Label label13 = new Label();
-    methodVisitor.visitLabel(label13);
+
+    // -- start bad finally (ie the finally block when an exception was thrown)
+    methodVisitor.visitLabel(label3);
+    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
+      methodVisitor.visitLineNumber(79 + TransformerUtils.LINE_OFFSET, label3);
+    }
+    // store thrown
+    // t2 = t;
+    methodVisitor.visitVarInsn(ASTORE, 3 + offset);
+    methodVisitor.visitLabel(label4);
+
+    //methodName = "intTemplate()I"
+    methodVisitor.visitLdcInsn(mappedMethod.name + mappedMethod.desc);
+    // filename = "MockMixinTemplate.java"
+    methodVisitor.visitLdcInsn(filename);
+    // lineNo = 79
+    methodVisitor.visitLdcInsn(mappedMethod.line);
+    // list = new ArrayList();
+    methodVisitor.visitTypeInsn(NEW, Type.getInternalName(ArrayList.class));
+    methodVisitor.visitInsn(DUP);
+    methodVisitor.visitMethodInsn(INVOKESPECIAL, Type.getInternalName(ArrayList.class), "<init>", "()V", false);
+
+    for (final TracePointConfig bp : breakpoints) {
+      if (!bp.acceptStage(EStage.METHOD_END)) {
+        continue;
+      }
+      // list.add(bp.getId());
+      methodVisitor.visitInsn(DUP);
+      methodVisitor.visitLdcInsn(bp.getId());
+      methodVisitor.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ArrayList.class), "add",
+          "(Ljava/lang/Object;)Z", false);
+      methodVisitor.visitInsn(POP); // dont care about return
+    }
+
+    // Make a map of locals
+    // vars = new HashMap()
+    processMethodArguments(mappedMethod.access, mappedMethod.vars, methodVisitor);
+    methodVisitor.visitMethodInsn(INVOKESTATIC, Type.getInternalName(CALLBACK_CLASS), "methodEnd",
+        Type.getMethodDescriptor(Type.VOID_TYPE,
+            Type.getType(String.class),
+            Type.getType(String.class),
+            Type.getType(int.class),
+            Type.getType(List.class),
+            Type.getType(Map.class)), false);
+    Label label11 = new Label();
+    methodVisitor.visitLabel(label11);
+
+    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
+      methodVisitor.visitLineNumber(80 + TransformerUtils.LINE_OFFSET, label11);
+    }
+    // throw t2;
+    methodVisitor.visitVarInsn(ALOAD, 3 + offset);
+    methodVisitor.visitInsn(ATHROW);
+    Label label12 = new Label();
+    methodVisitor.visitLabel(label12);
 
     // no need to visit local vars as this code is synthetic we won't be debugging it anyway
-
-    methodVisitor.visitMaxs(1 + offset, 6 + offset);
+    // the max/frames should be calculated for us
+    methodVisitor.visitMaxs(0, 0);
     methodVisitor.visitEnd();
   }
 
+  private void processMethodArguments(final int access, final List<MappedMethod.MappedVar> vars, final MethodVisitor methodVisitor) {
+    // map = new HashMap()
+    methodVisitor.visitTypeInsn(NEW, Type.getInternalName(HashMap.class));
+    methodVisitor.visitInsn(DUP);
+    methodVisitor.visitMethodInsn(INVOKESPECIAL, Type.getInternalName(HashMap.class), "<init>",
+        "()V", false);
+
+    // add this
+    final boolean isStatic = isStatic(access);
+    if (!isStatic) {
+      // map.put("this", this)
+      methodVisitor.visitInsn(DUP); // we need a ptr to our map
+      methodVisitor.visitLdcInsn("this"); // key
+      methodVisitor.visitVarInsn(ALOAD, 0); // value
+
+      // call map.put(name, value)
+      methodVisitor.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(HashMap.class),
+          "put",
+          Type.getMethodDescriptor(Type.getType(Object.class),
+              Type.getType(Object.class), Type.getType(Object.class)),
+          false);
+      methodVisitor.visitInsn(POP); // dont care about return
+    }
+
+    for (MappedVar var : vars) {
+
+      // map.put('param name', param);
+      final Type argumentType = Type.getType(var.desc);
+      final String pramName = var.name;
+
+      methodVisitor.visitInsn(DUP); // we need a ptr to our map
+      methodVisitor.visitLdcInsn(pramName); // key
+      // use the loadVariable method to ensure boxing
+      final InsnList abstractInsnNodes = loadVariable(argumentType, var.index);
+      // now convert to methodvisitor calls
+      appendToVisitor(methodVisitor, abstractInsnNodes);
+      // call map.put(name, value)
+      methodVisitor.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(HashMap.class),
+          "put",
+          Type.getMethodDescriptor(Type.getType(Object.class),
+              Type.getType(Object.class), Type.getType(Object.class)),
+          false);
+      methodVisitor.visitInsn(POP); // dont care about return
+    }
+  }
+
+  private static void appendToVisitor(final MethodVisitor methodVisitor, final InsnList abstractInsnNodes) {
+    for (AbstractInsnNode abstractInsnNode : abstractInsnNodes) {
+      if (abstractInsnNode instanceof VarInsnNode) {
+        methodVisitor.visitVarInsn(abstractInsnNode.getOpcode(), ((VarInsnNode) abstractInsnNode).var);
+      } else if (abstractInsnNode instanceof MethodInsnNode) {
+        final MethodInsnNode methodInstNode = (MethodInsnNode) abstractInsnNode;
+        methodVisitor.visitMethodInsn(abstractInsnNode.getOpcode(), methodInstNode.owner, methodInstNode.name, methodInstNode.desc,
+            methodInstNode.itf);
+      } else if (abstractInsnNode instanceof LdcInsnNode) {
+        methodVisitor.visitLdcInsn(((LdcInsnNode) abstractInsnNode).cst);
+      }
+    }
+  }
+
   private void createMappedVoidMethod(final MappedMethod mappedMethod) {
+    final List<TracePointConfig> breakpoints = this.methodBPs.get(mappedMethod.name);
     final MethodVisitor methodVisitor = this.cv.visitMethod(mappedMethod.access, mappedMethod.name, mappedMethod.desc, mappedMethod.sign,
         mappedMethod.excp);
     final Type[] argumentTypes = Type.getArgumentTypes(mappedMethod.desc);
@@ -1015,127 +1274,214 @@ public class Visitor extends ClassVisitor {
     Label label0 = new Label();
     Label label1 = new Label();
     Label label2 = new Label();
-    methodVisitor.visitTryCatchBlock(label0, label1, label2, "java/io/IOException");
+    methodVisitor.visitTryCatchBlock(label0, label1, label2, "java/lang/Throwable");
     Label label3 = new Label();
+    methodVisitor.visitTryCatchBlock(label0, label1, label3, null);
     Label label4 = new Label();
-    methodVisitor.visitTryCatchBlock(label3, label0, label4, null);
+    methodVisitor.visitTryCatchBlock(label2, label4, label3, null);
     Label label5 = new Label();
-    Label label6 = new Label();
-    Label label7 = new Label();
-    methodVisitor.visitTryCatchBlock(label5, label6, label7, "java/io/IOException");
-
-    Label label8 = new Label();
-    methodVisitor.visitLabel(label8);
+    methodVisitor.visitLabel(label5);
     if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(30 + TransformerUtils.LINE_OFFSET, label8);
-    }
-    methodVisitor.visitLdcInsn(mappedMethod.name);
-    // Closable closable = Callback.span(method.name)
-    methodVisitor.visitMethodInsn(INVOKESTATIC, Type.getInternalName(CALLBACK_CLASS), "span",
-        "(Ljava/lang/String;)Ljava/io/Closeable;", false);
-    methodVisitor.visitVarInsn(ASTORE, 1 + offset);
-    // try {
-    methodVisitor.visitLabel(label3);
-    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(32 + TransformerUtils.LINE_OFFSET, label3);
+      methodVisitor.visitLineNumber(38 + TransformerUtils.LINE_OFFSET, label5);
     }
 
-    // load 'this'
-    methodVisitor.visitVarInsn(ALOAD, 0);
-    // load all the parameters
+    //methodName = "intTemplate()I"
+    methodVisitor.visitLdcInsn(mappedMethod.name + mappedMethod.desc);
+    // filename = "MockMixinTemplate.java"
+    methodVisitor.visitLdcInsn(filename);
+    // lineNo = 79
+    methodVisitor.visitLdcInsn(mappedMethod.line);
+    // list = new ArrayList();
+    methodVisitor.visitTypeInsn(NEW, Type.getInternalName(ArrayList.class));
+    methodVisitor.visitInsn(DUP);
+    methodVisitor.visitMethodInsn(INVOKESPECIAL, Type.getInternalName(ArrayList.class), "<init>", "()V", false);
+
+    final StringBuilder spanOnlyIds = new StringBuilder();
+    for (final TracePointConfig bp : breakpoints) {
+      if (!bp.acceptStage(EStage.METHOD_START)) {
+        if (TracePointConfig.METHOD.equals(bp.getArg(TracePointConfig.SPAN, String.class, null))) {
+          spanOnlyIds.append(bp.getId()).append(",");
+        }
+        continue;
+      }
+      // list.add(bp.getId());
+      methodVisitor.visitInsn(DUP);
+      methodVisitor.visitLdcInsn(bp.getId());
+      methodVisitor.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ArrayList.class), "add",
+          "(Ljava/lang/Object;)Z", false);
+      methodVisitor.visitInsn(POP); // dont care about return
+    }
+
+    // Make a map of locals
+    // vars = new HashMap()
+    processMethodArguments(mappedMethod.access, mappedMethod.vars, methodVisitor);
+    // attach ids of tracepoints that just want a span crated
+    if (spanOnlyIds.length() > 0) {
+      spanOnlyIds.deleteCharAt(spanOnlyIds.length() - 1);
+    }
+    methodVisitor.visitLdcInsn(spanOnlyIds.toString());
+
+    // Callback.methodEntry(mehodName, filename, lineNo, list, vars);
+    methodVisitor.visitMethodInsn(INVOKESTATIC, Type.getInternalName(CALLBACK_CLASS), "methodEntry",
+        Type.getMethodDescriptor(Type.VOID_TYPE,
+            Type.getType(String.class),
+            Type.getType(String.class),
+            Type.getType(int.class),
+            Type.getType(List.class),
+            Type.getType(Map.class),
+            Type.getType(String.class)), false);
+
+    methodVisitor.visitLabel(label0);
+    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
+      methodVisitor.visitLineNumber(40 + TransformerUtils.LINE_OFFSET, label0);
+    }
+    // this.$deep$voidTemplate();
+    methodVisitor.visitVarInsn(ALOAD, 0); // load all the parameters
     for (int i = 0; i < argumentTypes.length; i++) {
       final Type argumentType = argumentTypes[i];
       methodVisitor.visitVarInsn(argumentType.getOpcode(ILOAD), i + 1);
     }
-    // call original method
     methodVisitor.visitMethodInsn(INVOKEVIRTUAL, this.classname, determineNewMethodName(mappedMethod.name), mappedMethod.desc,
         false);
-    methodVisitor.visitLabel(label0);
-    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(35 + TransformerUtils.LINE_OFFSET, label0);
-    }
-    methodVisitor.visitVarInsn(ALOAD, 1 + offset);
-    methodVisitor.visitJumpInsn(IFNULL, label1);
-    // } finally {
-    Label label9 = new Label();
-    methodVisitor.visitLabel(label9);
-    // try {
-    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(36 + TransformerUtils.LINE_OFFSET, label9);
-    }
-    methodVisitor.visitVarInsn(ALOAD, 1 + offset);
-    // closable.close()
-    methodVisitor.visitMethodInsn(INVOKEINTERFACE, "java/io/Closeable", "close", "()V", true);
+    // -- start good finally (ie the code in the finally block is run here if there is no exception)
     methodVisitor.visitLabel(label1);
     if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(40 + TransformerUtils.LINE_OFFSET, label1);
+      methodVisitor.visitLineNumber(45 + TransformerUtils.LINE_OFFSET, label1);
     }
-    methodVisitor.visitFrame(Opcodes.F_APPEND, 1, new Object[]{"java/io/Closeable"}, 0, null);
-    Label label10 = new Label();
-    methodVisitor.visitJumpInsn(GOTO, label10);
-    methodVisitor.visitLabel(label2);
-    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(38 + TransformerUtils.LINE_OFFSET, label2);
+
+    //methodName = "intTemplate()I"
+    methodVisitor.visitLdcInsn(mappedMethod.name + mappedMethod.desc);
+    // filename = "MockMixinTemplate.java"
+    methodVisitor.visitLdcInsn(filename);
+    // lineNo = 79
+    methodVisitor.visitLdcInsn(mappedMethod.line);
+    // list = new ArrayList();
+    methodVisitor.visitTypeInsn(NEW, Type.getInternalName(ArrayList.class));
+    methodVisitor.visitInsn(DUP);
+    methodVisitor.visitMethodInsn(INVOKESPECIAL, Type.getInternalName(ArrayList.class), "<init>", "()V", false);
+
+    for (final TracePointConfig bp : breakpoints) {
+      if (!bp.acceptStage(EStage.METHOD_END)) {
+        continue;
+      }
+      // list.add(bp.getId());
+      methodVisitor.visitInsn(DUP);
+      methodVisitor.visitLdcInsn(bp.getId());
+      methodVisitor.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ArrayList.class), "add",
+          "(Ljava/lang/Object;)Z", false);
+      methodVisitor.visitInsn(POP); // dont care about return
     }
-    methodVisitor.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{"java/io/IOException"});
-    // } catch (IOException ignored) {
-    methodVisitor.visitVarInsn(ASTORE, 2 + offset);
-    Label label11 = new Label();
-    methodVisitor.visitLabel(label11);
-    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(41 + TransformerUtils.LINE_OFFSET, label11);
-    }
-    methodVisitor.visitJumpInsn(GOTO, label10);
-    methodVisitor.visitLabel(label4);
-    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(34 + TransformerUtils.LINE_OFFSET, label4);
-    }
-    methodVisitor.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{"java/lang/Throwable"});
-    methodVisitor.visitVarInsn(ASTORE, 3 + offset);
-    methodVisitor.visitLabel(label5);
-    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(35 + TransformerUtils.LINE_OFFSET, label5);
-    }
-    methodVisitor.visitVarInsn(ALOAD, 1 + offset);
-    methodVisitor.visitJumpInsn(IFNULL, label6);
-    Label label12 = new Label();
-    methodVisitor.visitLabel(label12);
-    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(36 + TransformerUtils.LINE_OFFSET, label12);
-    }
-    methodVisitor.visitVarInsn(ALOAD, 1 + offset);
-    methodVisitor.visitMethodInsn(INVOKEINTERFACE, "java/io/Closeable", "close", "()V", true);
+
+    // Make a map of locals
+    // vars = new HashMap()
+    processMethodArguments(mappedMethod.access, mappedMethod.vars, methodVisitor);
+    methodVisitor.visitMethodInsn(INVOKESTATIC, Type.getInternalName(CALLBACK_CLASS), "methodEnd",
+        Type.getMethodDescriptor(Type.VOID_TYPE,
+            Type.getType(String.class),
+            Type.getType(String.class),
+            Type.getType(int.class),
+            Type.getType(List.class),
+            Type.getType(Map.class)), false);
+
+    // catch(Throwable t)
+    Label label6 = new Label();
     methodVisitor.visitLabel(label6);
     if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(40 + TransformerUtils.LINE_OFFSET, label6);
+      methodVisitor.visitLineNumber(46 + TransformerUtils.LINE_OFFSET, label6);
     }
-    methodVisitor.visitFrame(Opcodes.F_APPEND, 2, new Object[]{Opcodes.TOP, "java/lang/Throwable"}, 0, null);
-    Label label13 = new Label();
-    methodVisitor.visitJumpInsn(GOTO, label13);
-    methodVisitor.visitLabel(label7);
+    Label label7 = new Label();
+    methodVisitor.visitJumpInsn(GOTO, label7);
+    methodVisitor.visitLabel(label2);
     if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(38 + TransformerUtils.LINE_OFFSET, label7);
+      methodVisitor.visitLineNumber(41 + TransformerUtils.LINE_OFFSET, label2);
     }
-    methodVisitor.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{"java/io/IOException"});
-    methodVisitor.visitVarInsn(ASTORE, 4 + offset);
-    methodVisitor.visitLabel(label13);
+    // throwable = thrownException (store thrown exception into slot 1)
+    methodVisitor.visitVarInsn(ASTORE, 1 + offset);
+    Label label8 = new Label();
+    methodVisitor.visitLabel(label8);
     if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(41 + TransformerUtils.LINE_OFFSET, label13);
+      methodVisitor.visitLineNumber(42 + TransformerUtils.LINE_OFFSET, label8);
     }
-    methodVisitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
-    methodVisitor.visitVarInsn(ALOAD, 3 + offset);
+
+    // Callback.methodException(throwable)
+    methodVisitor.visitVarInsn(ALOAD, 1 + offset);
+    methodVisitor.visitMethodInsn(INVOKESTATIC, Type.getInternalName(CALLBACK_CLASS), "methodException",
+        Type.getMethodDescriptor(Type.VOID_TYPE, Type.getType(Throwable.class)), false);
+
+    Label label9 = new Label();
+    methodVisitor.visitLabel(label9);
+    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
+      methodVisitor.visitLineNumber(43 + TransformerUtils.LINE_OFFSET, label9);
+    }
+    // throw throwable
+    methodVisitor.visitVarInsn(ALOAD, 1 + offset);
     methodVisitor.visitInsn(ATHROW);
+
+    methodVisitor.visitLabel(label3);
+    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
+      methodVisitor.visitLineNumber(45 + TransformerUtils.LINE_OFFSET, label3);
+    }
+
+    // -- start bad finally (ie the code in the finally block is run here if there is an exception)
+    // t2 = throwable;
+    methodVisitor.visitVarInsn(ASTORE, 2 + offset);
+    methodVisitor.visitLabel(label4);
+
+    //methodName = "intTemplate()I"
+    methodVisitor.visitLdcInsn(mappedMethod.name + mappedMethod.desc);
+    // filename = "MockMixinTemplate.java"
+    methodVisitor.visitLdcInsn(filename);
+    // lineNo = 79
+    methodVisitor.visitLdcInsn(mappedMethod.line);
+    // list = new ArrayList();
+    methodVisitor.visitTypeInsn(NEW, Type.getInternalName(ArrayList.class));
+    methodVisitor.visitInsn(DUP);
+    methodVisitor.visitMethodInsn(INVOKESPECIAL, Type.getInternalName(ArrayList.class), "<init>", "()V", false);
+
+    for (final TracePointConfig bp : breakpoints) {
+      if (!bp.acceptStage(EStage.METHOD_END)) {
+        continue;
+      }
+      // list.add(bp.getId());
+      methodVisitor.visitInsn(DUP);
+      methodVisitor.visitLdcInsn(bp.getId());
+      methodVisitor.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ArrayList.class), "add",
+          "(Ljava/lang/Object;)Z", false);
+      methodVisitor.visitInsn(POP); // dont care about return
+    }
+
+    // Make a map of locals
+    // vars = new HashMap()
+    processMethodArguments(mappedMethod.access, mappedMethod.vars, methodVisitor);
+    // Callback.methodEnd(methodName, filename, lineNo, list, vars);
+    methodVisitor.visitMethodInsn(INVOKESTATIC, Type.getInternalName(CALLBACK_CLASS), "methodEnd",
+        Type.getMethodDescriptor(Type.VOID_TYPE,
+            Type.getType(String.class),
+            Type.getType(String.class),
+            Type.getType(int.class),
+            Type.getType(List.class),
+            Type.getType(Map.class)), false);
+
+    Label label10 = new Label();
     methodVisitor.visitLabel(label10);
     if (TransformerUtils.ALLOW_LINE_NUMBERS) {
-      methodVisitor.visitLineNumber(42 + TransformerUtils.LINE_OFFSET, label10);
+      methodVisitor.visitLineNumber(46 + TransformerUtils.LINE_OFFSET, label10);
     }
-    methodVisitor.visitFrame(Opcodes.F_CHOP, 2, null, 0, null);
+    // throw t2;
+    methodVisitor.visitVarInsn(ALOAD, 2 + offset);
+    methodVisitor.visitInsn(ATHROW);
+    methodVisitor.visitLabel(label7);
+    if (TransformerUtils.ALLOW_LINE_NUMBERS) {
+      methodVisitor.visitLineNumber(47 + TransformerUtils.LINE_OFFSET, label7);
+    }
+    methodVisitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
     methodVisitor.visitInsn(RETURN);
-    Label label14 = new Label();
-    methodVisitor.visitLabel(label14);
-    methodVisitor.visitLocalVariable("this", "L" + this.classname + ";", null, label8, label14, 0);
-    methodVisitor.visitLocalVariable("closeable", "Ljava/io/Closeable;", null, label3, label14, 1);
-    methodVisitor.visitMaxs(1 + offset, 5 + offset);
+    Label label11 = new Label();
+    methodVisitor.visitLabel(label11);
+
+    // no need to visit local vars as this code is synthetic we won't be debugging it anyway
+    // the max/frames should be calculated for us
+    methodVisitor.visitMaxs(0, 0);
     methodVisitor.visitEnd();
   }
 
@@ -1161,18 +1507,44 @@ public class Visitor extends ClassVisitor {
 
   static class MappedMethod {
 
+
     final int access;
     final String name;
     final String desc;
     final String sign;
     final String[] excp;
+    int line;
+    final List<MappedVar> vars;
 
-    public MappedMethod(final int access, final String name, final String desc, final String sign, final String[] excp) {
+    public MappedMethod(final int access, final String name, final String desc, final String sign, final String[] excp, final int line) {
       this.access = access;
       this.name = name;
       this.desc = desc;
       this.sign = sign;
       this.excp = excp;
+      this.line = line;
+      this.vars = new ArrayList<>();
+    }
+
+    void acceptLine(final int line) {
+      this.line = Math.max(this.line, line);
+    }
+
+    void acceptVariable(final String name, final String desc, final int index) {
+      this.vars.add(new MappedVar(name, desc, index));
+    }
+
+    static class MappedVar {
+
+      final String name;
+      final String desc;
+      final int index;
+
+      public MappedVar(final String name, final String desc, final int index) {
+        this.name = name;
+        this.desc = desc;
+        this.index = index;
+      }
     }
   }
 }

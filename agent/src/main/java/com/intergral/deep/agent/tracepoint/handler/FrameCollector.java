@@ -79,24 +79,32 @@ public class FrameCollector extends VariableProcessor {
   private final List<String> jspPackages;
 
   /**
+   * The name of the method we are wrapping, or {@code null} if not a method wrapped collection.
+   */
+  private final String methodName;
+
+  /**
    * Create a frame collector to collect the frame data.
    *
    * @param settings  the current settings being used by deep
    * @param evaluator the evaluator to use for this callback
    * @param variables the variables captured by the callback
    * @param stack     the stack captured by the callback
+   * @param methodName the name of the method we are wrapping, or {@code null} if not a method wrapped collection
    */
   public FrameCollector(
       final Settings settings,
       final IEvaluator evaluator,
       final Map<String, Object> variables,
-      final StackTraceElement[] stack) {
+      final StackTraceElement[] stack,
+      final String methodName) {
     this.settings = settings;
     this.evaluator = evaluator;
     this.variables = variables;
     this.stack = stack;
     this.jspSuffix = settings.getSettingAs(ISettings.JSP_SUFFIX, String.class);
     this.jspPackages = settings.getAsList(ISettings.JSP_PACKAGES);
+    this.methodName = methodName;
   }
 
   /**
@@ -105,6 +113,21 @@ public class FrameCollector extends VariableProcessor {
    * @return the result of the process {@link IFrameResult}
    */
   protected IFrameResult processFrame() {
+    // if all tracepoints are no collect then skip collection
+    if (this.frameConfig.isNoCollect()) {
+      return new IFrameResult() {
+        @Override
+        public Collection<StackFrame> frames() {
+          return Collections.emptyList();
+        }
+
+        @Override
+        public Map<String, Variable> variables() {
+          return Collections.emptyMap();
+        }
+      };
+    }
+
     final ArrayList<StackFrame> frames = new ArrayList<>();
 
     for (int i = 0; i < stack.length; i++) {
@@ -356,10 +379,9 @@ public class FrameCollector extends VariableProcessor {
    * <p>
    * So if we cannot get a result from the {@link IEvaluator} then we return an error result.
    *
-   * @param watch the watch expression to evaluate
+   * @param watch  the watch expression to evaluate
    * @param source the source of the watch expression
    * @return a {@link IExpressionResult}
-   *
    * @see WatchResult#LOG
    * @see WatchResult#METRIC
    * @see WatchResult#WATCH
@@ -459,6 +481,10 @@ public class FrameCollector extends VariableProcessor {
     attributes.put("line", tracepoint.getLineNo());
     attributes.put("stack", tracepoint.getStackType());
     attributes.put("frame", tracepoint.getFrameType());
+
+    if (this.methodName != null) {
+      attributes.put("method_name", this.methodName);
+    }
 
     if (!tracepoint.getWatches().isEmpty()) {
       attributes.put("has_watches", true);
