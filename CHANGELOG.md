@@ -1,6 +1,8 @@
 # main - Unreleased
  - **[FEATURE]**: plugin: Add plugin for Otel [#87](https://github.com/intergral/deep/pull/87) [@Umaaz](https://github.com/Umaaz)
  - **[FEATURE]**: traces: Add apis for creating traces from tracepoints [#87](https://github.com/intergral/deep/pull/87) [@Umaaz](https://github.com/Umaaz)
+ - **[BUGFIX]**: fix issue with SPI loading failing [#92](https://github.com/intergral/deep/pull/92) [@Umaaz](https://github.com/Umaaz)
+ - **[BUGFIX]**: fix issue with method entry tracepoings [#91](https://github.com/intergral/deep/pull/91) [@Umaaz](https://github.com/Umaaz)
 
 # 1.1.4 (15/12/2023)
 - **[CHANGE]**: plugin: Add new API for registering plugins [#84](https://github.com/intergral/deep/pull/84) [@Umaaz](https://github.com/Umaaz) 
