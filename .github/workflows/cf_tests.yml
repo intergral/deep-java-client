@@ -19,11 +19,11 @@ jobs:
 
       - name: Set up JDK 11
         uses: actions/setup-java@v3
-        if: ${{ github.event.event_name == "workflow_dispatch" || env.CHANGE_COUNT > 0 }}
+        if: ${{ github.event.event_name == 'workflow_dispatch' || env.CHANGE_COUNT > 0 }}
         with:
           java-version: '11'
           distribution: 'temurin'
           cache: 'maven'
       - name: Run CF Tests
-        if: ${{ github.event.event_name == "workflow_dispatch" || env.CHANGE_COUNT > 0 }}
+        if: ${{ github.event.event_name == 'workflow_dispatch' || env.CHANGE_COUNT > 0 }}
         run: make cf-tests
