@@ -1,5 +1,5 @@
 /*
- *     Copyright (C) 2024  Intergral GmbH
+ *     Copyright (C) 2023  Intergral GmbH
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as published by
@@ -18,6 +18,9 @@
 package com.intergral.deep.agent.resource;
 
 
+/**
+ * This type is used to test SPI loading.
+ */
 public class TestProvider implements ITestProvider {
 
 }
