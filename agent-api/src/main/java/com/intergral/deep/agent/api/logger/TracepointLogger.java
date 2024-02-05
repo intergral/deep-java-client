@@ -17,13 +17,14 @@
 
 package com.intergral.deep.agent.api.logger;
 
+import com.intergral.deep.agent.api.spi.IDeepPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This is the default tracepoint logger that will log to the default Deep logger.
  */
-public class TracepointLogger implements ITracepointLogger {
+public class TracepointLogger implements ITracepointLogger, IDeepPlugin {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(TracepointLogger.class);
 
