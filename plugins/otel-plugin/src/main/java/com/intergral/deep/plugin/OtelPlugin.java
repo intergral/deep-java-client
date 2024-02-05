@@ -95,7 +95,7 @@ public class OtelPlugin implements IDeepPlugin, ITraceProvider, IMetricProcessor
     }
 
     final Span span = deep.spanBuilder(name).setAttribute("deep", DeepVersion.VERSION).startSpan();
-    if(span == null) {
+    if (span == null) {
       return null;
     }
 
