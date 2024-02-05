@@ -141,6 +141,7 @@ class SettingsTest {
     abstract class TPLogger implements IDeepPlugin, ITracepointLogger {
 
     }
+
     final TPLogger tracepointLogger = Mockito.mock(TPLogger.class);
     settings.setPlugins(Collections.singletonList(tracepointLogger));
     assertNotNull(settings.getTracepointLogger());
