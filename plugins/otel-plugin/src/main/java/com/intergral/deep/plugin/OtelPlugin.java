@@ -65,8 +65,11 @@ public class OtelPlugin implements IDeepPlugin, ITraceProvider, IMetricProcessor
       final Double value) {
     final MeterProvider meterProvider = GlobalOpenTelemetry.getMeterProvider();
     final Meter deep = meterProvider.get("deep");
-    final ObservableDoubleMeasurement observableDoubleMeasurement = deep.gaugeBuilder(String.format("%s_%s", namespace, name)).setUnit(unit).setDescription(help)
+    final ObservableDoubleMeasurement observableDoubleMeasurement = deep.gaugeBuilder(String.format("%s_%s", namespace, name))
+        .setUnit(unit)
+        .setDescription(help)
         .buildObserver();
+
     observableDoubleMeasurement.record(value, buildAttributes(labels));
   }
 
