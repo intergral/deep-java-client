@@ -95,6 +95,10 @@ public class OtelPlugin implements IDeepPlugin, ITraceProvider, IMetricProcessor
     }
 
     final Span span = deep.spanBuilder(name).setAttribute("deep", DeepVersion.VERSION).startSpan();
+    if(span == null) {
+      return null;
+    }
+
     return new ISpan() {
       @Override
       public String name() {
@@ -104,25 +108,17 @@ public class OtelPlugin implements IDeepPlugin, ITraceProvider, IMetricProcessor
 
       @Override
       public String traceId() {
-        if (span != null) {
-          return span.getSpanContext().getTraceId();
-        }
-        return null;
+        return span.getSpanContext().getTraceId();
       }
 
       @Override
       public String spanId() {
-        if (span != null) {
-          return span.getSpanContext().getSpanId();
-        }
-        return null;
+        return span.getSpanContext().getSpanId();
       }
 
       @Override
       public void addAttribute(final String key, final String value) {
-        if (span != null) {
-          span.setAttribute(key, value);
-        }
+        span.setAttribute(key, value);
       }
 
       @Override
