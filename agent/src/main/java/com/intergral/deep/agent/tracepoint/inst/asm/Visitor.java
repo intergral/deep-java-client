@@ -900,7 +900,7 @@ public class Visitor extends ClassVisitor {
                 continue;
               }
               // map.put('var name', var)
-              LOGGER.debug("visitMethod {} {} Adding variable {}", classname, name, l.name);
+              LOGGER.trace("visitMethod {} {} Adding variable {}", classname, name, l.name);
               hook.add(new InsnNode(DUP)); // we need a ptr to our map
               hook.add(new LdcInsnNode(l.name)); // key
               hook.add(loadVariable(Type.getType(l.desc), l.index)); // value
@@ -912,7 +912,7 @@ public class Visitor extends ClassVisitor {
                   false));
               hook.add(new InsnNode(POP)); // dont care about return
             } else {
-              LOGGER.debug("visitMethod {} {} Skipping variable {}", classname, name, l.name);
+              LOGGER.trace("visitMethod {} {} Skipping variable {}", classname, name, l.name);
             }
           }
         }
@@ -924,7 +924,7 @@ public class Visitor extends ClassVisitor {
             // map.put('param name', param);
             final Type argumentType = argumentTypes[i];
             final String pramName = "param" + i;
-            LOGGER.debug("visitMethod {} {} Adding variable {}", classname, name, pramName);
+            LOGGER.trace("visitMethod {} {} Adding variable {}", classname, name, pramName);
             hook.add(new InsnNode(DUP)); // we need a ptr to our map
             hook.add(new LdcInsnNode(pramName)); // key
             hook.add(loadVariable(argumentType, i + 1)); // value

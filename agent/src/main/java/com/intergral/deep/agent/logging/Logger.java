@@ -41,6 +41,11 @@ public final class Logger {
    * @param settings the settings for deep
    */
   public static void configureLogging(final Settings settings) {
+    final java.util.logging.Logger loggerRelocated = java.util.logging.Logger.getLogger("com.intergral.deep.relocated");
+    loggerRelocated.setUseParentHandlers(false);
+    final Level relocatedLevel = settings.getSettingAs("logging.level.relocated", Level.class);
+    loggerRelocated.setLevel(relocatedLevel);
+
     final java.util.logging.Logger logger = java.util.logging.Logger.getLogger("com.intergral");
     logger.setUseParentHandlers(false);
     final ConsoleHandler handler = new ConsoleHandler();
