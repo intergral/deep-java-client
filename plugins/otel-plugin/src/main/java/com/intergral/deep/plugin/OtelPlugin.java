@@ -27,6 +27,8 @@ import com.intergral.deep.agent.api.settings.ISettings;
 import com.intergral.deep.agent.api.spi.IConditional;
 import com.intergral.deep.agent.api.spi.IDeepPlugin;
 import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
@@ -38,6 +40,7 @@ import io.opentelemetry.api.trace.TracerProvider;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * This plugin provides a connection between Deep and Otel. Allowing:
@@ -53,8 +56,8 @@ public class OtelPlugin implements IDeepPlugin, ITraceProvider, IMetricProcessor
       final Double value) {
     final MeterProvider meterProvider = GlobalOpenTelemetry.getMeterProvider();
     final Meter deep = meterProvider.get("deep");
-    final LongCounter build = deep.counterBuilder(name).setUnit(unit).setDescription(help).build();
-    build.add(value.longValue());
+    final LongCounter build = deep.counterBuilder(String.format("%s_%s", namespace, name)).setUnit(unit).setDescription(help).build();
+    build.add(value.longValue(), buildAttributes(labels));
   }
 
   @Override
@@ -62,9 +65,9 @@ public class OtelPlugin implements IDeepPlugin, ITraceProvider, IMetricProcessor
       final Double value) {
     final MeterProvider meterProvider = GlobalOpenTelemetry.getMeterProvider();
     final Meter deep = meterProvider.get("deep");
-    final ObservableDoubleMeasurement observableDoubleMeasurement = deep.gaugeBuilder(name).setUnit(unit).setDescription(help)
+    final ObservableDoubleMeasurement observableDoubleMeasurement = deep.gaugeBuilder(String.format("%s_%s", namespace, name)).setUnit(unit).setDescription(help)
         .buildObserver();
-    observableDoubleMeasurement.record(value);
+    observableDoubleMeasurement.record(value, buildAttributes(labels));
   }
 
   @Override
@@ -72,14 +75,35 @@ public class OtelPlugin implements IDeepPlugin, ITraceProvider, IMetricProcessor
       final Double value) {
     final MeterProvider meterProvider = GlobalOpenTelemetry.getMeterProvider();
     final Meter deep = meterProvider.get("deep");
-    final DoubleHistogram build = deep.histogramBuilder(name).setUnit(unit).setDescription(help).build();
-    build.record(value);
+    final DoubleHistogram build = deep.histogramBuilder(String.format("%s_%s", namespace, name)).setUnit(unit).setDescription(help).build();
+    build.record(value, buildAttributes(labels));
   }
 
   @Override
   public void summary(final String name, final Map<String, Object> labels, final String namespace, final String help, final String unit,
       final Double value) {
     histogram(name, labels, namespace, help, unit, value);
+  }
+
+  private Attributes buildAttributes(final Map<String, Object> labels) {
+    final AttributesBuilder builder = Attributes.builder();
+    for (Entry<String, Object> entry : labels.entrySet()) {
+      final Object value = entry.getValue();
+      if (value instanceof Integer) {
+        builder.put(entry.getKey(), (Integer) value);
+      } else if (value instanceof Float) {
+        builder.put(entry.getKey(), (Float) value);
+      } else if (value instanceof Double) {
+        builder.put(entry.getKey(), (Double) value);
+      } else if (value instanceof Long) {
+        builder.put(entry.getKey(), (Long) value);
+      } else if (value instanceof Boolean) {
+        builder.put(entry.getKey(), (Boolean) value);
+      } else {
+        builder.put(entry.getKey(), String.valueOf(value));
+      }
+    }
+    return builder.build();
   }
 
   @Override
