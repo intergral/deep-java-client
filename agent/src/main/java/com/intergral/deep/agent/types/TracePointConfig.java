@@ -112,7 +112,7 @@ public class TracePointConfig {
   public static final String COLLECT = "collect";
 
   /**
-   * This type tells Deep to not collect any data and not to send the sanpshot.
+    * This type tells Deep to not collect any data and not to send the snapshot.
    */
   public static final String NO_COLLECT = "no_collect";
 
