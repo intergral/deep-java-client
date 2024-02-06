@@ -497,20 +497,20 @@ public final class Callback {
       if (this.throwable != null) {
         final List<VariableID> variableIds = frameProcessor.processVars(Collections.singletonMap("thrown", this.throwable));
         final Map<String, Variable> watchLookup = frameProcessor.closeLookup();
-        eventSnapshot.addWatchResult(new WatchResult("thrown", variableIds.get(0), WatchResult.WATCH));
+        eventSnapshot.addWatchResult(new WatchResult("thrown", variableIds.get(0), WatchResult.CAPTURE));
         eventSnapshot.mergeVariables(watchLookup);
       }
 
       if (this.isSet) {
         final List<VariableID> variableIds = frameProcessor.processVars(Collections.singletonMap("return", this.value));
         final Map<String, Variable> watchLookup = frameProcessor.closeLookup();
-        eventSnapshot.addWatchResult(new WatchResult("return", variableIds.get(0), WatchResult.WATCH));
+        eventSnapshot.addWatchResult(new WatchResult("return", variableIds.get(0), WatchResult.CAPTURE));
         eventSnapshot.mergeVariables(watchLookup);
       }
 
       final List<VariableID> variableIds = frameProcessor.processVars(Collections.singletonMap("runtime", durationNs));
       final Map<String, Variable> watchLookup = frameProcessor.closeLookup();
-      eventSnapshot.addWatchResult(new WatchResult("runtime", variableIds.get(0), WatchResult.WATCH));
+      eventSnapshot.addWatchResult(new WatchResult("runtime", variableIds.get(0), WatchResult.CAPTURE));
       eventSnapshot.mergeVariables(watchLookup);
     }
   }
