@@ -136,7 +136,7 @@ public final class Callback {
             .map(TracePointConfig::getId).collect(Collectors.joining(","));
         final Closeable span;
         if (!spans.isEmpty()) {
-          span = span(filename + lineNo, spans);
+          span = span(filename + "#" + lineNo, spans);
         } else {
           span = null;
         }
@@ -158,6 +158,9 @@ public final class Callback {
       final IFactory factory,
       final CallbackHook callbackHook) {
     if (tracepointIds.isEmpty()) {
+      if (callbackHook != null) {
+        callbackHook.close(Callback.PUSH_SERVICE);
+      }
       return null;
     }
     final long[] lineStart = Utils.currentTimeNanos();
