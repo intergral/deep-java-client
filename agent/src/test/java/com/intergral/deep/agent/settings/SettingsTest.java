@@ -130,23 +130,20 @@ class SettingsTest {
   }
 
   @Test
-  void tracepointLogger_not_null() {
+  void tracepointLogger_null() {
     final Settings settings = Settings.build(new HashMap<>());
-    assertNotNull(settings.getTracepointLogger());
-  }
-
-  @Test
-  void tracepointLogger_set_null() {
-    final Settings settings = Settings.build(new HashMap<>());
-    settings.setTracepointLogger(null);
-    assertNotNull(settings.getTracepointLogger());
+    assertNull(settings.getTracepointLogger());
   }
 
   @Test
   void tracepointLogger_can_log() {
     final Settings settings = Settings.build(new HashMap<>());
-    final ITracepointLogger tracepointLogger = Mockito.mock(ITracepointLogger.class);
-    settings.setTracepointLogger(tracepointLogger);
+    abstract class TPLogger implements IDeepPlugin, ITracepointLogger {
+
+    }
+
+    final TPLogger tracepointLogger = Mockito.mock(TPLogger.class);
+    settings.setPlugins(Collections.singletonList(tracepointLogger));
     assertNotNull(settings.getTracepointLogger());
 
     settings.logTracepoint("log", "tp_id", "snap_id");

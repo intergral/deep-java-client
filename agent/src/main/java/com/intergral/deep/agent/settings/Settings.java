@@ -19,10 +19,10 @@ package com.intergral.deep.agent.settings;
 
 import com.intergral.deep.agent.api.IRegistration;
 import com.intergral.deep.agent.api.logger.ITracepointLogger;
-import com.intergral.deep.agent.api.logger.TracepointLogger;
 import com.intergral.deep.agent.api.resource.Resource;
 import com.intergral.deep.agent.api.settings.ISettings;
 import com.intergral.deep.agent.api.spi.IDeepPlugin;
+import com.intergral.deep.agent.api.spi.Ordered;
 import com.intergral.deep.agent.types.TracePointConfig.EStage;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,8 +54,7 @@ public class Settings implements ISettings {
   private static final AtomicBoolean IS_ACTIVE = new AtomicBoolean(true);
   private final Properties properties;
   private Resource resource;
-  private final Collection<IDeepPlugin> plugins = new ArrayList<>();
-  private ITracepointLogger tracepointLogger = new TracepointLogger();
+  private final List<IDeepPlugin> plugins = new ArrayList<>();
 
   private Settings(Properties properties) {
     this.properties = properties;
@@ -400,7 +400,7 @@ public class Settings implements ISettings {
    * @param snapshotId   the snapshot id
    */
   public void logTracepoint(final String logMsg, final String tracepointId, final String snapshotId) {
-    this.tracepointLogger.logTracepoint(logMsg, tracepointId, snapshotId);
+    getTracepointLogger().logTracepoint(logMsg, tracepointId, snapshotId);
   }
 
   /**
@@ -409,20 +409,9 @@ public class Settings implements ISettings {
    * @return the tracepoint logger
    */
   public ITracepointLogger getTracepointLogger() {
-    return tracepointLogger;
+    return getPlugin(ITracepointLogger.class);
   }
 
-  /**
-   * Set the tracepoint logger to a new logger.
-   *
-   * @param tracepointLogger the new logger
-   */
-  public void setTracepointLogger(final ITracepointLogger tracepointLogger) {
-    if (tracepointLogger == null) {
-      return;
-    }
-    this.tracepointLogger = tracepointLogger;
-  }
 
   /**
    * Add a plugin to the current config.
@@ -432,6 +421,7 @@ public class Settings implements ISettings {
    */
   public IRegistration<IDeepPlugin> addPlugin(final IDeepPlugin plugin) {
     this.plugins.add(plugin);
+    this.plugins.sort(Comparator.comparing(Ordered::order));
     return new IRegistration<IDeepPlugin>() {
       @Override
       public void unregister() {

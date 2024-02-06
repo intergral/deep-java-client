@@ -1,5 +1,6 @@
 # main - Unreleased
 - **[CHANGE]**: change log config to allow better control of logging [#103](https://github.com/intergral/deep/pull/103) [@Umaaz](https://github.com/Umaaz)
+- **[CHANGE]**: change tracepoint logger to be a plugin [#106](https://github.com/intergral/deep/pull/106) [@Umaaz](https://github.com/Umaaz)
 - **[FEATURE]**: plugin: Add plugin for Otel [#87](https://github.com/intergral/deep/pull/87) [@Umaaz](https://github.com/Umaaz)
 - **[FEATURE]**: traces: Add apis for creating traces from tracepoints [#87](https://github.com/intergral/deep/pull/87) [@Umaaz](https://github.com/Umaaz)
 - **[ENHANCEMENT]**: make checkstyle use regex for license check [#94](https://github.com/intergral/deep/pull/94) [@Umaaz](https://github.com/Umaaz)
