@@ -28,12 +28,22 @@ public final class Utils {
   /**
    * Are we running on a CF server.
    * <p>
-   * By looking at the java start up command we can tell if this is a CF server.
+   * By checking that the coldfusion.home system property exists, or by looking at the java start up command,
+   * we can tell if this is a CF server.
    *
    * @return {@code true} if we are on a coldfusion server.
    */
   public static boolean isCFServer() {
-    return System.getProperty("sun.java.command").contains("coldfusion");
+    if (System.getProperty("coldfusion.home") != null) {
+      return true;
+    }
+
+    final String javaCommand = System.getProperty("sun.java.command");
+    // has the potential to not exist on Windows services
+    if (javaCommand == null) {
+      return false;
+    }
+    return javaCommand.contains("coldfusion");
   }
 
   /**
