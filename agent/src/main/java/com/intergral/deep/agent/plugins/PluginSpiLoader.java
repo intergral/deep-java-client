@@ -27,11 +27,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This acts as the main loader for plugins using the SPI loader system.
  */
 public final class PluginSpiLoader {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(PluginSpiLoader.class);
 
   private PluginSpiLoader() {
   }
@@ -59,7 +63,12 @@ public final class PluginSpiLoader {
         .filter(plugin -> !ResourceDetector.isDisabled(plugin.getClass(), enabledProviders, disabledProviders))
         .filter(plugin -> {
           if (plugin instanceof IConditional) {
-            return ((IConditional) plugin).isActive();
+            try {
+              return ((IConditional) plugin).isActive();
+            } catch (Exception e) {
+              LOGGER.error("Failed to load plugin {}", plugin.getClass().getName(), e);
+              return false;
+            }
           }
           return true;
         })
