@@ -64,6 +64,9 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
+      - name: Update java version
+        run: mvn versions:set -DnewVersion=${VERSION} -B -U
+
       - name: Package project
         run: mvn clean package -DskipTests -U -B -P cf-it-tests,examples
 
