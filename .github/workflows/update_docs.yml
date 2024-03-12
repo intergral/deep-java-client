@@ -55,7 +55,7 @@ jobs:
       - name: Unpack
         run: |
           mkdir -p _site/mvn 
-          tar -xvf site.tar.gz --strip-components=2 -C _site/mvn
+          tar -xvf Maven.Site --strip-components=2 -C _site/mvn
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
