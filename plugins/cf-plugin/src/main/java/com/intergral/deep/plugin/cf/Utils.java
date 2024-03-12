@@ -28,7 +28,7 @@ public final class Utils {
   /**
    * Are we running on a CF server.
    * <p>
-   * By checking that the coldfusion.home system property exists, or by looking at the java start up command,
+   * By checking that the {@code coldfusion.home} system property exists, or by looking at the java start up command,
    * we can tell if this is a CF server.
    *
    * @return {@code true} if we are on a coldfusion server.
