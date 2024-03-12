@@ -41,7 +41,7 @@ class PluginSpiLoaderTest {
 
     final Set<String> classNames = iDeepPlugins.stream().map(Object::getClass).map(Class::getName).collect(Collectors.toSet());
 
-    assertTrue(classNames.contains(TestPlugin.class.getName()));
-    assertFalse(classNames.contains(TestBadPlugin.class.getName()));
+    assertTrue(classNames.contains(MockPlugin.class.getName()));
+    assertFalse(classNames.contains(MockBadPlugin.class.getName()));
   }
 }

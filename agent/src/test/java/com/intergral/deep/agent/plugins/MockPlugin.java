@@ -19,6 +19,9 @@ package com.intergral.deep.agent.plugins;
 
 import com.intergral.deep.agent.api.spi.IDeepPlugin;
 
-public class TestPlugin implements IDeepPlugin {
+/**
+ * This is used to test the SPI loder and doesn't need to actually do anything.
+ */
+public class MockPlugin implements IDeepPlugin {
 
 }

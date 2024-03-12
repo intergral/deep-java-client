@@ -20,7 +20,10 @@ package com.intergral.deep.agent.plugins;
 import com.intergral.deep.agent.api.spi.IConditional;
 import com.intergral.deep.agent.api.spi.IDeepPlugin;
 
-public class TestBadPlugin implements IDeepPlugin, IConditional {
+/**
+ * This is used to test the SPI loder and just throws an exception on activate.
+ */
+public class MockBadPlugin implements IDeepPlugin, IConditional {
 
 
   @Override
