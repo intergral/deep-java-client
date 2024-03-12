@@ -1,3 +1,6 @@
+# 1.2.1 - (12/03/2024)
+- **[BUGFIX]**: plugin: fix ColdFusion detection on Windows [#116](https://github.com/intergral/deep/pull/116) [@LMarkie](https://github.com/LMarkie) 
+
 # 1.2.0 - (06/02/2024)
 - **[CHANGE]**: change log config to allow better control of logging [#103](https://github.com/intergral/deep/pull/103) [@Umaaz](https://github.com/Umaaz)
 - **[CHANGE]**: change tracepoint logger to be a plugin [#106](https://github.com/intergral/deep/pull/106) [@Umaaz](https://github.com/Umaaz)
