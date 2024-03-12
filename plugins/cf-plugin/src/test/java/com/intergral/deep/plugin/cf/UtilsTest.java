@@ -32,6 +32,7 @@ class UtilsTest {
   void canDetectNotCF() {
     assertFalse(Utils.isCFServer());
   }
+
   @Test
   @ClearSystemProperty(key = "sun.java.command")
   void canHandleNoSunCommand() {
@@ -39,13 +40,13 @@ class UtilsTest {
   }
 
   @Test
-  @SetSystemProperty(key = "coldfusion.home", value ="doesn't matter")
+  @SetSystemProperty(key = "coldfusion.home", value = "doesn't matter")
   void canDetectCFHome() {
     assertTrue(Utils.isCFServer());
   }
 
   @Test
-  @SetSystemProperty(key = "sun.java.command", value ="/some/coldfusion")
+  @SetSystemProperty(key = "sun.java.command", value = "/some/coldfusion")
   void canUseSunCommand() {
     assertTrue(Utils.isCFServer());
   }
@@ -56,7 +57,7 @@ class UtilsTest {
   }
 
   @Test
-  @SetSystemProperty(key="cf.test.error", value = "anything")
+  @SetSystemProperty(key = "cf.test.error", value = "anything")
   void failLoadCFVersion() {
     assertNull(Utils.loadCFVersion());
   }
