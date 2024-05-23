@@ -382,6 +382,7 @@
                     <exclude>META-INF/*.RSA</exclude>
                     <exclude>META-INF/native-image/**/*.*</exclude>
                     <exclude>META-INF/proguard/**/*.*</exclude>
+                    <exclude>META-INF/native/**/*.*</exclude>
                     <exclude>META-INF/dgminfo</exclude>
                     <exclude>META-INF/*.properties</exclude>
                     <exclude>**/LICENSE.txt</exclude>
