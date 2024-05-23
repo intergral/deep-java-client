@@ -34,23 +34,7 @@ jobs:
       - name: Update java version
         run: mvn versions:set -DnewVersion=${VERSION} -B -U
       - name: Build and Release
-        run: mvn -s .ci-settings.xml clean package deploy -DskipTests -P release-ossrh -B -U -pl agent,deep --also-make
-
-      - name: Upload agent to release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          file: ./agent/target/agent-${VERSION}.jar
-          asset_name: Deep Agent
-          tag: ${{ github.ref_name }}
-          overwrite: true
-
-      - name: Upload lite agent to release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          file: ./agent/target/agent-${VERSION}-lite.jar
-          asset_name: Deep Lite Agent
-          tag: ${{ github.ref_name }}
-          overwrite: true
+        run: mvn -s .ci-settings.xml clean deploy -DskipTests -P release-ossrh -B -U -pl agent,deep --also-make
 
   JavaSite:
     runs-on: ubuntu-latest
@@ -81,6 +65,22 @@ jobs:
         with:
           file: site.tar.gz
           asset_name: Maven Site
+          tag: ${{ github.ref_name }}
+          overwrite: true
+
+      - name: Upload agent to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          file: ./agent/target/agent-${VERSION}.jar
+          asset_name: Deep Agent
+          tag: ${{ github.ref_name }}
+          overwrite: true
+
+      - name: Upload lite agent to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          file: ./agent/target/agent-${VERSION}-lite.jar
+          asset_name: Deep Lite Agent
           tag: ${{ github.ref_name }}
           overwrite: true
 
