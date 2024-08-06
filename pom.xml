@@ -554,7 +554,7 @@
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
                 <!-- Version upgrade blocked by junit-pioneer version -->
-                <version>5.9.3</version>
+                <version>5.10.3</version>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
