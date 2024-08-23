@@ -27,13 +27,13 @@ When using the dependency approach you simple add deep to you project and start 
     <dependency>
         <groupId>com.intergral.deep</groupId>
         <artifactId>deep</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>LATEST</version>
         <scope>compile</scope>
     </dependency>
     <dependency>
         <groupId>com.intergral.deep</groupId>
         <artifactId>agent</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>LATEST</version>
         <scope>provided</scope>
     </dependency>
 </depedencies>
