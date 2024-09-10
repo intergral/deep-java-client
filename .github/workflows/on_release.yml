@@ -74,7 +74,7 @@ jobs:
       - name: Upload agent to release
         uses: svenstaro/upload-release-action@v2
         with:
-          file: ./agent/target/agent-${VERSION}.jar
+          file: ./agent/target/agent-${{ github.ref_name }}.jar
           asset_name: Deep Agent
           tag: ${{ github.ref_name }}
           overwrite: true
@@ -82,7 +82,7 @@ jobs:
       - name: Upload lite agent to release
         uses: svenstaro/upload-release-action@v2
         with:
-          file: ./agent/target/agent-${VERSION}-lite.jar
+          file: ./agent/target/agent-${{ github.ref_name }}-lite.jar
           asset_name: Deep Lite Agent
           tag: ${{ github.ref_name }}
           overwrite: true
