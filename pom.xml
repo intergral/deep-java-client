@@ -87,7 +87,7 @@
     <properties>
         <deep-proto.version>1.0.5</deep-proto.version>
         <grpc.version>1.68.1</grpc.version>
-        <netty.version>4.1.112.Final</netty.version>
+        <netty.version>4.1.118.Final</netty.version>
         <tcnative.version>2.0.65.Final</tcnative.version>
         <asm.version>8.0.1</asm.version>
 
