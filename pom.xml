@@ -164,7 +164,7 @@
                                 </goals>
                                 <configuration>
                                     <!--suppress MavenModelInspection -->
-                                    <passphrase>${env.GPG_PASSPHRASE}</passphrase>
+                                    <passphrase>${env.GPG_PASSPHRASE_2}</passphrase>
                                     <gpgArguments>
                                         <!--https://stackoverflow.com/questions/28859942/how-do-i-get-the-maven-gpg-plugin-to-use-a-passphrase-from-environment-variable-->
                                         <arg>--pinentry-mode</arg>
@@ -174,7 +174,7 @@
                                         <argument>--batch</argument>
                                     </gpgArguments>
                                     <executable>gpg</executable>
-                                    <keyname>0x8FD157B6</keyname>
+                                    <keyname>0x405FE119</keyname>
                                 </configuration>
                             </execution>
                         </executions>
