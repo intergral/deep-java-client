@@ -28,6 +28,7 @@
   </parent>
 
   <artifactId>java-plugin</artifactId>
+  <name>Java Plugin</name>
   <description>Attach special Java attributes to the collected snapshots.</description>
 
   <properties>

@@ -28,6 +28,7 @@
   </parent>
 
   <artifactId>otel-plugin</artifactId>
+  <name>OTel Plugin</name>
 
   <properties>
   </properties>
